@@ -61,7 +61,7 @@
 
       //click de chaque bouton
       $(this).on("click", '.push_button', function() {
-        var ltb = [0,1,2,3,4,5,6,7,8,9];
+        var ltb = [0,1,2,3,4,5,6,7,8,9,'.'];
         //alert($(this).attr("datas"));
         var obj = JSON.parse($(this).attr("datas"));
         if(ltb.inArray(obj.content)) {
@@ -84,7 +84,7 @@
             $("#stdout").val('');
           }
           if($(this).attr("action").trim() == '+') {
-            alert('c bien un plus');
+            //alert('c bien un plus');
             parametres.tempon += parametres.memory + '+';
            
 
@@ -104,10 +104,10 @@
           }
           if($(this).attr("action").trim() == 'TOTAL') {
             parametres.tempon += parametres.memory
-            alert(parametres.tempon);
+            //alert(parametres.tempon);
             var ttl = eval(parametres.tempon);
             $("#stdout").val(ttl);
-            parametres.memory = 0;
+            parametres.memory = ttl;
             parametres.tempon = '';
 
           }

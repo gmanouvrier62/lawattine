@@ -6,7 +6,9 @@ requirejs.config({
       'jquery' :    'jquery',
       'jquery-ui' : 'jquery-ui',
       'composant/caisse_init': 'composant/caisse_init',
-      'composant/caisse':  'composant/caisse'
+      'composant/caisse':  'composant/caisse',
+      'bootstrap-3.3.7-dist/js/bootstrap.min': 'bootstrap-3.3.7-dist/js/bootstrap.min',
+      'DataTables-1.10.12/media/js/dataTables.bootstrap' : 'DataTables-1.10.12/media/js/dataTables.bootstrap'
       
 
       

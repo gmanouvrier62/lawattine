@@ -30,7 +30,7 @@ items: [{
 	
 },
 {
-	content:'',
+	content:'/',
 	color:'',
 	bgcolor:'',
 	action:'',
@@ -156,7 +156,7 @@ items: [{
 	
 },
 {
-	content:'',
+	content:'.',
 	color:'',
 	bgcolor:'',
 	action:'',

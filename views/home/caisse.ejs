@@ -3,31 +3,31 @@
 <link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
 <link href="/js/dependencies/caisse.css" rel="stylesheet">
 <link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+
 <script type="text/javascript" data-main="/js/dependencies/require.main.js"  src="/js/dependencies/require.js"></script>
 
 <script>
- require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse'], function () {
- 	alert($("#mondiv").attr('tom'));
+ require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
+ 	//alert($("#mondiv").attr('tom'));
  	console.log(caisse_init);
     //$( "#dialog" ).dialog();
     $("#mondiv").caisse(caisse_init);
 
-  } );
+ });
   
- </script>
+</script>
 </head>
 <body>
+<div id="dvHeader" class="row">
 
-<div id="dialog" title="Basic dialog">
-  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
 </div>
 
+<div id="dvMiddle" class="row">
+	<div id="mondiv" class="col-md-2"></div>
+</div>
 
-<div id="mondiv" tom="lechat">
-
-
-
-
+<div id="dvTouches" class="row">
 
 </div>
 
