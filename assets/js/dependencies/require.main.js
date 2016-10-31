@@ -2,24 +2,30 @@
 //Mode local<script src="external/jquery/jquery.js"></script>
 requirejs.config({
     paths: {
-      'pnotify': 'pnotify.custom.min',
-      'jquery' :    'jquery',
-      'jquery-ui' : 'jquery-ui',
-      'composant/caisse_init': 'composant/caisse_init',
-      'composant/caisse':  'composant/caisse',
-      'bootstrap-3.3.7-dist/js/bootstrap.min': 'bootstrap-3.3.7-dist/js/bootstrap.min',
-      'DataTables-1.10.12/media/js/dataTables.bootstrap' : 'DataTables-1.10.12/media/js/dataTables.bootstrap'
+      'pnotify': './pnotify.custom.min',
+      'jquery' :    './jquery',
+      'jquery-ui' : './jquery-ui',
+      'composant/caisse_init': './composant/caisse_init',
+      'composant/caisse':  './composant/caisse',
+      'bootstrap-3.3.7-dist/js/bootstrap.min': './bootstrap-3.3.7-dist/js/bootstrap.min',
+      'DataTables-1.10.12/media/js/dataTables.bootstrap' : './DataTables-1.10.12/media/js/dataTables.bootstrap'
       
 
       
     },
     // Bootstrap is a "browser globals" script :-(
     shim: {
-        'jquery-ui': {
+       
+         'jquery-ui': {
             exports: '$'
-        }
-      },
-      'jquery-ui': { deps: ['jquery']},
+        },
+        'jquery-ui': { deps: ['jquery']},
+        'bootstrap-3.3.7-dist/js/bootstrap.min' :  { deps: ['jquery']},
+        'composant/caisse' :  { deps: ['jquery']}
+       
+       
+      }
+      
       
              
   });

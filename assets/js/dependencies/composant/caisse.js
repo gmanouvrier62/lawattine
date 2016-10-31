@@ -38,22 +38,22 @@
                   ct += "<tr>";
                   for(var cols = 1; cols <= caisse_init.cols;cols ++) {
                     if(elCpt<caisse_init.items.length-1) {
-                        var additionnel = "";
+                        var additionnel = "width: 60px;";
                         if(caisse_init.items[elCpt].bgcolor != '') additionnel += "background-color:" + caisse_init.items[elCpt].bgcolor + ";";
                         if(caisse_init.items[elCpt].color != '') additionnel += "color:" + caisse_init.items[elCpt].color + ";";
                         
                         p_action = caisse_init.items[elCpt].content;
-                        ct += "<td class='push_button' action='" + p_action + " ' datas='" + JSON.stringify(caisse_init.items[elCpt]) + "' style='" + additionnel + "'>" + caisse_init.items[elCpt].content  +  "</td>";
+                        ct += "<td><div class='push_button'  data-action='" + p_action + "' data-contents='" + JSON.stringify(caisse_init.items[elCpt]) + "' style='" + additionnel + "'>" + caisse_init.items[elCpt].content  +  "</div></td>";
                     } else
                     {
-                       ct += "<td class='vide'></td>";
+                       ct += "<td ><div class='push_button'></div></td>";
                     }
                     elCpt ++;
                   }
                   ct += "</tr>";
                 }
                 var head="<thead><tr><th></th><th></th><th></th><th></th></tr></thead>";
-                return "<table cellspacing='6' style='width:400px'>" + head + "<tr><td colspan='" + caisse_init.cols + "'><input type='txt' style='width:100%;height:30px' id='stdout'></td></tr>" + ct + "</table>";
+                return "<table>" + "<tr><td colspan='" + caisse_init.cols + "'><input type='txt' style='width:100%;height:30px' id='stdout'></td></tr>" + ct + "</table>";
              }
             };
 
@@ -62,8 +62,8 @@
       //click de chaque bouton
       $(this).on("click", '.push_button', function() {
         var ltb = [0,1,2,3,4,5,6,7,8,9,'.'];
-        //alert($(this).attr("datas"));
-        var obj = JSON.parse($(this).attr("datas"));
+        //alert(JSON.stringify($(this).data("contents")));
+        var obj =  $(this).data("contents");
         if(ltb.inArray(obj.content)) {
           $("#stdout").val($("#stdout").val() + obj.content);
           if(parametres.lastAction.trim() != '') {
@@ -77,32 +77,32 @@
         } else {
           
           
-          if($(this).attr("action").trim() == 'RAZ') {
+          if($(this).data("action").trim() == 'RAZ') {
            
             parametres.memory = '';
             parametres.lastAction = '';
             $("#stdout").val('');
           }
-          if($(this).attr("action").trim() == '+') {
+          if($(this).data("action").trim() == '+') {
             //alert('c bien un plus');
             parametres.tempon += parametres.memory + '+';
            
 
           }
-          if($(this).attr("action").trim() == '-') {
+          if($(this).data("action").trim() == '-') {
             parametres.tempon += parametres.memory + '-';
           }
-          if($(this).attr("action").trim() == '*') {
+          if($(this).data("action").trim() == '*') {
             parametres.tempon += parametres.memory + '*';
           }
-          if($(this).attr("action").trim() == '/') {
+          if($(this).data("action").trim() == '/') {
             parametres.tempon += parametres.memory + '/';
           }
-          if($(this).attr("action").trim() == 'C') {
+          if($(this).data("action").trim() == 'C') {
             parametres.memory = '';
             $("#stdout").val('');
           }
-          if($(this).attr("action").trim() == 'TOTAL') {
+          if($(this).data("action").trim() == 'TOTAL') {
             parametres.tempon += parametres.memory
             //alert(parametres.tempon);
             var ttl = eval(parametres.tempon);
@@ -111,14 +111,14 @@
             parametres.tempon = '';
 
           }
-           parametres.lastAction = $(this).attr("action").trim();
+           parametres.lastAction = $(this).data("action").trim();
           //alert(parametres.lastAction);
         }
 
       });
     
-      
-      $(this).attr("style","float:left; margin-top: 50px; padding: 10px 20px 20px; line-height: 1; color:#fff; -moz-border-radius: 30px; -webkit-border-radius: 30px; border-radius: 30px; background:linear-gradient(to top,#ED283F,#ED7171)");
+      //panel arrondi
+      $(this).attr("style","float:left; margin-top: 30px;margin-bottom:3px; width:280px;padding: 10px 20px 20px; line-height: 1; color:#fff; -moz-border-radius: 30px; -webkit-border-radius: 30px; border-radius: 30px; background:linear-gradient(to top,#ED283F,#ED7171)");
       
 
 

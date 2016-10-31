@@ -6,7 +6,7 @@ items: [{
 	content:'RAZ',
 	color:'',
 	bgcolor:'',
-	action:'lebol',
+	action:'',
 	numerique:false,
 	fct:''
 	

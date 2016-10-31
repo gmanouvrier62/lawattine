@@ -26,13 +26,13 @@ module.exports = {
                 {type: 'console'},
                 {
                     type: 'dateFile',
-                    filename: '/home/gilles/node/git/lawattine/logs/lawattine.log',
+                    filename: '/var/log/lawattine.log',
                     "pattern": "-yyyy-MM-dd",
                     "alwaysIncludePattern": true
                 }
             ],
             replaceConsole: true,
-            path: '/home/gilles/node/git/lawattine/logs/sailsmydb.log'
+            path: '/var/log/lawattine.log'
         }
 
 

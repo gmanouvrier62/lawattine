@@ -1,12 +1,11 @@
 .push_button{
 	position:relative;
-	width:20px;
-	height:40px;
+	display: block;
 	color:#FFF;
-	display:block;
+	
 	text-decoration:none;
-	margin:0 auto;
-	border-radius:5px;
+	margin:0;
+	border-radius:3px;
 	border:solid 1px #D94E3B;
 	background:#cb3b27;
 	text-align:center;
@@ -28,3 +27,5 @@
     position:relative;
     top:7px;
 }
+
+
