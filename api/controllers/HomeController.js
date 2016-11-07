@@ -5,7 +5,7 @@ var logger = require('../services/logger.init.js').logger("tom.txt");
 module.exports = {
 	
 
-home : function (req,res){
+home : function (req, res){
 	/*
 		var socket = req.socket;
 		var io = sails.io;
@@ -15,13 +15,14 @@ home : function (req,res){
  	 	logger.warn("coucouroucoucou");
    	var tom = menu.toString();
 	*/
-	var tom ="";
-	return res.render ('home/caisse',{'nom': 'Manouvrius', 'prenom': 'Gillus','tplMenu': tom});
+	logger.warn(sails.config.appPath);
+	return res.render ('home/caisse',{'action': 'caisse', 'menu': ''});
   
 
     
 
-},
+}
+
 
 
  

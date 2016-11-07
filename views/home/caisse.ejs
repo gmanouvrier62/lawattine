@@ -2,9 +2,9 @@
 <head>
 <link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
 <link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
 <link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
 <link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
-
 <!--<script type="text/javascript" data-main="/js/dependencies/require.main.js"  src="/js/dependencies/require.js"></script>-->
   
  <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
@@ -13,16 +13,18 @@
  <script type="text/javascript" src="/js/dependencies/composant/caisse_init.js"></script>
  <script type="text/javascript" src="/js/dependencies/composant/caisse.js"></script>
  <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
- 
-
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>		
 <script>
  //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
  	//alert($("#mondiv").attr('tom'));
 $(function(){
  	console.log(caisse_init);
-    
-    $("#mondiv").caisse(caisse_init);
-
+    <% if (action == "caisse") {%>
+    	$("#mondiv").caisse(caisse_init);
+    <% } %>
+	<% if (action == "admin") {%>
+		$('#nav').spasticNav();
+	<% } %>    
     //init des touches
     for(var t = 1; t < 13; t++) {
     	$("#ligne1").append("<div id='l1_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
@@ -39,7 +41,17 @@ $(function(){
 </head>
 <body>
 <div id="dvHeader" class="row">
+<% if (action == "admin") { %><%=menu %>
 
+<ul id="nav">
+		<li id="selected"><a href="/">Caisse</a></li>
+		<li><a href="/produits">Produits</a></li>
+		<li><a href="/clients">Clients</a></li>
+		<li><a href="/fournisseurs">Fournisseurs</a></li>
+		<li><a href="/stats">Stats</a></li>
+	</ul>
+
+<% } %>
 </div>
 
 <div id="dvMiddle" class="row">

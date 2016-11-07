@@ -1,0 +1,67 @@
+<html>
+<head>
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<!--<script type="text/javascript" data-main="/js/dependencies/require.main.js"  src="/js/dependencies/require.js"></script>-->
+  
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/composant/caisse_init.js"></script>
+ <script type="text/javascript" src="/js/dependencies/composant/caisse.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>		
+<script>
+ //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
+ 	//alert($("#mondiv").attr('tom'));
+$(function(){
+
+	
+	
+ 	console.log(caisse_init);
+ 	$('#nav').spasticNav();
+    <% if (action == "produits") {%>
+    	//$("#mondiv").caisse(caisse_init);
+    <% } %>
+	<% if (action == "clients") {%>
+		
+	<% } %>    
+    //init des touches
+    for(var t = 1; t < 11; t++) {
+    	$("#ligne1").append("<div id='l1_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+		$("#ligne2").append("<div id='l2_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+		$("#ligne3").append("<div id='l3_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+		$("#ligne4").append("<div id='l4_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+
+
+    }
+
+ });
+  
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+
+<div id="dvMiddle" class="row">
+	<div id="mondiv" class="col-md-2"></div>
+</div>
+<% if (action == "produits") {%>
+<div id="dvTouches" class="row" style="margin-left:20px">
+	<div id="ligne1" class="row" ></div>
+	<div id="ligne2" class="row"></div>
+	<div id="ligne3" class="row"></div>
+	<div id="ligne4" class="row"></div>
+</div>
+
+<% } %>
+
+
+</body>
+
+</html>

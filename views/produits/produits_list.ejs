@@ -1,0 +1,128 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/DataTables-1.10.12/media/css/dataTables.jqueryui.min.css" rel="stylesheet">
+
+<!--<script type="text/javascript" data-main="/js/dependencies/require.main.js"  src="/js/dependencies/require.js"></script>-->
+  
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/composant/caisse_init.js"></script>
+ <script type="text/javascript" src="/js/dependencies/composant/caisse.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+  <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
+<script>
+ //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
+ 	//alert($("#mondiv").attr('tom'));
+$(function(){
+ 	console.log(caisse_init);
+ 	$('#nav').spasticNav();
+    <% if (action == "produits") {%>
+    	//$("#mondiv").caisse(caisse_init);
+    <% } %>
+	<% if (action == "clients") {%>
+		
+	<% } %>    
+    //init des touches
+    for(var t = 1; t < 11; t++) {
+    	$("#ligne1").append("<div id='l1_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+		$("#ligne2").append("<div id='l2_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+		$("#ligne3").append("<div id='l3_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+		$("#ligne4").append("<div id='l4_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+
+
+    }
+
+         
+     $('#tblProduits').DataTable( {
+        "columnDefs": [
+            {
+                // The `data` parameter refers to the data for the cell (defined by the
+                // `data` option, which defaults to the column being worked with, in
+                // this case `data: 0`.
+                "render": function ( data, type, row ) {
+                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir le produit" data-id="' + row.id + '"><i class="fa fa-eye"></i></button>';
+                    html += '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;margin-left:5px" title="assigner à une touche" data-id="' + row.id + '"><i class="fa fa-hashtag"></i></button>';
+                    
+                    return html;
+                },
+                "targets": 12
+            },
+            { "visible": false,  "targets": [ 0,3,4 ] }
+        ],
+        "processing" : true,
+        "serverSide" : true,
+        "ajax": '/<%=action%>/getAll'
+    } );
+/*
+     $('#tblProduits').DataTable(datatables_columns, {
+            "processing" : true,
+            "serverSide" : true,
+            "ajax": '/<%=action%>/getAll'
+            
+     });
+*/
+ });
+  
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+
+<div style="text-align:center"><H1><font >PRODUITS</font></H1></div>
+
+<div id="dvMiddle" class="row">
+
+	<div id="rowProduits" class="col-md-6" style="margin-left:100px;margin-top:20px;">
+		<table id="tblProduits" class="display" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                	<th>id</th>
+                    <th>nom</th>
+                    <th>type</th>
+                    <th>ref interne</th>
+                    <th>externe</th>
+                    <th>TTC achat</th>
+                    <th>H.T</th>
+                    <th>T.V.A</th>
+                    <th>Com (%)</th>
+                    <th>TTC vente</th>
+                    <th>icone</th>
+                    <th>conditionnement</th>
+                    <th>action</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                	<th>id</th>
+                    <th>nom</th>
+                    <th>type</th>
+                    <th>ref interne</th>
+                    <th>externe</th>
+                    <th>TTC achat</th>
+                    <th>H.T</th>
+                    <th>T.V.A</th>
+                    <th>Com (%)</th>
+                    <th>TTC vente</th>
+                    <th>icone</th>
+                    <th>conditionnement</th>
+                    <th>action</th>
+                </tr>
+            </tfoot>
+
+	</div>
+</div>
+
+
+</body>
+
+</html>
