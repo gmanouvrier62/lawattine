@@ -35,7 +35,9 @@ module.exports.routes = {
   '/':                      'HomeController.home',
   '/admin':                 'AdminController.home',
   '/produits':              'ProduitsController.home',
-  '/produits/getAll':       'ProduitsController.getAll' 
+  '/produits/getAll':       'ProduitsController.getAll',
+  '/produits/getOneById/:id':   'ProduitsController.getOneById',
+  '/produits/upload':       'ProduitsController.upload' 
 
   /***************************************************************************
   *                                                                          *

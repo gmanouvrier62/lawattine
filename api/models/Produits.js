@@ -9,9 +9,9 @@ module.exports = {
 
     id_type : { type: 'string'},
 
-    ref_interne : { type: 'sting' },
+    ref_interne : { type: 'string' },
 
-    ref_externe : { type: 'sting' },
+    ref_externe : { type: 'string' },
 
     pht : { type: 'decimal' },
 
@@ -25,7 +25,9 @@ module.exports = {
 
     icone : { type: 'string' },
 
-    conditionnement : { type: 'string'}
+    conditionnement : { type: 'string'},
+
+    disponibilite : { type: 'int' }    
   },
 
   getAll: function(callback) {

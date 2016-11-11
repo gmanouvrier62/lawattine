@@ -13,3 +13,40 @@ ul, li {margin: 0; padding: 0;}
 #nav { position: relative; background: #292929; float: left;}
 #nav li { float: left; list-style: none; border-right: 1px solid #4a4a4a; border-left: 1px solid black;}
 #nav li a { color: #e3e3e3; position: relative; z-index: 2; float: left; font-size: 22px; font-family: helvetica, arial, sans-serif; text-decoration: none; padding: 10px 35px;}
+.picto {
+	background-image: url("/images/uploads/no_image.png");
+    background-repeat: no-repeat;
+    height: 34px;
+    padding-left: 1px;
+    padding-top: 5px;
+    width: 34px;
+    float: left;
+}
+.pictoImg {
+	
+    height: 60px;
+    padding-left: 1px;
+    padding-top: 5px;
+    width: 60px;
+    float: left;
+}
+.disponible {
+	padding-left:3px;
+	padding-right:3px;
+	width:100px;
+	color:#DDDDDD;
+	box-shadow: 0px 0px 10px 4px rgba(37, 180, 8, 0.75);
+	-moz-box-shadow: 0px 0px 10px 4px rgba(37, 180, 8, 0.75);
+	-webkit-box-shadow: 0px 0px 10px 4px rgba(37, 180, 8, 0.75);
+	background-color:#2EBC0F;
+}
+.indisponible {
+	padding-left:3px;
+	padding-right:3px;
+	width:100px;
+	color:#DDDDDD;
+	box-shadow: 0px 0px 10px 4px rgba(223, 92, 49, 0.75);
+	-moz-box-shadow: 0px 0px 10px 4px rgba(223, 92, 49, 0.75);
+	-webkit-box-shadow: 0px 0px 10px 4px rgba(223, 92, 49, 0.75);
+	background-color:#D8251C;
+}

@@ -7,8 +7,6 @@
 <link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
 <link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="/js/dependencies/DataTables-1.10.12/media/css/dataTables.jqueryui.min.css" rel="stylesheet">
-
-<!--<script type="text/javascript" data-main="/js/dependencies/require.main.js"  src="/js/dependencies/require.js"></script>-->
   
  <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
@@ -18,59 +16,116 @@
  <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
   <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
+ <script type="text/javascript" src="/js/dependencies/composant/ModalFormBind.js"></script>
 <script>
- //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
- 	//alert($("#mondiv").attr('tom'));
 $(function(){
+    PNotify.prototype.options.styling = "jqueryui";
  	console.log(caisse_init);
+    $("#formModal").hide();
  	$('#nav').spasticNav();
-    <% if (action == "produits") {%>
-    	//$("#mondiv").caisse(caisse_init);
-    <% } %>
-	<% if (action == "clients") {%>
-		
-	<% } %>    
     //init des touches
     for(var t = 1; t < 11; t++) {
     	$("#ligne1").append("<div id='l1_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
 		$("#ligne2").append("<div id='l2_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
 		$("#ligne3").append("<div id='l3_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
 		$("#ligne4").append("<div id='l4_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
-
-
     }
 
-         
-     $('#tblProduits').DataTable( {
+    $('body').on('click', 'button.action-view', function (event) {
+        $("#formModale").ModalFormBind( {
+                                            'resource':'produits', 
+                                            'id': $(this).data("id"),
+                                            'fields' : {
+                                                            'nom': 'Nom',
+                                                            'ref_interne': 'Réf interne',
+                                                            'ref_externe': 'Réf externe',
+                                                            'id_type': 'Type',
+                                                            'pht': 'Prix HT',
+                                                            'tva': 'TVA',
+                                                            'ttc_externe': 'Prix TTC achat',
+                                                            'tx_com': '% Comm',
+                                                            'ttc_vente': 'Prix TTC vente',
+                                                            'icone': 'Icône',
+                                                            'conditionnement': 'Conditionnement',
+                                                            'disponibilite': 'dispo'
+                                                        }
+                                        } );
+        
+    });
+    
+     $('body').on('click', 'button.action-new', function (event) {
+        $("#formModale").ModalFormBind( {
+                                            'resource':'produits', 
+                                            'id': 'N',
+                                            'fields' : {
+                                                            'nom': 'Nom',
+                                                            'ref_interne': 'Réf interne',
+                                                            'ref_externe': 'Réf externe',
+                                                            'id_type': 'Type',
+                                                            'pht': 'Prix HT',
+                                                            'tva': 'TVA',
+                                                            'ttc_externe': 'Prix TTC achat',
+                                                            'tx_com': '% Comm',
+                                                            'ttc_vente': 'Prix TTC vente',
+                                                            'icone': 'Icône',
+                                                            'conditionnement': 'Conditionnement',
+                                                            'disponibilite': 'dispo'
+                                                        }
+                                        });
+    });
+
+    $('#tblProduits').DataTable( {
         "columnDefs": [
             {
                 // The `data` parameter refers to the data for the cell (defined by the
                 // `data` option, which defaults to the column being worked with, in
                 // this case `data: 0`.
                 "render": function ( data, type, row ) {
-                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir le produit" data-id="' + row.id + '"><i class="fa fa-eye"></i></button>';
-                    html += '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;margin-left:5px" title="assigner à une touche" data-id="' + row.id + '"><i class="fa fa-hashtag"></i></button>';
+                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir le produit" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
+                    html += '<button class="btn btn-primary btn-xs btn-action action-touche" style="font-size: 13px;margin-left:5px" title="assigner à une touche" data-id="' + row[0] + '"><i class="fa fa-hashtag"></i></button>';
                     
                     return html;
                 },
                 "targets": 12
+            },
+            {
+                // The `data` parameter refers to the data for the cell (defined by the
+                // `data` option, which defaults to the column being worked with, in
+                // this case `data: 0`.
+                "render": function ( data, type, row ) {
+                    var classette ="";
+                    console.log("le dispo? ", row[13]);
+                    if(row[13]<=0 || row[13] == undefined || row[13] == "undefined") {
+                        classette = "indisponible";
+                    } else {
+                        console.log(parseInt(row[13]));
+                        classette = "disponible";
+                    }
+                    var html = "<div class='" + classette + "'>" + classette + "</div>";
+                   
+                    
+                    return html;
+                },
+                "targets": 13
+            },
+            {
+                // The `data` parameter refers to the data for the cell (defined by the
+                // `data` option, which defaults to the column being worked with, in
+                // this case `data: 0`.
+                "render": function ( data, type, row ) {
+                    var html = "<img class='pictoImg' src='" + row[10]  + "'>";
+                                        
+                    return html;
+                },
+                "targets": 10
             },
             { "visible": false,  "targets": [ 0,3,4 ] }
         ],
         "processing" : true,
         "serverSide" : true,
         "ajax": '/<%=action%>/getAll'
-    } );
-/*
-     $('#tblProduits').DataTable(datatables_columns, {
-            "processing" : true,
-            "serverSide" : true,
-            "ajax": '/<%=action%>/getAll'
-            
-     });
-*/
+    });
  });
-  
 </script>
 </head>
 <body>
@@ -78,7 +133,10 @@ $(function(){
 <%- menu %>
 </div>
 
-<div style="text-align:center"><H1><font >PRODUITS</font></H1></div>
+<div style="text-align:center"><H1><font >PRODUITS</font></H1>
+<button class="btn btn-success action-new" value="Ajouter">+ Ajouter </button>
+
+</div>
 
 <div id="dvMiddle" class="row">
 
@@ -99,6 +157,8 @@ $(function(){
                     <th>icone</th>
                     <th>conditionnement</th>
                     <th>action</th>
+                    <th>dispo</th>
+                    
                 </tr>
             </thead>
             <tfoot>
@@ -116,13 +176,12 @@ $(function(){
                     <th>icone</th>
                     <th>conditionnement</th>
                     <th>action</th>
+                    <th>dispo</th>
+                    
                 </tr>
             </tfoot>
-
 	</div>
 </div>
-
-
+<div id="formModale" ></div>
 </body>
-
 </html>

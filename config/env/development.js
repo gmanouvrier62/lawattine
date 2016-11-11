@@ -33,7 +33,9 @@ module.exports = {
             ],
             replaceConsole: true,
             path: '/var/log/lawattine.log'
-        }
+        },
+  productImages: "/assets/images/uploads/",
+  relativProductImages: "/images/uploads/"
 
 
 };
