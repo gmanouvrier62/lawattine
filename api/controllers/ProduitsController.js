@@ -101,12 +101,16 @@ module.exports = {
 		  	var fn = process.cwd() + sails.config.productImages + uploadedFiles[0].filename;
 		  	logger.warn("dest images : ", fn);
 		  	
-		  	fs.createReadStream(uploadedFiles[0].fd).pipe(fs.createWriteStream(fn));
-	        logger.util(uploadedFiles);
-	        return res.json({
-			    message: sails.config.productImages + uploadedFiles[0].filename,
-			    filepath: sails.config.relativProductImages + uploadedFiles[0].filename
-			}); 
+		  	var stream = fs.createReadStream(uploadedFiles[0].fd);
+	        stream.pipe(fs.createWriteStream(fn));
+	        stream.on('end', function(){
+				logger.util(uploadedFiles);
+		        return res.json({
+				    message: sails.config.productImages + uploadedFiles[0].filename,
+				    filepath: sails.config.relativProductImages + uploadedFiles[0].filename
+				}); 
+	        });
+	        
 		  });
 		});
 	}

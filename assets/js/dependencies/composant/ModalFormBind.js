@@ -30,15 +30,19 @@
       //gestion des cas particuliers
       function specificite(datas) {
         if(opts.resource == 'produits') {
-          $("#imgIcon").attr('src',datas.data['icone']);
+         
           $("#ttc_vente").attr('disabled','disabled');
           $("#pht").attr('disabled','disabled'); 
           $("#icone").hide();
           $("#disponibilite").hide();
-          if(datas.data["icone"] !== null && datas.data["icone"] !== undefined)
-            var dvIcone = "<img id='imgIcon' class='pictoImg' src='" + datas.data["icone"] + "'>";
-          else
-            var dvIcone = "<img id='imgIcon' class='pictoImg' src='/images/uploads/no_image.png'>";
+          //$("#imgIcon").attr('src',datas.data['icone']);
+          if(datas.data !== undefined && datas.data !== null) {
+            if(datas.data["icone"] !== null && datas.data["icone"] !== undefined)
+              var dvIcone = "<img id='imgIcon' class='pictoImg' src='" + datas.data["icone"] + "'>";
+            else
+              var dvIcone = "<img id='imgIcon' class='pictoImg' src='/images/uploads/no_image.png'>";
+          } else
+              var dvIcone = "<img id='imgIcon' class='pictoImg' src='/images/uploads/no_image.png'>";
 
          
           var btnImg = "<input id='icon' type='file' name='icone' style='display:none'>";
@@ -46,29 +50,44 @@
           $("#icone").after(dvIcone + btnImg);
           var currentDispo = "";
           var newClass = "";
-          if(datas.data["disponibilite"] <= 0 || datas.data["disponibilite"] == null || datas.data["disponibilite"] == "null") {
-            currentDispo = 0;
-            var dvDispo = "<div id='dvDispo' class='indisponible'>indisponible</div>";
+
+          if(datas.data !== undefined && datas.data !== null) {
+            if(datas.data["disponibilite"] <= 0 || datas.data["disponibilite"] == null || datas.data["disponibilite"] == "null") {
+              currentDispo = 0;
+              var dvDispo = "<div id='dvDispo' class='indisponible margetop'>indisponible</div>";
+            } else {
+              currentDispo = 1;
+              var dvDispo = "<div id='dvDispo' class='disponible margetop'>disponible</div>";
+            }
           } else {
-            currentDispo = 1;
-            var dvDispo = "<div id='dvDispo' class='disponible'>disponible</div>";
+              currentDispo = 0;
+              var dvDispo = "<div id='dvDispo' class='indisponible margetop'>indisponible</div>";
           }
-          
+
           $("#disponibilite").after(dvDispo);
-          $("#dvDispo").click (function() {
-            if(currentDispo <= 0) {
-              newClass = "disponible"; 
-              $("#disponibilite").val("1");
-            }
-            else {
-              newClass = "indisponible";
-              $("#disponibilite").val("0");
-            }
-            $(this).removeClass(".indisponible").removeClass(".disponible").addClass(newClass);
-          });
+
 
           $("#chImg").click (function() {
             $("#icon").click();
+          });
+
+          $("#dvDispo").click (function() {
+             
+              if(currentDispo <= 0) {
+                newClass = "disponible"; 
+                $("#disponibilite").val("1");
+               
+              }
+              else {
+                newClass = "indisponible";
+                $("#disponibilite").val("0");
+                
+              }
+              $("#dvDispo").html(newClass);
+              console.log("futur dispo=",newClass);
+              $(this).removeClass("indisponible").removeClass("disponible").addClass(newClass);
+              currentDispo = $("#disponibilite").val();
+              
           });
 
           $("#icon").on('change', function(){
@@ -132,7 +151,7 @@
         }
 
       }
-
+      //Fin de section des cas particuliers
      //atteignable par parametres.curenIdx, etc...
       var defauts = {
           'externalFields': [],
@@ -225,6 +244,7 @@
       lec += "</table>";
       
       self.html(lec); 
+      //Check des cas particuliers/tables resources
       specificite({});
       self.dialog({
         title: "La Modale",
@@ -239,7 +259,6 @@
              for (var fld in opts.fields) {
                 obj[fld] = $('#' + fld).val();
              }
-             alert(JSON.stringify(obj));
              $.post('/' + opts.resource + '/add',{'datas':obj}, function(result){
                 var msg="";
                 var msg_type ="";

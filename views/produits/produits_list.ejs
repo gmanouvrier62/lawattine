@@ -94,16 +94,13 @@ $(function(){
                 // this case `data: 0`.
                 "render": function ( data, type, row ) {
                     var classette ="";
-                    console.log("le dispo? ", row[13]);
-                    if(row[13]<=0 || row[13] == undefined || row[13] == "undefined") {
-                        classette = "indisponible";
-                    } else {
-                        console.log(parseInt(row[13]));
+                    if(parseInt(row[12]) > 0) {
                         classette = "disponible";
+                    } else {
+                        
+                        classette = "indisponible";
                     }
                     var html = "<div class='" + classette + "'>" + classette + "</div>";
-                   
-                    
                     return html;
                 },
                 "targets": 13
