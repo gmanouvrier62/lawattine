@@ -42,7 +42,9 @@ module.exports.routes = {
   '/clients':               'ClientsController.home',
   '/clients/getAll':        'ClientsController.getAll',
   '/clients/getOneById/:id':   'ClientsController.getOneById',  
-
+  '/fournisseurs':               'FournisseursController.home',
+  '/fournisseurs/getAll':        'FournisseursController.getAll',
+  '/fournisseurs/getOneById/:id':   'FournisseursController.getOneById',  
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

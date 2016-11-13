@@ -49,6 +49,17 @@
 
       //gestion des cas particuliers
       function specificite(datas) {
+        if(opts.resource == 'clients') {
+          $("#adresse").addClass('adresse');
+          $("#email").addClass('email');
+           
+        }
+        if(opts.resource == 'fournisseurs') {
+          $("#adresse1").addClass('adresse');
+          $("#adresse2").addClass('adresse');
+          $("#email").addClass('email');
+           
+        }
         if(opts.resource == 'produits') {
          
           $("#ttc_vente").attr('disabled','disabled');
@@ -197,21 +208,36 @@
               if (typeof opts.fields[fld] !== 'undefined') {
                 if(fld == 'id_type') {
                   afficheType(datas.data['id_type']);
-                  lec += "<tr><td>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
+                  lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
                 } else
-                  lec += "<tr><td>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value='" + datas.data[fld] + "'></td></tr>";
+                  lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value='" + datas.data[fld] + "'></td></tr>";
 
               }
             }
             lec += "</table>";
             self.html(lec); 
             specificite(datas);
+            var frmWidth = "";
+            var frmHeight = "";
+            if(opts.width !== undefined && opts.width !== null)
+              frmWidth = opts.width;
+            else
+              frmWidth = 450;
 
+            if(opts.height !== undefined && opts.height !== null) 
+              frmHeight = opts.height;
+            else
+              frmHeight = 500;
+            var title = "";
+            if(opts.title !== null && opts.title !== undefined)
+              title = opts.title;
+            else
+              title = "Fiche";
             self.dialog({
-              title: "La Modale",
+              title: title,
               resizable: true,
-              height:500,
-              width:450,
+              height: frmHeight,
+              width: frmWidth,
               modal: true,
               buttons: {
                 "Save": function() {
@@ -263,9 +289,9 @@
         if (typeof opts.fields[fld] !== 'undefined') {
           if(fld == 'id_type') {
             afficheType("--");
-            lec += "<tr><td>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
+            lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
           } else
-          lec += "<tr><td>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value=''></td></tr>";
+          lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value=''></td></tr>";
 
         }
       }

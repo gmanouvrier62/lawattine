@@ -26,18 +26,18 @@ $(function(){
     
     $('body').on('click', 'button.action-view', function (event) {
         $("#formModale").ModalFormBind( {
-                                            'title': "Fiche Client",
-                                            'height': '380',
-                                            'resource':'clients', 
+                                            'title': "Fiche Fournisseur",
+                                            'resource':'fournisseurs', 
                                             'id': $(this).data("id"),
                                             'fields' : {
 
                                                             'nom': 'Nom',
-                                                            'prenom': 'Prénom',
-                                                            'adresse': 'Adresse',
+                                                            'adresse1': 'Adresse1',
+                                                            'adresse2': 'Adresse2',
                                                             'cp': 'Code postal',
                                                             'ville': 'Ville',
                                                             'tel': 'Tel',
+                                                            'fax': 'Fax',
                                                             'mobile': 'Mobile',
                                                             'email': 'Mail'
                                                         }
@@ -47,36 +47,36 @@ $(function(){
     
      $('body').on('click', 'button.action-new', function (event) {
         $("#formModale").ModalFormBind( {
-                                            'title': "Fiche Client",
-                                            'height': '380',
-                                            'resource':'clients', 
+                                            'title': "Fiche Fournisseur",
+                                            'resource':'fournisseurs', 
                                             'id': 'N',
                                             'fields' : {
                                                             'nom': 'Nom',
-                                                            'prenom': 'Prénom',
-                                                            'adresse': 'Adresse',
+                                                            'adresse1': 'Adresse1',
+                                                            'adresse2': 'Adresse2',
                                                             'cp': 'Code postal',
                                                             'ville': 'Ville',
                                                             'tel': 'Tel',
+                                                            'fax': 'Fax',
                                                             'mobile': 'Mobile',
                                                             'email': 'Mail'
                                                         }
                                         });
     });
 
-    $('#tblClients').DataTable( {
+    $('#tblFournisseurs').DataTable( {
         "columnDefs": [
             {
                 // The `data` parameter refers to the data for the cell (defined by the
                 // `data` option, which defaults to the column being worked with, in
                 // this case `data: 0`.
                 "render": function ( data, type, row ) {
-                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir le client" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
+                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir le fournisseur" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
                     html += '<button class="btn btn-primary btn-xs btn-action action-touche" style="font-size: 13px;margin-left:5px" title="Supprimer" data-id="' + row[0] + '"><i class="fa fa-trash"></i></button>';
                     
                     return html;
                 },
-                "targets": 9
+                "targets": 10
             },
             { "visible": false,  "targets": [0] }
             
@@ -100,24 +100,25 @@ $(function(){
 <%- menu %>
 </div>
 
-<div style="text-align:center"><H1><font >CLIENTS</font></H1>
+<div style="text-align:center"><H1><font >FOURNISSEURS</font></H1>
 <button class="btn btn-success action-new" value="Ajouter">+ Ajouter </button>
 
 </div>
 
 <div id="dvMiddle" class="row">
 
-	<div id="rowClients" class="col-md-8" style="margin-left:100px;margin-top:20px;">
-		<table id="tblClients" class="order-column" cellspacing="0" width="100%">
+	<div id="rowFournisseurs" class="col-md-8" style="margin-left:100px;margin-top:20px;">
+		<table id="tblFournisseurs" class="order-column" cellspacing="0" width="100%">
             <thead>
                 <tr>
                 	<th>id</th>
                     <th>nom</th>
-                    <th>prenom</th>
-                    <th>adresse</th>
+                    <th>adresse1</th>
+                    <th>adresse2</th>
                     <th>Code postal</th>
                     <th>Villes</th>
                     <th>Tel</th>
+                    <th>Fax</th>
                     <th>Mobile</th>
                     <th>Email</th>
                     <th>Action</th>
@@ -127,11 +128,12 @@ $(function(){
                 <tr>
                 	<th>id</th>
                     <th>nom</th>
-                    <th>prenom</th>
-                    <th>adresse</th>
+                    <th>adresse1</th>
+                    <th>adresse2</th>
                     <th>Code postal</th>
                     <th>Villes</th>
                     <th>Tel</th>
+                    <th>Fax</th>
                     <th>Mobile</th>
                     <th>Email</th>
                     <th>Action</th>
