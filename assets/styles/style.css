@@ -26,7 +26,7 @@ ul, li {margin: 0; padding: 0;}
 	
     height: 60px;
     padding-left: 1px;
-    padding-top: 5px;
+    padding-top: 2px;
     width: 60px;
     float: left;
 }
@@ -52,4 +52,8 @@ ul, li {margin: 0; padding: 0;}
 }
 .margetop {
 	margin-top:5px;
+}
+.col_plus_large {
+
+	width:150px;
 }

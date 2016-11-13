@@ -24,8 +24,28 @@
         var resultat = parseFloat(ttc_achat) /(1 + (parseFloat(tva)/100) );
         return Math.round(resultat *100)/100;
       }
-      //gestion des uploads de fichiers
-
+      //afichage des types produits
+      function afficheType(selectedType) {
+         //remplacement id_type text par un object select
+          
+          var selectProduits = "<select id='id_type'>"; 
+          $.get('/produits/getTypes/',{}, function(datas){
+            
+            if(datas.err == null) {
+              var types = datas.data;
+              for (var cc = 0; cc < types.length; cc++) {
+                var attrS ="";
+                if(selectedType == types[cc].id) attrS = "selected"; 
+                selectProduits += "<option value='" + types[cc].id + "' " + attrS + " >" + types[cc].nom + "</option>";
+              }
+              selectProduits += "</select>";
+            }
+            $("#callbackFill").append(selectProduits);
+            return selectProduits;
+          });
+          
+          
+      }
 
       //gestion des cas particuliers
       function specificite(datas) {
@@ -35,7 +55,9 @@
           $("#pht").attr('disabled','disabled'); 
           $("#icone").hide();
           $("#disponibilite").hide();
-          //$("#imgIcon").attr('src',datas.data['icone']);
+
+          
+
           if(datas.data !== undefined && datas.data !== null) {
             if(datas.data["icone"] !== null && datas.data["icone"] !== undefined)
               var dvIcone = "<img id='imgIcon' class='pictoImg' src='" + datas.data["icone"] + "'>";
@@ -60,8 +82,8 @@
               var dvDispo = "<div id='dvDispo' class='disponible margetop'>disponible</div>";
             }
           } else {
-              currentDispo = 0;
-              var dvDispo = "<div id='dvDispo' class='indisponible margetop'>indisponible</div>";
+              currentDispo = 1;
+              var dvDispo = "<div id='dvDispo' class='disponible margetop'>disponible</div>";
           }
 
           $("#disponibilite").after(dvDispo);
@@ -173,8 +195,11 @@
             var lec = "<table id='fiche' data-entite='"+ opts.resource + "' data-id='" + opts.id + "'>";
             for (var fld in datas.data){
               if (typeof opts.fields[fld] !== 'undefined') {
-
-                lec += "<tr><td>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value='" + datas.data[fld] + "'></td></tr>";
+                if(fld == 'id_type') {
+                  afficheType(datas.data['id_type']);
+                  lec += "<tr><td>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
+                } else
+                  lec += "<tr><td>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value='" + datas.data[fld] + "'></td></tr>";
 
               }
             }
@@ -186,7 +211,7 @@
               title: "La Modale",
               resizable: true,
               height:500,
-              width:400,
+              width:450,
               modal: true,
               buttons: {
                 "Save": function() {
@@ -236,7 +261,10 @@
       var lec = "<table id='fiche' data-entite='"+ opts.resource + "' data-id='" + opts.id + "'>";
       for (var fld in opts.fields){
         if (typeof opts.fields[fld] !== 'undefined') {
-
+          if(fld == 'id_type') {
+            afficheType("--");
+            lec += "<tr><td>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
+          } else
           lec += "<tr><td>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value=''></td></tr>";
 
         }
@@ -250,7 +278,7 @@
         title: "La Modale",
         resizable: true,
         height:500,
-        width:400,
+        width:450,
         modal: true,
         buttons: {
           "Save": function() {

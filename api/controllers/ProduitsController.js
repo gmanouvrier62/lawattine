@@ -89,7 +89,16 @@ module.exports = {
 			return res.send(retour);
 		});
 	},
-
+	getTypes: function (req, res) {
+		logger.util("ok dans getTypes ");
+		var sql = " select * from caisse.typesproduits order by nom asc";
+		sails.models.typesproduits.query(sql,function(err,results) {
+			logger.warn(err);
+			if (err) return res.send({'err': err});
+			logger.util(results);
+			return res.send({'err': null, 'data': results});
+		});
+	},
 	upload: function(req,res) {
 		req.file('icone').upload(function (err, uploadedFiles) {
 		  console.log("dans upload", uploadedFiles);

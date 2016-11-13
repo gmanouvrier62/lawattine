@@ -1,0 +1,126 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
+  
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/composant/caisse_init.js"></script>
+ <script type="text/javascript" src="/js/dependencies/composant/caisse.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+  <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
+ <script type="text/javascript" src="/js/dependencies/composant/ModalFormBind.js"></script>
+<script>
+$(function(){
+    PNotify.prototype.options.styling = "jqueryui";
+ 	console.log(caisse_init);
+    $("#formModal").hide();
+ 	$('#nav').spasticNav();
+    
+    $('body').on('click', 'button.action-view', function (event) {
+        $("#formModale").ModalFormBind( {
+                                            'resource':'clients', 
+                                            'id': $(this).data("id"),
+                                            'fields' : {
+
+                                                            'nom': 'Nom',
+                                                            'prenom': 'Prénom',
+                                                            'adresse': 'Adresse',
+                                                            'cp': 'Code postal',
+                                                            'ville': 'Ville',
+                                                            'tel': 'Tel',
+                                                            'mobile': 'Mobile',
+                                                            'email': 'Mail'
+                                                        }
+                                        } );
+        
+    });
+    
+     $('body').on('click', 'button.action-new', function (event) {
+        $("#formModale").ModalFormBind( {
+                                            'resource':'clients', 
+                                            'id': 'N',
+                                            'fields' : {
+                                                            'nom': 'Nom',
+                                                            'prenom': 'Prénom',
+                                                            'adresse': 'Adresse',
+                                                            'cp': 'Code postal',
+                                                            'ville': 'Ville',
+                                                            'tel': 'Tel',
+                                                            'mobile': 'Mobile',
+                                                            'email': 'Mail'
+                                                        }
+                                        });
+    });
+
+    $('#tblClients').DataTable( {
+        "columnDefs": [
+            { "visible": false,  "targets": [0] }
+            
+        ],
+        "processing": false,
+        "serverSide": false,
+        "paging": true,
+        "ordering": true,
+        "defaultOrdering": [[1, 'desc']],
+        "searching": true,
+        "search": {
+            "smart": false
+        },
+        "ajax": '/<%=action%>/getAll'
+    });
+ });
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+
+<div style="text-align:center"><H1><font >CLIENTS</font></H1>
+<button class="btn btn-success action-new" value="Ajouter">+ Ajouter </button>
+
+</div>
+
+<div id="dvMiddle" class="row">
+
+	<div id="rowClients" class="col-md-8" style="margin-left:100px;margin-top:20px;">
+		<table id="tblClients" class="order-column" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                	<th>id</th>
+                    <th>nom</th>
+                    <th>prenom</th>
+                    <th>adresse</th>
+                    <th>Code postal</th>
+                    <th>Villes</th>
+                    <th>Tel</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                	<th>id</th>
+                    <th>nom</th>
+                    <th>prenom</th>
+                    <th>adresse</th>
+                    <th>Code postal</th>
+                    <th>Villes</th>
+                    <th>Tel</th>
+                    <th>Mobile</th>
+                    <th>Email</th>
+                </tr>
+            </tfoot>
+	</div>
+</div>
+<div id="formModale" ></div>
+</body>
+</html>

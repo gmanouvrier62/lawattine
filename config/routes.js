@@ -37,7 +37,11 @@ module.exports.routes = {
   '/produits':              'ProduitsController.home',
   '/produits/getAll':       'ProduitsController.getAll',
   '/produits/getOneById/:id':   'ProduitsController.getOneById',
-  '/produits/upload':       'ProduitsController.upload' 
+  '/produits/upload':       'ProduitsController.upload',
+  '/produits/getTypes':     'ProduitsController.getTypes',
+  '/clients':               'ClientsController.home',
+  '/clients/getAll':        'ClientsController.getAll',
+  '/clients/getOneById/:id':   'ClientsController.getOneById',  
 
   /***************************************************************************
   *                                                                          *
