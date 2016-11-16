@@ -1,73 +1,175 @@
 <html>
 <head>
 <link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
-<link href="/js/dependencies/caisse.css" rel="stylesheet">
 <link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
 <link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
 <link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
 <!--<script type="text/javascript" data-main="/js/dependencies/require.main.js"  src="/js/dependencies/require.js"></script>-->
-  
+  <link rel="stylesheet" type="text/css" href="/js/dependencies/msdropdown/css/msdropdown/dd.css" />
+
+
  <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+
  <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
  <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
- <script type="text/javascript" src="/js/dependencies/composant/caisse_init.js"></script>
- <script type="text/javascript" src="/js/dependencies/composant/caisse.js"></script>
+ 
  <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
- <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>		
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>	
+ <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>	
+
+
 <script>
  //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
  	//alert($("#mondiv").attr('tom'));
 $(function(){
- 	console.log(caisse_init);
-    <% if (action == "caisse") {%>
-    	$("#mondiv").caisse(caisse_init);
-    <% } %>
-	<% if (action == "admin") {%>
-		$('#nav').spasticNav();
-	<% } %>    
-    //init des touches
-    for(var t = 1; t < 13; t++) {
-    	$("#ligne1").append("<div id='l1_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
-		$("#ligne2").append("<div id='l2_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
-		$("#ligne3").append("<div id='l3_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
-		$("#ligne4").append("<div id='l4_" + t + "' data-nom='' data-ht='' data-ttc='' class='col-md-1 push_button' style='width:90px;height:70px;margin-left:2px;margin-bottom:12px'></div>");
+ 	var currentClient ="";
+  var selectProduits = ""; 
+ 	$('#nav').spasticNav();
+	
+ 	$.get('/clients/getAllJson',{}, function(datas){
+        var selectClients = ""; 
+        selectClients += "<option value='0'>--</option>";  
+        if(datas.err == null) {
+          var clt = datas;
+          console.log(clt[0]);
 
+          for (var cc = 0; cc < clt.length; cc++) {
+            var attrS ="";
+            //if(memoType == types[cc].id) attrS = "selected"; 
+            selectClients += "<option value='" + clt[cc].id + "' " + attrS + " >" + clt[cc].nom + "(" + clt[cc].prenom + " de " + clt[cc].ville + ")</option>";
+          }
+          
+        }
 
-    }
+    $.get('/produits/types/list',{}, function(datas){
+          
+        if(datas.err == null) {
+          var types = datas.data;
+          selectProduits = "<select>";
+          for (var cc = 0; cc < types.length; cc++) {
+            var attrS ="";
+            selectProduits += "<option value='" + types[cc].id + "'>" + types[cc].nom + "</option>";
+          }
+          selectProduits +=" </select>";
+        }
+        $("#firstP").click();
+       
+    });
+        
+    /*
+    var currentR = $("#slRayon").append(selectProduits);
+        currentR.change(function(){
+          alert('zobbie' + $(this).val());
+    });
+    */
+    $("#slClient").append(selectClients);
+      $("#slClient").change(function() {
+      	currentClient = $(this).val();
+      	$.get('/clients/getOneById/' + currentClient,{}, function(datas){
 
+            var ligne_nom = "<li >" + datas.data.civ + " " + datas.data.prenom + " " + datas.data.nom + "</li>";
+            var ligne_adr = "<li style='margin-top:10px'>" + datas.data.adresse + "</li>";
+            var ligne_ville = "<li>" + datas.data.cp + " " + datas.data.ville + "</li>";
+            var ligne_tel = "<li style='margin-top:12px;font-weight:bold'>Tel : " + datas.data.tel + "</li>";
+            var ligne_mobile = "<li style='font-weight:bold'>Mobile : " + datas.data.mobile + "</li>";
+            $("#infos").html("<ul>" + ligne_nom + ligne_adr + ligne_ville + ligne_tel + ligne_mobile + "</ul>");
+        });
+
+        	//Gérer l'accès à la dernière commande
+        	//Gérer le changement de client courrant
+      });
+    });
+    $('body').on('click', 'button.action-suppr', function (event) {
+      $(this).parent().parent().remove();
+    });
+     $('body').on('click', 'button.action-newL', function (event) {
+      
+       var table = $("#tblCommande");
+       var ligne = "<tr class='ligneProduit'>" +
+                  "<td></td>" +
+                  "<td><input type='text' class='txt80'></td>" +
+                  "<td class='les_produits'></td>" +
+                  "<td><input type='text' class='txt50'></td>" +
+                  "<td><input type='text' class='txt50'></td>" +
+                  "<td><input type='text' class='txt90'></td>" +
+                  "<td><button class='btn btn-danger action-suppr'>-</button></td>" +
+                  "</tr>";
+
+       $(ligne).appendTo(table.find('tbody:last'));
+       //table.find('tr:last').find('td:nth-child(7)').find('button').remove();
+       var currentSelect = table.find('tr:last').find('td:nth-child(1)').append(selectProduits);
+       currentSelect.change(function(o){
+          var idRayon = $(this).find('option:selected').val();
+          var self = $(this);
+          $.get('/produits/getAll/' + idRayon,{}, function(datas){
+            var tbP = datas.data;
+            var slP = "<div class='dropdown'>" +
+              "<button class='btn btn-primary dropdown-toggle' id='menu1' type='button' data-toggle='dropdown'>" + 
+              "CHOIX PRODUIT<span class='aret'></span></button>" +
+              "<ul class='dropdown-menu' role='menu' aria-labelledby='menu1'>";
+               for (var c = 0; c < tbP.length; c++) { 
+                slP += "<li role='presentation'><a role='menuitem' tabindex='-1' href='#'><img class='pictoImg' src='" + tbP[c][10] + "'>" + tbP[c][1] + "</a></li>";
+               }
+            slP += "</ul></div>";
+            selfLigne = self.parent();
+            var choixProduit = self.parent().find('td:nth-child(3)').html(slP);
+          });
+       });
+     });
+    
+
+    $("#tblCommande").DataTable({
+      'searching': false,
+      'paging': false
+    });
+    
  });
   
 </script>
 </head>
 <body>
 <div id="dvHeader" class="row">
-<% if (action == "admin") { %><%=menu %>
-
-<ul id="nav">
-		<li id="selected"><a href="/">Caisse</a></li>
-		<li><a href="/produits">Produits</a></li>
-		<li><a href="/clients">Clients</a></li>
-		<li><a href="/fournisseurs">Fournisseurs</a></li>
-		<li><a href="/stats">Stats</a></li>
-	</ul>
-
-<% } %>
+<%- menu%>
 </div>
 
 <div id="dvMiddle" class="row">
-	<div id="mondiv" class="col-md-2"></div>
+	<div id="mondiv" class="col-md-4 arrondi-commande">
+	   <font class="alignLabel">Client</font><select id="slClient"></select><div id='infos'></div>
+  </div>
 </div>
 
-<div id="dvTouches" class="row" style="margin-left:20px">
-	<div id="ligne1" class="row" ></div>
-	<div id="ligne2" class="row"></div>
-	<div id="ligne3" class="row"></div>
-	<div id="ligne4" class="row"></div>
-</div>
+<div id="dvMiddle" class="row">
+ 
+ <div class="col-md-10 arrondi-commande">
+  <table id="tblCommande" class="order-column" cellspacing="0" width="100%">
+    <thead>
+        <tr>
+          <th>RAYON</th>
+            <th class="txt80 marge">REF.</th>
+            <th class="txt250 marge">DESIGNATION</th>
+            <th class="txt50 marge">Qté/Poids</th>
+            <th class="txt50 marge">Prix U.</th>
+            <th class="txt90 marge">TOTAL TTC</th>
+            <th class="txt90 marge"></th>
+            
+          </tr>
+    </thead>
+    <tbody id='zzz'>
+        <tr class='ligneProduit'>
+          <td class="clRayon"></td>
+          <td></td>
+          <td class="clProduit"></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td><button id="firstP" class="btn btn-success action-newL" value="">+</button></td>
+        </tr>
+    </tbody>
+  </table>
 
+</div>  
 
-
-
+ 
 </body>
 
 </html>

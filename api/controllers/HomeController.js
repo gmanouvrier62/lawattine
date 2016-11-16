@@ -16,7 +16,8 @@ home : function (req, res){
    	var tom = menu.toString();
 	*/
 	logger.warn(sails.config.appPath);
-	return res.render ('home/caisse',{'action': 'caisse', 'menu': ''});
+	var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+	return res.render ('home/caisse',{'action': 'caisse', 'menu': menu});
   
 
     

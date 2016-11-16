@@ -46,6 +46,21 @@
           
           
       }
+      function afficheCiv(civ) {
+        var sl = "<select id='civ'>";
+        if (civ == 'Mr')
+          sl += "<option value='Mr' selected>Mr</option><option value='Mlle'>Mlle</option><option value='Mme'>Mme</option>";
+        else
+            if (civ == 'Mlle')
+              sl += "<option value='Mr'>Mr</option><option value='Mlle' selected>Mlle</option><option value='Mme'>Mme</option>";
+            else 
+              if (civ == 'Mme')
+                sl += "<option value='Mr' >Mr</option><option value='Mlle'>Mlle</option><option value='Mme'selected>Mme</option>";
+              else
+                sl += "<option value='Mr' >Mr</option><option value='Mlle'>Mlle</option><option value='Mme'>Mme</option>";                
+        sl +="</select>";        
+        return sl;
+      }
 
       //gestion des cas particuliers
       function specificite(datas) {
@@ -210,7 +225,10 @@
                   afficheType(datas.data['id_type']);
                   lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
                 } else
-                  lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value='" + datas.data[fld] + "'></td></tr>";
+                    if(fld == 'civ') {
+                       lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td>" + afficheCiv(datas.data[fld]) + "</td></tr>";
+                    } else
+                        lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value='" + datas.data[fld] + "'></td></tr>";
 
               }
             }
@@ -291,7 +309,10 @@
             afficheType("--");
             lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
           } else
-          lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value=''></td></tr>";
+            if(fld == 'civ') {
+                lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td>" + afficheCiv('') + "</td></tr>";
+            } else
+                lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value=''></td></tr>";
 
         }
       }

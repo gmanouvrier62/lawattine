@@ -5,6 +5,8 @@ module.exports = {
 
     id : { type: 'int' },
 
+    civ: { type: 'string'},
+
     nom : { type: 'string' },
 
     prenom : { type: 'string'},

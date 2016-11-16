@@ -37,6 +37,14 @@ module.exports = {
 			return res.send(objResult);
 		});
 	},
+	getAllJson: function (req, res) {
+		sails.models.clients.getAll(function(err,results) {
+			var objResult = {"data": []};
+			
+			logger.util(objResult);
+			return res.send(results);
+		});
+	},
 	getOneById: function (req,res) {
 		logger.warn("va rechercher ", req.params.id);
 		sails.models.clients.findOne({'id': req.params.id}).exec(function(err,results) {

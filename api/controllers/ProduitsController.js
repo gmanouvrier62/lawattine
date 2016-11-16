@@ -20,31 +20,36 @@ module.exports = {
 	 	 	logger.warn("coucouroucoucou");
 	   	var tom = menu.toString();
 		*/
+		var letype = "0";
+		if (req.params.id !== undefined && req.params.id !== null)
+			letype = req.params.id;
 
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
-		return res.render ('produits/produits_list',{'action': 'produits', 'menu': menu});
+		return res.render ('produits/produits_list',{'action': 'produits', 'menu': menu, 'memoType':letype});
 	},
 	getAll: function (req, res) {
-		sails.models.produits.getAll(function(err,results) {
+		sails.models.produits.getAll(req.params.id, function(err,results) {
+			if (results !== null) {
 			var objResult = {"data": []};
-			results.map(function(obj,idx) {
-				var tb = [];
-				tb.push(obj.id);
-				tb.push(obj.nom.toString());
-				tb.push(obj.id_type);
-				tb.push(obj.ref_interne.toString());
-				tb.push(obj.ref_externe.toString());
-				tb.push(obj.ttc_externe);
-				tb.push(obj.pht);
-				tb.push(obj.tva);
-				tb.push(obj.tx_com);
-				tb.push(obj.ttc_vente);
-				tb.push(obj.icone.toString());
-				tb.push(obj.conditionnement.toString());
-				tb.push(obj.disponibilite);
-				objResult.data.push(tb);
+				results.map(function(obj,idx) {
+					var tb = [];
+					tb.push(obj.id);
+					tb.push(obj.nom.toString());
+					tb.push(obj.id_type);
+					tb.push(obj.ref_interne.toString());
+					tb.push(obj.ref_externe.toString());
+					tb.push(obj.ttc_externe);
+					tb.push(obj.pht);
+					tb.push(obj.tva);
+					tb.push(obj.tx_com);
+					tb.push(obj.ttc_vente);
+					tb.push(obj.icone.toString());
+					tb.push(obj.conditionnement.toString());
+					tb.push(obj.disponibilite);
+					objResult.data.push(tb);
 
-			});
+				});
+			}
 			logger.util(objResult);
 			return res.send(objResult);
 		});
@@ -95,7 +100,7 @@ module.exports = {
 		sails.models.typesproduits.query(sql,function(err,results) {
 			logger.warn(err);
 			if (err) return res.send({'err': err});
-			logger.util(results);
+			//logger.util(results);
 			return res.send({'err': null, 'data': results});
 		});
 	},

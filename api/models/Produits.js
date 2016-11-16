@@ -3,49 +3,48 @@ module.exports = {
 
   attributes: {
 
-    id : { type: 'int' },
+    id: { type: 'int' },
 
-    nom : { type: 'string' },
+    nom: { type: 'string' },
 
-    id_type : { type: 'string'},
+    id_type: { type: 'string'},
 
-    ref_interne : { type: 'string' },
+    ref_interne: { type: 'string' },
 
-    ref_externe : { type: 'string' },
+    ref_externe: { type: 'string' },
 
-    pht : { type: 'decimal' },
+    pht: { type: 'decimal' },
 
-    tva : { type: 'decimal' },
+    tva: { type: 'decimal' },
 
-    ttc_externe : { type: 'decimal' },
+    ttc_externe: { type: 'decimal' },
 
-    tx_com : { type: 'decimal' },
+    tx_com: { type: 'decimal' },
 
-    ttc_vente : { type: 'decimal' },
+    ttc_vente: { type: 'decimal' },
 
-    icone : { type: 'string' },
+    icone: { type: 'string' },
 
-    conditionnement : { type: 'string'},
+    conditionnement: { type: 'string'},
 
-    disponibilite : { type: 'int' }    
+    disponibilite: { type: 'int' }    
   },
 
-  getAll: function(callback) {
-
-    sql = "select * from  caisse.produits order by nom asc";
+  getAll: function(idType, callback) {
+    if(idType == "" || idType == null || idType == undefined || idType == "0")
+      sql = "select * from  caisse.produits order by nom asc";
+    else
+      sql = "select * from  caisse.produits where id_type='" + idType + "' order by nom asc";
     console.log("DANS MODEL : ", sql);
     
-    this.query(sql,function creaStat(err,result){
+    this.query(sql, function creaStat(err,result){
       if(err != null) {
         logger.error("ATTENTION ! ", err);
         callback(err,null);
       } else {
-
         callback(null,result);
       }
     });
-
   }
-  
 };
 
