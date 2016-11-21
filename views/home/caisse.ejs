@@ -22,6 +22,27 @@
  //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
  	//alert($("#mondiv").attr('tom'));
 $(function(){
+  function calcul_prix_ligne(p_ttc, p_qte) {
+
+    return parseInt((p_ttc * p_qte) * 100)/100;
+  }
+  function refreshLocalTotal() {
+     
+      var ttl = 0;
+      var nbA =0;
+      $(".prix_ttc").each(function(){
+        nbA ++;
+        ttl += parseFloat($(this).html());
+
+      });
+      ttl = ttl - parseFloat($("#txtAvoir").val());
+      ttl = ttl + parseFloat($("#txtDebit").val());
+      
+      ttl = parseInt(ttl * 100)/100;
+      $("#ttlMarchandises").html(ttl);
+      $("#nbArt").html(nbA);
+  }
+
  	var currentClient ="";
   var selectProduits = ""; 
  	$('#nav').spasticNav();
@@ -81,23 +102,26 @@ $(function(){
     });
     $('body').on('click', 'button.action-suppr', function (event) {
       $(this).parent().parent().remove();
+      refreshLocalTotal();
     });
+     //ajout d'une ligne produit
      $('body').on('click', 'button.action-newL', function (event) {
-      
+       refreshLocalTotal();
        var table = $("#tblCommande");
        var ligne = "<tr class='ligneProduit'>" +
                   "<td></td>" +
-                  "<td><input type='text' class='txt80'></td>" +
+                  "<td></td>" +
                   "<td class='les_produits'></td>" +
-                  "<td><input type='text' class='txt50'></td>" +
-                  "<td><input type='text' class='txt50'></td>" +
-                  "<td><input type='text' class='txt90'></td>" +
+                  "<td><input  type='text' class='txt50' value='1'></td>" +
+                  "<td class='prix_unitaire'></td>" +
+                  "<td class='prix_ttc'></td>" +
                   "<td><button class='btn btn-danger action-suppr'>-</button></td>" +
                   "</tr>";
 
        $(ligne).appendTo(table.find('tbody:last'));
-       //table.find('tr:last').find('td:nth-child(7)').find('button').remove();
+       //ajout du combo rayon dans la premère cellule
        var currentSelect = table.find('tr:last').find('td:nth-child(1)').append(selectProduits);
+       //sur le choix d'un rayon, mise en place du combo image des produits associés
        currentSelect.change(function(o){
           var idRayon = $(this).find('option:selected').val();
           var self = $(this);
@@ -108,11 +132,48 @@ $(function(){
               "CHOIX PRODUIT<span class='aret'></span></button>" +
               "<ul class='dropdown-menu' role='menu' aria-labelledby='menu1'>";
                for (var c = 0; c < tbP.length; c++) { 
-                slP += "<li role='presentation'><a role='menuitem' tabindex='-1' href='#'><img class='pictoImg' src='" + tbP[c][10] + "'>" + tbP[c][1] + "</a></li>";
+                var dataBloc = "data-id='" + tbP[c][0] + "' ";
+                    dataBloc += "data-tva='" + tbP[c][7] + "' ";
+                    dataBloc += "data-ht='" + tbP[c][6] + "' ";
+                    dataBloc += "data-ttc='" + tbP[c][9] + "' ";
+                    dataBloc += "data-txcom='" + tbP[c][8] + "' ";
+                    dataBloc += "data-dispo='" + tbP[c][12] + "' ";
+                    dataBloc += "data-ref='" + tbP[c][3] + "' ";
+                    
+                slP += "<li role='presentation'><a " + dataBloc + " role='menuitem' tabindex='-1' class='selectionP'><img class='pictoImg' src='" + tbP[c][10] + "'>" + tbP[c][1] + "</a></li>";
                }
             slP += "</ul></div>";
             selfLigne = self.parent();
             var choixProduit = self.parent().find('td:nth-child(3)').html(slP);
+            $(".selectionP").click(function(){
+               //alert('poilade ' + $(this).data('ref'));
+              $(this).parent().parent().parent().find('button').text($(this).text());//mettre le nom produit dans le toggle
+              //mise en place de la référence du produit choisi
+              var objLigne = self.parent().find('td');
+              objLigne.eq(1).html($(this).data('ref'));
+              var l_ht = $(this).data('ht');
+              var l_tva = $(this).data('tva');
+              var l_txcom = $(this).data('txcom');
+              var l_ttc = parseFloat($(this).data('ttc'));
+              var qte =  parseFloat(objLigne.eq(3).find('.txt50').val());
+              selfLigne = objLigne;
+              selfP = $(this);
+              objLigne.eq(3).find('.txt50').change(function(){
+                var bis_ttc = parseFloat(selfP.data('ttc'));
+                var bis_qte =  parseFloat(selfLigne.eq(3).find('.txt50').val());
+                objLigne.eq(5).html(calcul_prix_ligne(bis_ttc, bis_qte));
+                refreshLocalTotal();
+              });
+              
+              //var pu = calcul_pu(l_ht, l_txcom, l_tva);
+              objLigne.eq(4).html(l_ttc);
+                            
+              objLigne.eq(5).html(calcul_prix_ligne(l_ttc, qte));
+              refreshLocalTotal();
+            });
+            
+
+
           });
        });
      });
@@ -120,7 +181,8 @@ $(function(){
 
     $("#tblCommande").DataTable({
       'searching': false,
-      'paging': false
+      'paging': false,
+      'bInfo': false
     });
     
  });
@@ -133,14 +195,14 @@ $(function(){
 </div>
 
 <div id="dvMiddle" class="row">
-	<div id="mondiv" class="col-md-4 arrondi-commande">
+	<div id="mondiv" class="col-md-4 arrondi-plein">
 	   <font class="alignLabel">Client</font><select id="slClient"></select><div id='infos'></div>
   </div>
 </div>
 
 <div id="dvMiddle" class="row">
  
- <div class="col-md-10 arrondi-commande">
+ <div class="col-md-10 arrondi-commande" style="margin-bottom:0px">
   <table id="tblCommande" class="order-column" cellspacing="0" width="100%">
     <thead>
         <tr>
@@ -168,7 +230,22 @@ $(function(){
   </table>
 
 </div>  
+<div class="col-md-10 arrondi-commande-footer" style="margin-top:0px">
+  <div class="arrondi-plein-art">
+    Art : <font id="nbArt"></font><br>
 
+  </div>
+  <div style="float:left;margin-right:500px;">
+    <ul class="infosLi">
+      <li>Avoir : <input id='txtAvoir' class="txt50" type='text' value="0"></li>
+      <li>Débit : <input id='txtDebit' class="txt50" type='text' value="0"></li>
+    </ul>
+  </div>
+  <div style="float:left;">
+    <font id="marchandise">Marchandises</font><font id='ttlMarchandises' style="margin-right:20px"></font><button class="btn btn-warning">Validation</button><br>
+    <div class="arrondi-plein-net"><b>Net à payer</b><input id='txtNet' class="txt50" type='text' value="0"></div>
+  </div>
+</div>  
  
 </body>
 

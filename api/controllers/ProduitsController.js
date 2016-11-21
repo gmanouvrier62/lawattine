@@ -4,10 +4,9 @@ var moment = require('moment');
 var logger = require('../services/logger.init.js').logger("tom.txt");
 var sleep = require("sleep");
 var mkdirp = require('mkdirp');
-
 var path = require('path');
 var formidable = require('formidable');
-
+var importProduits = require("../services/import_produits.js");
 module.exports = {
 
 	home: function (req, res) {
@@ -26,6 +25,14 @@ module.exports = {
 
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 		return res.render ('produits/produits_list',{'action': 'produits', 'menu': menu, 'memoType':letype});
+	},
+	import: function (req, res) {
+
+		importProduits(function(result) {
+
+			return res.send(result);
+		});
+
 	},
 	getAll: function (req, res) {
 		sails.models.produits.getAll(req.params.id, function(err,results) {
