@@ -86,11 +86,11 @@
 
           if(datas.data !== undefined && datas.data !== null) {
             if(datas.data["icone"] !== null && datas.data["icone"] !== undefined)
-              var dvIcone = "<img id='imgIcon' class='pictoImg' src='" + datas.data["icone"] + "'>";
+              var dvIcone = "<img id='imgIcon' class='pictoImg' src='/images/images_rayons/" + datas.data["id_type"] + "/" + datas.data["icone"] + "'>";
             else
-              var dvIcone = "<img id='imgIcon' class='pictoImg' src='/images/uploads/no_image.png'>";
+              var dvIcone = "<img id='imgIcon' class='pictoImg' src='/images/no_image.png'>";
           } else
-              var dvIcone = "<img id='imgIcon' class='pictoImg' src='/images/uploads/no_image.png'>";
+              var dvIcone = "<img id='imgIcon' class='pictoImg' src='/images/no_image.png'>";
 
          
           var btnImg = "<input id='icon' type='file' name='icone' style='display:none'>";

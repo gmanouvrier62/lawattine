@@ -11,8 +11,6 @@
  <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
  <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
- <script type="text/javascript" src="/js/dependencies/composant/caisse_init.js"></script>
- <script type="text/javascript" src="/js/dependencies/composant/caisse.js"></script>
  <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
  <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
@@ -21,8 +19,7 @@
 $(function(){
 
     PNotify.prototype.options.styling = "jqueryui";
- 	console.log(caisse_init);
-    $("#formModal").hide();
+ 	$("#formModal").hide();
  	$('#nav').spasticNav();
     //init des touches
     for(var t = 1; t < 11; t++) {
@@ -113,7 +110,7 @@ $(function(){
                 // `data` option, which defaults to the column being worked with, in
                 // this case `data: 0`.
                 "render": function ( data, type, row ) {
-                    var html = "<img class='pictoImg' src='" + row[10]  + "'>";
+                    var html = "<img class='pictoImg' src='/images/images_rayons/" + row[2] + "/" + row[10]  + "'>";
                                         
                     return html;
                 },

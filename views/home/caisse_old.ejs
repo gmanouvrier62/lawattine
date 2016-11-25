@@ -1,12 +1,9 @@
 <html>
 <head>
-<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
 <link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
 <link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
 <link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
-
 <!--<script type="text/javascript" data-main="/js/dependencies/require.main.js"  src="/js/dependencies/require.js"></script>-->
   <link rel="stylesheet" type="text/css" href="/js/dependencies/msdropdown/css/msdropdown/dd.css" />
 
@@ -19,15 +16,12 @@
  <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>	
  <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>	
- <script type="text/javascript" src="/js/dependencies/caisse/caisse.js"></script>  
- <script type="text/javascript" src="/js/dependencies/commande/commande.js"></script>  
 
 
 <script>
  //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
  	//alert($("#mondiv").attr('tom'));
 $(function(){
-  var allProducts = new Array();
   function calcul_prix_ligne(p_ttc, p_qte) {
 
     return parseInt((p_ttc * p_qte) * 100)/100;
@@ -51,8 +45,6 @@ $(function(){
 
  	var currentClient ="";
   var selectProduits = ""; 
-  //var btnChoixProduit = "<button class='btn btn-primary choix'>Selection</button>";
-
  	$('#nav').spasticNav();
 	
  	$.get('/clients/getAllJson',{}, function(datas){
@@ -74,22 +66,15 @@ $(function(){
           
         if(datas.err == null) {
           var types = datas.data;
-          selectProduits = "<select id='slP'>";
+          selectProduits = "<select>";
           for (var cc = 0; cc < types.length; cc++) {
             var attrS ="";
             selectProduits += "<option value='" + types[cc].id + "'>" + types[cc].nom + "</option>";
           }
           selectProduits +=" </select>";
         }
-        $(".fontPr").append(selectProduits);
-        var globalTable = $("#tblP").setDataTable('produits',0);
-        //Gestion du choix produit
-        $("#slP").change(function(){
-          var idRayon = $(this).find('option:selected').val();
-          globalTable.ajax.url( '/produits/getAll/' + idRayon ).load();
-         
-
-        });
+        $("#firstP").click();
+       
     });
         
     /*
@@ -115,14 +100,12 @@ $(function(){
         	//Gérer le changement de client courrant
       });
     });
-    //suppression d'une ligne produit
     $('body').on('click', 'button.action-suppr', function (event) {
       $(this).parent().parent().remove();
       refreshLocalTotal();
     });
      //ajout d'une ligne produit
      $('body').on('click', 'button.action-newL', function (event) {
-       //alert('bou');
        refreshLocalTotal();
        var table = $("#tblCommande");
        var ligne = "<tr class='ligneProduit'>" +
@@ -135,67 +118,74 @@ $(function(){
                   "<td><button class='btn btn-danger action-suppr'>-</button></td>" +
                   "</tr>";
 
-      // $(ligne).appendTo(table.find('tbody:last'));
-       //Affichage de la modale choix produit       
-       $("#dvChoixPr").css('display','block');
-       $(".close").click(function() {
-          $("#dvChoixPr").css('display','none');
+       $(ligne).appendTo(table.find('tbody:last'));
+       //ajout du combo rayon dans la premère cellule
+       var currentSelect = table.find('tr:last').find('td:nth-child(1)').append(selectProduits);
+       //sur le choix d'un rayon, mise en place du combo image des produits associés
+       currentSelect.change(function(o){
+          var idRayon = $(this).find('option:selected').val();
+          var self = $(this);
+          $.get('/produits/getAll/' + idRayon,{}, function(datas){
+            var tbP = datas.data;
+            var slP = "<div class='dropdown'>" +
+              "<button class='btn btn-primary dropdown-toggle' id='menu1' type='button' data-toggle='dropdown'>" + 
+              "CHOIX PRODUIT<span class='aret'></span></button>" +
+              "<ul class='dropdown-menu' role='menu' aria-labelledby='menu1'>";
+               for (var c = 0; c < tbP.length; c++) { 
+                var dataBloc = "data-id='" + tbP[c][0] + "' ";
+                    dataBloc += "data-tva='" + tbP[c][7] + "' ";
+                    dataBloc += "data-ht='" + tbP[c][6] + "' ";
+                    dataBloc += "data-ttc='" + tbP[c][9] + "' ";
+                    dataBloc += "data-txcom='" + tbP[c][8] + "' ";
+                    dataBloc += "data-dispo='" + tbP[c][12] + "' ";
+                    dataBloc += "data-ref='" + tbP[c][3] + "' ";
+                    
+                slP += "<li role='presentation'><a " + dataBloc + " role='menuitem' tabindex='-1' class='selectionP'><img class='pictoImg' src='/images/images_rayons/" + tbP[c][2] + "/" + tbP[c][10] + "'>" + tbP[c][1] + "</a></li>";
+               }
+            slP += "</ul></div>";
+            selfLigne = self.parent();
+            //c ici ke je vais remplacer par un modal, a voir pour faire cela server side(ejs)
+            var choixProduit = self.parent().find('td:nth-child(3)').html(slP);
+            $(".selectionP").click(function(){
+               //alert('poilade ' + $(this).data('ref'));
+              $(this).parent().parent().parent().find('button').text($(this).text());//mettre le nom produit dans le toggle
+              //mise en place de la référence du produit choisi
+              var objLigne = self.parent().find('td');
+              objLigne.eq(1).html($(this).data('ref'));
+              var l_ht = $(this).data('ht');
+              var l_tva = $(this).data('tva');
+              var l_txcom = $(this).data('txcom');
+              var l_ttc = parseFloat($(this).data('ttc'));
+              var qte =  parseFloat(objLigne.eq(3).find('.txt50').val());
+              selfLigne = objLigne;
+              selfP = $(this);
+              objLigne.eq(3).find('.txt50').change(function(){
+                var bis_ttc = parseFloat(selfP.data('ttc'));
+                var bis_qte =  parseFloat(selfLigne.eq(3).find('.txt50').val());
+                objLigne.eq(5).html(calcul_prix_ligne(bis_ttc, bis_qte));
+                refreshLocalTotal();
+              });
+              
+              //var pu = calcul_pu(l_ht, l_txcom, l_tva);
+              objLigne.eq(4).html(l_ttc);
+                            
+              objLigne.eq(5).html(calcul_prix_ligne(l_ttc, qte));
+              refreshLocalTotal();
+            });
+            
+
+
+          });
        });
-       /*
-             
-       $("#dvChoixPr").dialog({
-          title: "Sélection produit",
-          resizable: true,
-          height: 550,
-          width: 900,
-          modal: true
-       });
-
-       */
-
-
-
      });
+    
 
-    var dt = $("#tblCommande").setCommandeTable();
-
-    //$("#dvChoixPr").hide();
-    $('body').on('click', 'button.action-add', function (event) {
-        var q = parseInt( $(this).parent().find(".fontQte").html() );
-        $(this).parent().find(".fontQte").html( q+1 );
+    $("#tblCommande").DataTable({
+      'searching': false,
+      'paging': false,
+      'bInfo': false
     });
-    $('body').on('click', 'button.action-min', function (event) {
-        var q = parseInt( $(this).parent().find(".fontQte").html() );
-        if(q>1) $(this).parent().find(".fontQte").html( q-1 );
-    });
-    $('body').on('click', 'button.action-okpr', function (event) {
-        //mise en place des produits dans le tableau de datas de commande
-        var currentP = new Array();
-        currentP.push( $(this).data('id') );
-        currentP.push( $(this).data('rayon') );
-        currentP.push( $(this).data('ref') );
-        currentP.push( $(this).parent().parent().find('.pictoImg').attr('src') );
-        currentP.push( $(this).parent().parent().find('.designation').html() );//designation
-        currentP.push( $(this).parent().parent().find('.fontQte').html() );//qte
-        currentP.push( $(this).data('pu') );//pu
-        var l_ttc = parseInt($(this).parent().parent().find('.fontQte').html()) * parseFloat( $(this).data('pu') );
-        currentP.push(l_ttc);//ttc
-        $("#dvChoixPr").css('display','none');//fermeture de la modale
-        //alert(currentP);
-        
-        //dt.row.add(currentP);
-        var produit_ligne = "<tr>";
-          produit_ligne += "<td>1</td>";
-          produit_ligne += "<td>2</td>";
-          produit_ligne += "<td>3</td>";
-          produit_ligne += "<td>4</td>";
-          produit_ligne += "<td>5</td>";
-          produit_ligne += "<td>6</td>";
-          produit_ligne += "<td>7</td>";
-          produit_ligne += "<td>8</td>";
-          produit_ligne += "</tr>";
-        $(produit_ligne).appendTo($("#tblCommande").find('tbody:last'));
-    });
+    
  });
   
 </script>
@@ -213,13 +203,11 @@ $(function(){
 
 <div id="dvMiddle" class="row">
  
- <div class="col-md-10 arrondi-commande" style="margin-bottom:0px"><br>
- <button id="firstP" class="btn btn-success action-newL" value="">Ajouter +</button>
+ <div class="col-md-10 arrondi-commande" style="margin-bottom:0px">
   <table id="tblCommande" class="order-column" cellspacing="0" width="100%">
     <thead>
         <tr>
-            <th>id</th>
-            <th>RAYON</th>
+          <th>RAYON</th>
             <th class="txt80 marge">REF.</th>
             <th class="txt250 marge">DESIGNATION</th>
             <th class="txt50 marge">Qté/Poids</th>
@@ -230,7 +218,15 @@ $(function(){
           </tr>
     </thead>
     <tbody id='zzz'>
-       
+        <tr class='ligneProduit'>
+          <td class="clRayon"></td>
+          <td></td>
+          <td class="clProduit"></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td><button id="firstP" class="btn btn-success action-newL" value="">+</button></td>
+        </tr>
     </tbody>
   </table>
 
@@ -251,8 +247,7 @@ $(function(){
     <div class="arrondi-plein-net"><b>Net à payer</b><input id='txtNet' class="txt50" type='text' value="0"></div>
   </div>
 </div>  
- <%- partial ('/home/gilles/node/git/caisse/views/produits/choix.ejs',{'nom': 'Gilles Manouvrier'}) %>
-
+ 
 </body>
 
 </html>

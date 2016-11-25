@@ -34,8 +34,8 @@ module.exports = {
             replaceConsole: true,
             path: '/var/log/lawattine.log'
         },
-  productImages: "/assets/images/uploads/",
-  relativProductImages: "/images/uploads/"
+  productImages: "/home/gilles/node/git/caisse/assets/images/uploads/leclerc/",
+  relativProductImages: "/images/uploads/leclerc/"
 
 
 };

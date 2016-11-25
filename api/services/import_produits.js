@@ -2,7 +2,7 @@ var request = require('request');
 var fs = require('fs');
 var util = require("util");
 var moment = require('moment');
-//var sleep = require('sleep');
+var sleep = require('sleep');
 var cheerio = require('cheerio');
 var Entities = require('html-entities').XmlEntities; 
 var Immutable = require('immutable');
@@ -30,15 +30,30 @@ module.exports = function(callback){
 	        return Math.round(resultat *100)/100;
 	};
 
+	var download = function(uri, filename, callback){
+	  if(uri !== null && uri !== undefined) {
+		  request.head(uri, function(err, res, body){
+		    console.log('content-type:', res.headers['content-type']);
+		    console.log('content-length:', res.headers['content-length']);
+		    if (err !== null && err !== undefined) {
+		    	logger.error("ERR : ", err);
+		    	logger.error ("pour copier sur ", filename);
+		    }
 
-	function importAProduct(currentP, callback) {
+		    request(uri).pipe(fs.createWriteStream(filename)).on('close', callback);
+		    
+		  });
+	  }
+	};
+
+	function importAProduct(currentP, fu, callback) {
 		var entities = new Entities();
 		//prevoir le telchargement img ici avec dedution du nom image
-		var full_url = currentP.sUrlVignetteProduit;
-		var tbPath = full_url.split('/');
-		var fileN = tbPath[tbPath.length-1];
-		var imgName = fileN.split('&use=')[0].replace('image.ashx?id=','') + '.png';
-		var req=new request(full_url, function (error, response, body) {
+			var full_url = currentP.sUrlVignetteProduit;
+				var tbPath = full_url.split('/');
+				var fileN = tbPath[tbPath.length-1];
+				var imgName = fileN.split('&use=')[0].replace('image.ashx?id=','') + '.jpg';
+	
 			var prd = {};
 			if(currentP.sLibelleLigne1 != "" && currentP.sLibelleLigne1 != undefined)
 				currentP.sLibelleLigne1 = entities.decode(currentP.sLibelleLigne1);
@@ -46,10 +61,10 @@ module.exports = function(callback){
 				currentP.sLibelleLigne2 = entities.decode(currentP.sLibelleLigne2);
 			
 			prd.nom = currentP.sLibelleLigne1 + ", " + currentP.sLibelleLigne2;
-			prd.id_type = currentP.iIdRayon;
+			prd.id_type = currentP.iIdFamille;
 			prd.ref_interne = "";
 			prd.tva = 5.5;
-			prd.ref_externe = currentP.iIdProduit;
+			prd.ref_externe = currentP.iIdProduit.toString();
 			prd.pht =  calculHT(currentP.nrPVBRIIDeduit,prd.tva);
 			
 			prd.ttc_externe = currentP.nrPVBRIIDeduit ;
@@ -62,35 +77,37 @@ module.exports = function(callback){
 			prd.disponibilite = 1;
 			sails.models.produits.findOne({'ref_externe': prd.ref_externe}).exec(function(err,results) {
 			  if (!err) {
-			  	logger.util("le result : " + results);
+			  	logger.util("le result : ", results);
 			  	if(results == null || results == undefined) {
 			  		//C'est une création
-			  		/*
-			  		var sql = "insert into caisse.produits (nom, id_type, ref_interne, tva, ref_externe, pht, ttc_externe, tc_com, ttc_vente, icone, conditionnement, disponibilite) ";
-						sql += "values(";
-						sql += "'" + prd.nom.clean() + "'," + prd.id_type + ",";
-						sql += "'" + prd.ref_interne.clean() + "'," + prd.tva + ",";
-						sql += "'" + prd.ref_externe.clean() + "'," + prd.pht + "," + prd.ttc_externe + "," + prd.tx_com + "," + prd.ttc_vente + ",";
-						sql += "'" + prd.icone.clean() + "',";
-						sql += "'" + prd.conditionnement.clean() + "',1)";
-					*/
-					logger.util("prd : ", prd);
-					callback(null);
+					//logger.util("prd : ", prd);
 
-				    //prevoir le telechargement de l'icone
-
+					sails.models.produits.findOrCreate(prd,prd).exec(function creaStat(err,created){
+						if (err !== null && err !== undefined) {
+						 	logger.warn("il y aurait une err : ", err);
+						 	return callback(err);
+						} else {
+							logger.info("create semble ok");
+							return callback({current_url: full_url});
+						}
+					});
 			  	} else {
 			  		//C'est un update
+			  		var datasInitial = {ref_externe: prd.ref_externe};
+			  		sails.models.produits.update(datasInitial,prd).exec(function creaStat(err,updated){
+						if (err !== null && err !== undefined) {
+							logger.warn(err);
+							return callback(err);
+						} else
+							return callback({current_url: full_url});
+					});
 			  	}
-
-
 			  } else
 			    logger.error('erreur de recherche produit ', prd.ref_externe + ", " + prd.nom);
 			    logger.error("err : ", err);
-			    callback("err");
+			    return callback("err");
 			});
-
-		});
+		
 
 	};
 
@@ -99,26 +116,43 @@ module.exports = function(callback){
         if (err) {
             throw err;
         }
-
+        var lesurl = "";
         files.forEach(function (file) {
         	logger.info(file);
         	contenu = JSON.parse(fs.readFileSync(rep_base + file, "UTF-8"));
         	
         	//console.log(util.inspect(contenu.objContenu.lstElements));
         	var produits = contenu.objContenu.lstElements;
+        	
         	for(var cpt = 0 ; cpt < produits.length;cpt++) {
         		tom ++;
         		//logger.warn(produits[cpt].objElement.sLibelleLigne1);
-        		importAProduct(produits[cpt].objElement, function(err) {
+        		var full_url = produits[cpt].objElement.sUrlVignetteProduit;
+				var tbPath = full_url.split('/');
+				var fileN = tbPath[tbPath.length-1];
+				var imgName = fileN.split('&use=')[0].replace('image.ashx?id=','') + '.jpg';
 
-
-
+				logger.warn("avant download");
+				logger.warn("ok down fini");
+        		importAProduct(produits[cpt].objElement,full_url, function(err) {
+        			if(err.current_url != "" && err.current_url !== null && err.current_url != undefined)
+					lesurl += err.current_url + '\r\n';
+					else
+						lesurl +="vide\r\n";
+					
+						
         		});
+
+        		
         	}
+        	
      	});
        
 
 		logger.info(" ttl : ",tom);
+		fs.writeFile("/home/gilles/node/git/caisse/lnkImages.txt", lesurl, function (err) {
+							logger.warn("c tout fini");
+        });
   	});
 
 };

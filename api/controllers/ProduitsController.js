@@ -22,7 +22,8 @@ module.exports = {
 		var letype = "0";
 		if (req.params.id !== undefined && req.params.id !== null)
 			letype = req.params.id;
-
+		else
+			letype = 284358;
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 		return res.render ('produits/produits_list',{'action': 'produits', 'menu': menu, 'memoType':letype});
 	},
@@ -51,7 +52,10 @@ module.exports = {
 					tb.push(obj.tx_com);
 					tb.push(obj.ttc_vente);
 					tb.push(obj.icone.toString());
-					tb.push(obj.conditionnement.toString());
+					if(obj.conditionnement !== null)
+						tb.push(obj.conditionnement.toString());
+					else
+						tb.push(obj.conditionnement);
 					tb.push(obj.disponibilite);
 					objResult.data.push(tb);
 
