@@ -75,6 +75,8 @@ module.exports = function(callback){
 			prd.icone = tbP[tbP.length-1];
 			prd.conditionnement = currentP.sPrixParUniteDeMesure;
 			prd.disponibilite = 1;
+			prd.qte_dispo = currentP.iQteDisponible;
+			prd.id_fournisseur = 1;
 			sails.models.produits.findOne({'ref_externe': prd.ref_externe}).exec(function(err,results) {
 			  if (!err) {
 			  	logger.util("le result : ", results);
@@ -95,6 +97,7 @@ module.exports = function(callback){
 			  		//C'est un update
 			  		var datasInitial = {ref_externe: prd.ref_externe};
 			  		sails.models.produits.update(datasInitial,prd).exec(function creaStat(err,updated){
+						
 						if (err !== null && err !== undefined) {
 							logger.warn(err);
 							return callback(err);
@@ -111,7 +114,7 @@ module.exports = function(callback){
 
 	};
 
-
+	//début du parsing du repertoire contenant les json
  	fs.readdir(rep_base, function (err, files) {
         if (err) {
             throw err;

@@ -21,7 +21,11 @@ module.exports = {
 
     mobile : { type: 'string' },
 
-    email : { type: 'string' }
+    email : { type: 'string' },
+
+    current_debit: { type: 'decimal'},
+
+    current_avoir: { type: 'decimal'}
   },
 
   getAll: function(callback) {

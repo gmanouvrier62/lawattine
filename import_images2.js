@@ -6,7 +6,9 @@ var moment = require('moment');
 var cheerio = require('cheerio');
 var Immutable = require('immutable');
 var mkdirp = require('mkdirp');
-
+var Curl = require( 'node-libcurl' ).Curl;
+ 
+var curl = new Curl();
 var tbLiens = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284322-Viandes-Poissons.aspx',
 'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284325-Boucherie.aspx',
 'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284326-Volailles-et-Gibiers.aspx',
@@ -107,53 +109,41 @@ var tbLiens = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/ray
 'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284692-Chauffage-et-allumage.aspx',
 'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284689-Fleurs-Jardin-et-Piscine.aspx'];
 
-//divWCRS310_Content
-//contient une image
-//contient 1 p de class pWCRS310_PrixUnitaire
-//contient 1 p de class pWCRS310_PrixUniteMesure
-
 
 var crea =" var tbLiens = [";
-/*
-var full_url = 'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284351-Legumes.aspx';
+for(var cptL = 0; cptL < tbLiens.length; cptL++) {
 
-var req=new request(full_url, function (error, response, body) {
-	//idx++;
-	 if (!error && response.statusCode == '200') {
-        console.log("ok nav : " + full_url);
-        //lister les lien de la slidebarre
-        fs.writeFile("/home/gilles/node/leclerc/base.html", body, function (err) {
-            if (err) {
-              console.log("pas bon pour " + full_url);
-            } else {
+    var full_url = tbLiens[cptL];
+    curl.setOpt( 'URL', full_url );
+    curl.setOpt( 'FOLLOWLOCATION', true );
+     
+    curl.on( 'end', function( statusCode, body, headers ) {
+        console.info('pour' + full_url);     
+        console.info( statusCode );
+        console.info( '---' );
+        console.info( body.length );
+        console.info( '---' );
+        console.info( this.getInfo( 'TOTAL_TIME' ) );
+        var tb = body.split("('ctl00_main_ctl05_pnlElementProduit',");
+        if(tb.length > 0) {
+            var part2 = tb[1];
+            var tb2 = part2.split('Utilitaires.widget.initOptions');
+            var leJSON = tb2[0];
+            leJSON = leJSON.substring(0,leJSON.length-2);
+            var tbFn = full_url.split('rayon-');
+            var fn = tbFn[1] + '.json';
+     
+            fs.writeFile("/var/leclerc/" + fn, leJSON, function (err) {
+                if (err) {
+                  console.log("pas bon pour " + full_url);
+                } else {
+                    console.log("ok ducky");
+                }
+            });
+        }
+        this.close();
+    });
+    curl.on( 'error', curl.close.bind( curl ) );
+    curl.perform();
+}
 
-            	var li=$('li').each(function(i,elem){
-                 	//console.log("li : " + elem.data('data-sidselection'));
-                 	console.log($(this).find('a').attr('href'));
-                 	crea += "'" + $(this).find('a').attr('href') + "',\r\n";
-                	var lili = $(this).find('ul').find('li');
-                	lili.each(function(i,elem){
-                		console.log("lili : " + $(this).data('sidselection'));
-                 		crea += "'" + $(this).find('a').attr('href') + "',\r\n";
-
-
-                 	});	
-                 });
-                 crea += "]";
-                 console.log("e : " + crea);
-
-            }
-        });
-
-    }
-});
-
-*/
-$ = cheerio.load('http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284646-Nettoyants-vaisselle.aspx');
-console.log(util.inspect($));
-
-$("img").each(function(i,elem) {
-
-console.log("d : ", $(this).attr('src'));
-
-})

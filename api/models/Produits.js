@@ -5,6 +5,8 @@ module.exports = {
 
     id: { type: 'int' },
 
+    id_fournisseur: { type: 'int'},
+
     nom: { type: 'string' },
 
     id_type: { type: 'string'},
@@ -26,6 +28,8 @@ module.exports = {
     icone: { type: 'string' },
 
     conditionnement: { type: 'string'},
+
+    qte_dispo: { type: 'int'},
 
     disponibilite: { type: 'int' }    
   },

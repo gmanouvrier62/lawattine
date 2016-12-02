@@ -40,6 +40,8 @@ module.exports.routes = {
   '/produits/upload':       'ProduitsController.upload',
   '/produits/types/list':     'ProduitsController.getTypes',
   '/produits/import':       'ProduitsController.import', 
+  '/produits/prepare_import_json': 'ProduitsController.prepare_import_json',
+  '/produits/import_rayon_json/:id': 'ProduitsController.import_rayon_json',
   '/clients':               'ClientsController.home',
   '/clients/getAll':        'ClientsController.getAll',
   '/clients/getAllJson':        'ClientsController.getAllJson',
@@ -47,6 +49,9 @@ module.exports.routes = {
   '/fournisseurs':               'FournisseursController.home',
   '/fournisseurs/getAll':        'FournisseursController.getAll',
   '/fournisseurs/getOneById/:id':   'FournisseursController.getOneById',  
+  '/commandes/addormodify':             'CommandesController.addormodify',
+  '/commandes/valider':              'CommandesController.valider',
+  '/commandes/retirer_produit':      'CommandesController.retirer_produit' 
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

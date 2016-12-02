@@ -35,7 +35,8 @@ module.exports = {
             path: '/var/log/lawattine.log'
         },
   productImages: "/home/gilles/node/git/caisse/assets/images/uploads/leclerc/",
-  relativProductImages: "/images/uploads/leclerc/"
+  relativProductImages: "/images/uploads/leclerc/",
+  importProductsFolder: "/var/leclerc"
 
 
 };

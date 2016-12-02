@@ -7,6 +7,8 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var formidable = require('formidable');
 var importProduits = require("../services/import_produits.js");
+var createJson = require("../services/createJson.js");
+
 module.exports = {
 
 	home: function (req, res) {
@@ -32,6 +34,22 @@ module.exports = {
 		importProduits(function(result) {
 
 			return res.send(result);
+		});
+
+	},
+	prepare_import_json: function(req, res) {
+
+		createJson(null, function(result){
+			return res.send(result);
+
+		});
+
+	},
+	import_rayon_json: function(req, res) {
+
+		createJson(req.params.id, function(result){
+			return res.send(result);
+
 		});
 
 	},
