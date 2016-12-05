@@ -1,10 +1,38 @@
-<ul id="nav">
-		<li id="selected"><a href="/">Caisse</a></li>
+
+<nav id="topNav">
+	<ul>
+		<li><a href="/">Caisse</a></li>
 		<li><a href="/produits">Produits</a></li>
 		<li><a href="/clients">Clients</a></li>
 		<li><a href="/fournisseurs">Fournisseurs</a></li>
-		<li><a href="/achats">Achats</a></li>
+		<li><a title="" href="#">Achats</a>
+			<ul>
+				<li><a href="/achats">Commandes</a></li>
+				<li><a href="/stocks">Stocks</a></li>
+			</ul>
+		</li>
 		<li><a href="/commandes">Commandes</a></li>
 		<li><a href="/stats">Stats</a></li>
-		<li><a href="/config">Config</a></li>
-</ul>
+		<li class="last"><a href="/config">Config</a></li>
+	</ul>
+</nav>
+
+
+
+<script>
+(function($){
+		var nav = $("#topNav");
+		nav.find("li").each(function() {
+			if ($(this).find("ul").length > 0) {
+				$("<span>").text("^").appendTo($(this).children(":first"));
+				$(this).mouseenter(function() {
+				$(this).find("ul").stop(true, true).slideDown();});
+				$(this).mouseleave(function() {
+				$(this).find("ul").stop(true, true).slideUp();});
+			}
+		});
+	})(jQuery);
+
+
+
+</script>

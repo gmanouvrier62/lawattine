@@ -47,11 +47,16 @@ module.exports.routes = {
   '/clients/getAllJson':        'ClientsController.getAllJson',
   '/clients/getOneById/:id':   'ClientsController.getOneById',  
   '/fournisseurs':               'FournisseursController.home',
+
   '/fournisseurs/getAll':        'FournisseursController.getAll',
   '/fournisseurs/getOneById/:id':   'FournisseursController.getOneById',  
   '/commandes/addormodify':             'CommandesController.addormodify',
   '/commandes/valider':              'CommandesController.valider',
-  '/commandes/retirer_produit':      'CommandesController.retirer_produit' 
+  '/commandes/retirer_produit':      'CommandesController.retirer_produit',
+  '/achats':                        'AchatsController.home',
+  '/achats/achat_todo':             'AchatsController.achat_todo',
+  '/stocks':                        'StocksController.home' 
+  
   /***************************************************************************
   *                                                                          *
   * Custom routes here...                                                    *

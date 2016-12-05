@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<title>jQuery sc026</title>
+<!-- http://modernizr.com/ -->
+<!-- traduit et adapté par outils-web.com -->
+<!-- chargement des feuilles de style -->
+<link rel="stylesheet" href="css/style.css">
+<!-- chargement des scripts -->	
+<script src="scr/jquery.js"></script>
+<script src="scr/modernizr.js"></script>
+</head>
+<body class="no-js">
+<!-- Emplacement du menu -->		
+<nav id="topNav">
+	<ul>
+	<li><a href="#" title="">Accueil</a></li>
+	<li><a href="#" title="">Diaporamas</a>
+		<ul>
+		<li><a href="#" title="">HTML</a></li>
+		<li><a href="#" title="">jQuery</a></li>
+		<li><a href="#" title="">Flash</a></li>
+		</ul>
+	</li>
+	<li><a href="#" title="">Lightbox</a></li>
+	<li><a href="#" title="">Scripts</a>
+		<ul>
+		<li><a href="#" title="">Javascript</a></li>
+		<li><a href="#" title="">jQuery</a></li>
+		</ul>     				
+	</li>
+	<li class="last"><a href="#" title="">Contact</a></li>
+	</ul>
+</nav>
+<!-- Emplacement du contenu -->		
+<div class="content">
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. <br />
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. <br />
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. <br />
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. <br />
+Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. <br />
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum
+</div>
+<!-- Initialisation de la fonction -->	
+<script>
+	var el = document.getElementsByTagName("body")[0];
+	el.className = "";
+	
+	(function($){
+		var nav = $("#topNav");
+		nav.find("li").each(function() {
+			if ($(this).find("ul").length > 0) {
+				$("<span>").text("^").appendTo($(this).children(":first"));
+				$(this).mouseenter(function() {
+				$(this).find("ul").stop(true, true).slideDown();});
+				$(this).mouseleave(function() {
+				$(this).find("ul").stop(true, true).slideUp();});
+			}
+		});
+	})(jQuery);
+</script>
+</body>
+</html>

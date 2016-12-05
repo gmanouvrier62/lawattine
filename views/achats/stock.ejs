@@ -1,0 +1,143 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/js/dependencies/tooltipster/dist/css/tooltipster.bundle.min.css" />
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">
+   
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+ <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
+ <script type="text/javascript" src="/js/dependencies/composant/ModalFormBind.js"></script>
+ <script type="text/javascript" src="/js/dependencies/tooltipster/dist/js/tooltipster.bundle.min.js"></script> 
+ <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+<script>
+$(function(){
+    var tableStock = $('#tblStock').DataTable( {
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                    var html = "<font class='prNom' data-tooltip-content='#tooltip_content_" + row[0] + "'>" + row[1] + "</font>";
+
+                    html += "<div class='tooltip_templates' style='display:none'><span id='tooltip_content_" + row[0] + "'><img src='/images/images_rayons/" + row[3] + "/" + row[4] +  "'' /><strong>" + row[5] + "</strong></span></div>";
+                    
+                    return html;
+                },
+                "targets": 1
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    return row[2];
+                },
+                "targets": 2
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    var html = '<button class="btn btn-success btn-xs btn-action action-maj" style="font-size: 13px;" title="Voir le produit" data-id="' + row[0] + '"><i class="fa fa-chevron-down"></i>Valider</button>';
+                    
+                    return html;
+                },
+                "targets": 3
+            },
+            {
+                "render": function ( data, type, row ) {
+                    var html = "<input type='text' data-id='" + row[0] + "' class='txt50' value=''>";
+                    return html;
+                },
+                "targets": 4
+            },
+            { "className": "col_xxl", "targets": [ 1 ] }
+        ],
+        "processing": false,
+        "serverSide": false,
+        "paging": true,
+        "ordering": true,
+        "defaultOrdering": [[1, 'asc']],
+        "searching": true,
+        "search": {
+            "smart": false
+        },
+        "ajax": '/stocks/getAllStock'
+    });
+    tableStock.on('draw.dt', function(){
+    
+        $('.prNom').each(function(){
+            $(this).tooltipster();
+        });
+    });
+    
+    $('body').on('click', 'button.action-maj', function(){
+        tbQ = new Array();   
+        $(".txt50").each(function(){
+            var cur = {
+              'id_produit': $(this).data('id'),
+              'mouvement': $(this).val()
+            };
+            tbQ.push(cur);
+        });
+        $.post("/stocks/modify_stock",{'datas': tbQ}, function(result){
+            
+            if(result != null && result != "") {
+                //KO
+                var infos = new PNotify({
+                    title: 'Erreur ',
+                    text: result,
+                    type: 'error',
+                    desktop: {
+                      desktop: true
+                    }
+                }); 
+            } else {
+                //OK
+                var infos = new PNotify({
+                    title: 'Achats enregistrés ',
+                    text: "",
+                    type: 'success',
+                    desktop: {
+                      desktop: true
+                    }
+                }); 
+                document.location.href = "/stocks";
+            }
+
+        });     
+    });
+});
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+<div style="text-align:center"><H1><font >STOCK</font></H1></div>
+
+<div id="dvMiddle" class="row">
+
+	<div id="rowStock" class="col-md-8" style="margin-left:100px;margin-top:20px;">
+		<table id="tblStock" class="order-column" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                	<th>REF</th>
+                    <th>nom</th>
+                    <th>Quantité</th>
+                    <th>Btn</th>
+                    <th>Mouvement</th>
+                    
+                </tr>
+            </thead>
+            
+	</div>
+</div>
+
+</body>
+</html>

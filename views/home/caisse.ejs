@@ -4,6 +4,7 @@
 <link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
 <link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">
 <link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
 
@@ -17,7 +18,9 @@
  <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
  
  <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
- <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>	
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+ <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+ 	
  <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>	
  <script type="text/javascript" src="/js/dependencies/caisse/caisse.js"></script>  
  <script type="text/javascript" src="/js/dependencies/commande/commande.js"></script>  
@@ -74,7 +77,7 @@ $(function(){
   var selectProduits = ""; 
   //var btnChoixProduit = "<button class='btn btn-primary choix'>Selection</button>";
 
- 	$('#nav').spasticNav();
+ 	//$('#nav').spasticNav();
 	
  	$.get('/clients/getAllJson',{}, function(datas){
         var selectClients = ""; 
