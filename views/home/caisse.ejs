@@ -40,6 +40,8 @@ $(function(){
     $("#nbArt").html(fCommande.ttlArticles);
     $("#infoCmd").show();
     $("#btnAchat").show();
+    currentIdClient = fCommande.client.id;
+   
     for(var f = 0; f < fCommande.produits.length; f++) {
       AjouterUneLigne(fCommande.produits[f]);
     }          
@@ -78,7 +80,19 @@ $(function(){
   //var btnChoixProduit = "<button class='btn btn-primary choix'>Selection</button>";
 
  	//$('#nav').spasticNav();
-	
+	function rechercheClient(currentClient) {
+    $.get('/clients/getOneById/' + currentClient,{}, function(datas){
+        currentIdClient = datas.data.id;
+
+        var ligne_nom = "<li >" + datas.data.civ + " " + datas.data.prenom + " " + datas.data.nom + "</li>";
+        var ligne_adr = "<li style='margin-top:10px'>" + datas.data.adresse + "</li>";
+        var ligne_ville = "<li>" + datas.data.cp + " " + datas.data.ville + "</li>";
+        var ligne_tel = "<li style='margin-top:12px;font-weight:bold'>Tel : " + datas.data.tel + "</li>";
+        var ligne_mobile = "<li style='font-weight:bold'>Mobile : " + datas.data.mobile + "</li>";
+        $("#infos").html("<ul>" + ligne_nom + ligne_adr + ligne_ville + ligne_tel + ligne_mobile + "</ul>");
+        fullCommande.client = datas.data;
+    });
+  }
  	$.get('/clients/getAllJson',{}, function(datas){
         var selectClients = ""; 
         selectClients += "<option value='0'>--</option>";  
@@ -118,29 +132,19 @@ $(function(){
         });
     });
         
-    /*
-    var currentR = $("#slRayon").append(selectProduits);
-        currentR.change(function(){
-          alert('zobbie' + $(this).val());
-    });
-    */
+    //Ajout des infos clients en général et client selectionné
     $("#slClient").append(selectClients);
+    if(currentIdClient > 0) {
+      $("#slClient").val(currentIdClient);
+      rechercheClient(currentIdClient);
+    }
       $("#slClient").change(function() {
       	currentClient = $(this).val();
-      	$.get('/clients/getOneById/' + currentClient,{}, function(datas){
-            currentIdClient = datas.data.id;
-
-            var ligne_nom = "<li >" + datas.data.civ + " " + datas.data.prenom + " " + datas.data.nom + "</li>";
-            var ligne_adr = "<li style='margin-top:10px'>" + datas.data.adresse + "</li>";
-            var ligne_ville = "<li>" + datas.data.cp + " " + datas.data.ville + "</li>";
-            var ligne_tel = "<li style='margin-top:12px;font-weight:bold'>Tel : " + datas.data.tel + "</li>";
-            var ligne_mobile = "<li style='font-weight:bold'>Mobile : " + datas.data.mobile + "</li>";
-            $("#infos").html("<ul>" + ligne_nom + ligne_adr + ligne_ville + ligne_tel + ligne_mobile + "</ul>");
-            fullCommande.client = datas.data;
-        });
+      	rechercheClient(currentClient);
 
       });
     });
+
     //suppression d'une ligne produit
     $('body').on('click', 'button.action-suppr', function (event) {
       var numC = parseInt($("#idCommande").html());
@@ -237,18 +241,36 @@ $(function(){
                   }
                 }); 
           } else {
-              //alert(JSON.stringify(datas.commande));
-              fullCommande = datas.commande;
-              GestionAffichage(fullCommande);
+               var infos = new PNotify({
+                  title: 'OK ',
+                  text: "Commande validée!",
+                  type: 'success',
+                  desktop: {
+                    desktop: true
+                  }
+                }); 
+               fullCommande = datas.commande;
+               GestionAffichage(fullCommande);
           }
         });
     });
-    
- });
   
+  <% if (id !== null && id !== undefined) {%>
+      var currentID = '<%=id%>';
+      if (parseInt(currentID) > 0) {
+         //load d'une commande
+         
+         fullCommande = <%- f_com%>;
+         GestionAffichage(fullCommande);
+         
+      } 
+  <%}%> 
+
+ });
 </script>
 </head>
 <body>
+
 <div id="dvHeader" class="row">
 <%- menu%>
 </div>
@@ -307,7 +329,7 @@ $(function(){
   </div>
   <div style="float:left;">
     <font id="marchandise">Marchandises</font><font id='ttlMarchandises' style="margin-right:20px"></font><button id="validation" class="btn btn-warning">Validation</button><br>
-    <div class="arrondi-plein-net"><b>Net à payer</b><font id="cmdNet" class="txt50"></font></div><button id="btnAchat" class="btn btn-success">Achat OK</button>
+    <div class="arrondi-plein-net"><b>Net à payer</b><font id="cmdNet" class="txt50"></font></div>
   </div>
 </div>  
  <%- partial ('/home/gilles/node/git/caisse/views/produits/choix.ejs',{'nom': 'Gilles Manouvrier'}) %>

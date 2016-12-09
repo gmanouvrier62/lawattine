@@ -20,7 +20,31 @@
  <script type="text/javascript" src="/js/dependencies/tooltipster/dist/js/tooltipster.bundle.min.js"></script> 
  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
 <script>
+
+
 $(function(){
+function impression(content){
+    var fen = window.open("", "", "height=500, width=600,toolbar=0, menubar=0, scrollbars=1, resizable=1,status=0, location=0, left=10, top=10");
+     
+    // style du popup
+    fen.document.body.style.color = '#000000';
+    fen.document.body.style.backgroundColor = '#FFFFFF';
+    fen.document.body.style.padding = "20px";
+     
+    // Ajout des données a imprimer
+    fen.document.title = "ACHATS";
+    fen.document.body.innerHTML += " " + content + " ";
+     
+    // Impression du popup
+    fen.window.print();
+     
+    //Fermeture du popup
+    fen.window.close();
+    return true;
+    
+
+}
+var tIndex = 0;
  $('#nav').spasticNav();
  var tableAchats = $('#tblAchats').DataTable( {
         "columnDefs": [
@@ -37,7 +61,7 @@ $(function(){
             {
                 "render": function ( data, type, row ) {
                     
-                    return "<font data-qte='" + row[4] + "' class='ftDispo'>" + row[12] + "</font>";
+                    return "<font data-id='" + row[0] + "'  data-qte='" + row[4] + "' class='ftDispo'>" + row[12] + "</font>";
                 },
                 "targets": 5
             },
@@ -66,7 +90,8 @@ $(function(){
             },
             {
                 "render": function ( data, type, row ) {
-                    var html = "<input type='text' data-id='" + row[0] + "' class='txt50' value=''>";
+                    tIndex ++;
+                    var html = "<input tabindex='" + tIndex + "' type='text' data-id='" + row[0] + "' class='txt50' value=''>";
                     return html;
                 },
                 "targets": 9
@@ -75,12 +100,14 @@ $(function(){
             { "className": "col_xxl", "targets": [ 1 ] },
             { "className": "col_xl", "targets": [ 8 ] }
         ],
+        "oLanguage": {"sZeroRecords": "", "sEmptyTable": "<b>Pas de produits achetés</b>"},
         "processing": false,
         "serverSide": false,
-        "paging": true,
+        'searching': false,
+        'bInfo': false,
+        "paging": false,
         "ordering": true,
         "defaultOrdering": [[2, 'desc']],
-        "searching": true,
         "search": {
             "smart": false
         },
@@ -126,7 +153,26 @@ $(function(){
             $(this).tooltipster();
         });
     });
-
+    $("#print").click(function(){
+        var st = "";
+        var template = "<table style='border: 1px solid black; margin-left:3px;margin-right:3px' id='tblPrint'><thead><tr><th>Ref</th><th>Désignation</th><th>Quantité</th></tr></thead><tbody><tr><td></td><td></td><td></td></tr>";
+        var ligne = "";
+        $(".ftDispo").each(function(){
+            console.log("the this ", $(this).html());
+            console.log("the this num", parseInt($(this).html()));
+            
+            if( $(this).html() != 'null' && parseInt($(this).html()) > 0 ) {
+                var idp = $(this).data('id');
+                var nom = $(this).parent().parent().find('.prNom').html();
+                var qte = $(this).data('qte');
+                ligne += "<tr><td>" + idp + "</td><td>" + nom + "</td><td>" + qte + "</td></tr>";
+                console.log("funcking hell ok ", ligne);
+                
+            
+            } else console.log("bou du");
+        });
+        impression(template + ligne + "</table>");
+    });
     $('body').on('click', 'button.action-maj', function(){
         tbQ = new Array();   
         $(".txt50").each(function(){
@@ -171,7 +217,7 @@ $(function(){
 <div id="dvHeader" class="row">
 <%- menu %>
 </div>
-<div style="text-align:center"><H1><font >ACHATS</font></H1></div>
+<div style="text-align:center"><H1><font >ACHATS</font></H1><button id="print" class="btn btn-success btn-xs btn-action action-print" style="font-size: 13px;" title="Voir le produit" ><i class="fa fa-print"></i>Imprimer</button></div>
 
 <div id="dvMiddle" class="row">
 
@@ -187,7 +233,7 @@ $(function(){
                     <th>Qté Dispo</th>
                     
                     <th>Total TTC</th>
-                    <th>Total TVA</th>
+                    <th>Total HT</th>
                     <th>Btn</th>
                     <th>Qté achetée</th>
                     

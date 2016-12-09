@@ -1,0 +1,202 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/js/dependencies/tooltipster/dist/css/tooltipster.bundle.min.css" />
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">
+   
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+ <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
+ <script type="text/javascript" src="/js/dependencies/composant/ModalFormBind.js"></script>
+ <script type="text/javascript" src="/js/dependencies/tooltipster/dist/js/tooltipster.bundle.min.js"></script> 
+ <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+<script>
+$(function(){
+ $('#nav').spasticNav();
+ var tableCo = $('#tblCo').DataTable( {
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                   
+                    return row[10];//livraison
+                },
+                "targets": 0
+            },
+            {
+                "render": function ( data, type, row ) {
+                   
+                    return row[0];//REF
+                },
+                "targets": 1
+            },
+            {
+                "render": function ( data, type, row ) {
+                   
+                    return row[9];//Ville
+                },
+                "targets": 2
+            },
+            {
+                "render": function ( data, type, row ) {
+                   
+                    return row[4] + " " + row[3];//client
+                },
+                "targets": 3
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    return row[7] + " " + row[8] + " " + row[9];//Adresse
+                },
+                "targets": 4
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    return row[2];//Status
+                },
+                "targets": 5
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir la commande" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
+                    if (row[1] == 2) {
+                        html += '<button class="btn btn-success btn-xs btn-action action-maj" style="font-size: 13px;" title="Livrer la commande" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-chevron-down"></i>Livraison faite</button>';
+                    }
+                    return html;//bitonio
+                },
+                "targets": 6
+            },
+            { "className": "col_xxl", "targets": [ 4 ] },
+            { "className": "col_xl", "targets": [ 3 ] }
+        ],
+        "oLanguage": {"sZeroRecords": "", "sEmptyTable": "<b>Pas de commandes</b>"},
+        "processing": false,
+        "serverSide": false,
+        "paging": true,
+        "ordering": true,
+        "defaultOrdering": [[2, 'desc']],
+        "searching": true,
+        "search": {
+            "smart": false
+        },
+        "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            /*
+            var cl = '';
+            if(aData[4] < aData[12]) cl = 'complet';
+            if(aData[4] == aData[12]) cl = 'complet';
+            
+            if(aData[12] == 0) 
+                cl = "insuffisant";
+            else 
+                if(aData[4] > aData[12]) cl = 'partiel';
+            
+            
+            $('td:eq(0)', nRow).addClass( cl );
+            
+            $('td:eq(1)', nRow).addClass( cl );
+            $('td:eq(2)', nRow).addClass( cl );
+            $('td:eq(3)', nRow).addClass( cl );
+            $('td:eq(4)', nRow).addClass( cl );
+            $('td:eq(5)', nRow).addClass( cl );
+            $('td:eq(6)', nRow).addClass( cl );
+            $('td:eq(7)', nRow).addClass( cl );
+            $('td:eq(8)', nRow).addClass( cl );
+            $('td:eq(9)', nRow).addClass( cl );    
+            */
+            return nRow;
+        }
+    });
+    //tableCo.ajax.url( '/commandes/getCommande/' + idRayon ).load();;
+    console.log("dans la page avant le premier post");
+    $.post('/commandes/getCommandes', {'status': [1,2,5]}, function(datas){
+        //alert('dans le post ');
+        console.log('postounet : ', datas);
+        $('#tblCo').dataTable().fnClearTable();
+        if(datas.data.length > 0){
+            //alert(datas.data);
+            $('#tblCo').dataTable().fnAddData(datas.data);    
+        }
+    });
+    tableCo.on('draw.dt', function(){
+        $('.prNom').each(function(){
+            $(this).tooltipster();
+        });
+    });
+    $('body').on('click', 'button.action-view', function(){
+        var idx = $(this).data('id');
+        var id_client = $(this).data('id_client');
+        document.location.href = '/commandes/load/' + idx + '/client/' + id_client;
+    });
+    $('body').on('click', 'button.action-maj', function(){
+        var id_commande = $(this).data('id');
+        var id_client = $(this).data('id_client');
+        var cStatus = 4;//Livré
+        $.post("/commandes/livrer",{'id_commande': id_commande, 'id_client': id_client, 'status': cStatus}, function(result){
+            
+            if(result.err != null && result.err != "") {
+                //KO
+                var infos = new PNotify({
+                    title: 'Erreur ',
+                    text: result.err,
+                    type: 'error',
+                    desktop: {
+                      desktop: true
+                    }
+                  }); 
+            } else {
+                //OK
+                var infos = new PNotify({
+                    title: 'Achats enregistrés ',
+                    text: "OK",
+                    type: 'success',
+                    desktop: {
+                      desktop: true
+                    }
+                }); 
+                document.location.href = "/commandes/home";
+            }
+
+       });     
+            
+    });
+});
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+<div style="text-align:center"><H1><font >COMMANDES A LIVRER</font></H1></div>
+
+<div id="dvMiddle" class="row">
+
+	<div id="rowCommandes" class="col-md-8" style="margin-left:100px;margin-top:20px;">
+		<table id="tblCo" class="order-column" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Livraison</th>    
+                	<th>REF</th>
+                    <th>Ville</th>
+                    <th>Client</th>
+                    <th>Adresse</th>
+                    <th>Status</th>
+                    <th><button class="btn btn-danger btn-xs btn-action action-allmaj" style="font-size: 13px;" title="Tout modifier comme livré" ><i class="fa fa-chevron-down"></i>Tout livrer</button></th>
+                </tr>
+            </thead>
+            
+	</div>
+</div>
+
+</body>
+</html>

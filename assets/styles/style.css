@@ -301,3 +301,11 @@ ul, li {margin: 0; padding: 0;}
 .insuffisant {
 	background-color: #F7ADAD;
 }
+.impression{
+
+border: 1px solid black; 
+margin-left:3px;
+margin-right:3px;
+
+
+}

@@ -50,7 +50,7 @@ module.exports = {
 					logger.error(err);
 					allErr += err;	
 				} 
-				if (ccc = tb.length-1)
+				if (ccc == tb.length-1)
 					res.send(null);
 				ccc++;
 			});

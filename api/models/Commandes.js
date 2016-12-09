@@ -39,7 +39,7 @@ module.exports = {
     sails.models.clients.find({"id": id_client}, function (err, clt) {
     	if (err !== null) return callback("pb de récupération client", null);
     	if (clt == null || clt == undefined) return callback("Le client n'existe pas", null);
-    	fullCommande.client = clt;
+    	fullCommande.client = clt[0];
     	sails.models.commandes.query(sql, function(err, commandes) {
 			if (err !== null && err !== undefined)  return callback("pb de récupération des produits d'une commande", null);
 			if (commandes == null || commandes == undefined) return callback("La commande est vide", null);			

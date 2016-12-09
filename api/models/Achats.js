@@ -1,4 +1,6 @@
 var logger = require('../services/logger.init.js').logger("tom.txt");
+var moment = require('moment');
+
 module.exports = {
 
   attributes: {
@@ -61,15 +63,34 @@ module.exports = {
 
   },
   addStock: function(ins, callback) {
-  	logger.info("le ins ", ins);
+  	logger.info("ajout stock : ", ins);
 	sails.models.achats.findOrCreate(ins,ins).exec(function creaStat(err,created){
 		
 		if(err !== null && err !== undefined) {
 			return callback(err,null);
 		} else 
-			logger.util("created : ", created);
-		
-		 callback(null, created);
+			logger.util("created stock: ", created);
+		//check total pour rester à stock > 0
+		var sql = "SELECT sum( qte ) as ttl FROM achats WHERE id_produit =" + created.id_produit;
+		logger.warn(sql);
+		sails.models.achats.query(sql, function (err, result) {
+			if(err !== null && err !== undefined) {
+				logger.error(err);
+			} else {
+				if(result[0].ttl < 0) {
+					var ajustement = result[0].ttl * -1;
+					ins.qte = ajustement;
+					ins.modifiedAt = moment().format("YYYY-MM-DD HH:mm:ss");
+					ins.raison = 'remise à 0 aprés solde négatif';
+					sails.models.achats.addStock(ins,function(err, crea2){
+						
+					});
+				} else {
+					return callback(null, created);
+				}
+			}
+		});
+		callback(null, created);	 
 	});	
 
   }

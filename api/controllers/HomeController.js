@@ -17,7 +17,7 @@ home : function (req, res){
 	*/
 	logger.warn(sails.config.appPath);
 	var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
-	return res.render ('home/caisse',{'action': 'caisse', 'menu': menu});
+	return res.render ('home/caisse',{'id': 0, 'f_com': 'zgeg', 'action': 'caisse', 'menu': menu});
   
 
     

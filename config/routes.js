@@ -50,9 +50,12 @@ module.exports.routes = {
 
   '/fournisseurs/getAll':        'FournisseursController.getAll',
   '/fournisseurs/getOneById/:id':   'FournisseursController.getOneById',  
+  '/commandes':                     'CommandesController.home',
   '/commandes/addormodify':             'CommandesController.addormodify',
+  '/commandes/livrer':             'CommandesController.livrer',
   '/commandes/valider':              'CommandesController.valider',
   '/commandes/retirer_produit':      'CommandesController.retirer_produit',
+  '/commandes/load/:id/client/:id_client':              'CommandesController.load',
   '/achats':                        'AchatsController.home',
   '/achats/achat_todo':             'AchatsController.achat_todo',
   '/stocks':                        'StocksController.home' 

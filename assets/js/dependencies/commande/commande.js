@@ -5,6 +5,7 @@ $.prototype.setCommandeTable = function(l_table,id) {
 		'columnDefs': [
 			{ "visible": false,  "targets": [ 0] }
         	],
+          'oLanguage': {"sZeroRecords": "", "sEmptyTable": ""},
           'processing': false,
           'serverSide': false,
 	      'searching': false,
