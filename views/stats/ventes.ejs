@@ -1,0 +1,255 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/js/dependencies/tooltipster/dist/css/tooltipster.bundle.min.css" />
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">
+   
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+ <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
+ <script type="text/javascript" src="/js/dependencies/composant/ModalFormBind.js"></script>
+ <script type="text/javascript" src="/js/dependencies/tooltipster/dist/js/tooltipster.bundle.min.js"></script> 
+ <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+ 
+<script>
+
+
+$(function(){
+	$("#dt1").hide();
+	var monthNames = [
+	  "Janvier", "Février", "Mars",
+	  "Avril", "Mai", "Juin", "Juillet",
+	  "Août", "Septembre", "Octobre",
+	  "Novembre", "Decembre"
+	];
+	var currentDate = new Date();
+	var day = currentDate.getDate();
+	var monthIndex = currentDate.getMonth();
+	var year = currentDate.getFullYear();
+	var ladate = day + ' ' + monthNames[monthIndex] + ' ' + year;
+	var myMonth = monthIndex + 1;
+	myMonth = myMonth  >9?myMonth: '0' + myMonth;
+	var myDay = day > 9?day: '0' + day;
+		
+	var d1= year + '-' + myMonth + '-' + myDay;
+	var d2= year + '-' + myMonth + '-' + myDay;
+	
+	console.log(d1);
+	console.log(d2); 
+	$("#fdt").html(ladate);
+	$('#tblVentes').DataTable( {
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[0];//id
+                },
+                "targets": 0
+            },
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[1];//nom
+                },
+                "targets": 1
+            },
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[2];//achat TTC
+                },
+                "targets": 2
+            },
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[3]; //ht
+                },
+                "targets": 3
+            },
+            {
+                "render": function ( data, type, row ) {
+                 
+                 	return "<font title='" + row[12] + " %'>" + row[4] + "</font>";  //tva                  
+                    
+                },
+                "targets": 4
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    return "<font title='" + row[11] + " %'>" + row[5] + "</font>";                    
+                },
+                "targets": 5
+            },
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[6];
+                },
+                "targets": 6
+            },
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[7];
+                },
+                "targets": 7
+            },
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[8];
+                },
+                "targets": 8
+            },
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[9];
+                },
+                "targets": 9
+            },
+            {
+                "render": function ( data, type, row ) {
+                                     
+                    return row[10];
+                },
+                "targets": 10
+            },
+            { "className": "col_xxl", "targets": [ 1 ] },
+            { "className": "col_l", "targets": [ 2 ] },
+            { "className": "col_l", "targets": [ 3 ] },
+            { "className": "col_l", "targets": [ 5 ] }
+            
+        ],
+        "oLanguage": {"sZeroRecords": "", "sEmptyTable": "<b>Pas de produits achetés</b>"},
+        "processing": false,
+        "serverSide": false,
+        'searching': false,
+        'bInfo': false,
+        "paging": false,
+        "ordering": true,
+        "defaultOrdering": [[1, 'desc']],
+        "search": {
+            "smart": false
+        }
+    });
+	PNotify.prototype.options.styling = "jqueryui";
+	$.post("/stats/ventes_jour",{'dtDebut': d1, 'dtFin': d2, 'status': [4]}, function(datas) {
+		if(datas.err != "" && datas.err !== null) {
+			 var infos = new PNotify({
+                title: 'Erreur ',
+                text: datas.err,
+                type: 'error',
+                desktop: {
+                  desktop: true
+                }
+              }); 
+		} else {
+			//rêmplissage
+			console.log(datas.data);
+			$('#tblVentes').dataTable().fnClearTable();
+	        if(datas.data.length > 0){
+	        	$('#tblVentes').dataTable().fnAddData(datas.data);    
+	        	$("#somme_ht").html(datas.recap.somme_ht);
+	        	$("#somme_tva").html(datas.recap.somme_tva);
+	        	$("#somme_ttc").html(datas.recap.somme_ttc);
+	        	$("#somme_com").html(datas.recap.somme_com);
+	        		
+	        }
+		}
+
+	});
+    
+	$('body').on('click', 'button.action-cal', function(){
+		console.log('ok');
+		$( "#dt1" ).datepicker({
+	      defaultDate: currentDate,
+	      changeMonth: true,
+	      changeYear: true,
+	      dateFormat: "yy-mm-dd",
+	      onClose: function( selectedDate ) {
+	        currentDate = selectedDate;
+
+	      }
+     	});
+     	$("#dt1").show();
+	});
+});
+
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+<div style="text-align:center"><H1><font >VENTES DU JOUR</font></H1>
+<font id='fdt'></font>
+<div style="width:600px;text-align:center;margin: 0 auto;margin-bottom:10px">
+	
+	<table width="100%">
+		<tr>
+			<td class="colH"><i class="somme"></i>&nbsp;H.T</td>
+			<td class="colH"><i class="somme"></i>&nbsp;TVA</td>
+			<td class="colH"><i class="somme"></i>&nbsp;TTC</td>
+			<td class="colH"><i class="somme"></i>&nbsp;Com.</td>
+		</tr>
+		<tr>
+			<td id="somme_ht" class="brd"></td>
+			<td id="somme_tva" class="brd"></td>
+			<td id="somme_ttc" class="brd"></td>
+			<td id="somme_com" class="brd"></td>
+		</tr>
+	</table>
+</div>
+<button id="print" class="btn btn-success btn-xs btn-action action-cal" style="font-size: 13px;margin-bottom:5px" title="Choisir le jour" ><i class="fa fa-calendar"></i></button><div id="dt1"></div><br><button id="print" class="btn btn-success btn-xs btn-action action-print" style="font-size: 13px;" title="Imprimer" ><i class="fa fa-print"></i>Imprimer</button></div>
+
+<div id="dvMiddle" class="row">
+
+	<div id="rowVentes" class="col-md-12" style="margin-left:10px;margin-top:20px;">
+		<table id="tblVentes" class="order-column" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                	<th>id</th>
+                    <th>nom</th>
+                    <th>Achat TTC</th>
+                    <th>PU H.T</th>
+                    <th>TVA</th>
+                    <th>Com.U</th>
+                    <th>Qté</th>
+                    <th><i class="somme"></i>&nbsp;H.T</th>
+                    <th><i class="somme"></i>&nbsp;TVA</th>
+                    <th><i class="somme"></i>&nbsp;TTC</th>
+                    <th><i class="somme"></i>&nbsp;Com.</th>
+                    
+                </tr>
+            </thead>
+            <tfoot>
+                <tr>
+                	<th>id</th>
+                    <th>nom</th>
+                    <th>Achat TTC</th>
+                    <th>PU H.T</th>
+                    <th>TVA</th>
+                    <th>Com.U</th>
+                    <th>Qté</th>
+                    <th><i class="somme"></i>&nbsp;H.T</th>
+                    <th><i class="somme"></i>&nbsp;TVA</th>
+                    <th><i class="somme"></i>&nbsp;TTC</th>
+                    <th><i class="somme"></i>&nbsp;Com</th>
+                </tr>
+            </tfoot>
+        </table>
+	</div>
+
+</div>

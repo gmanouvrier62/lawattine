@@ -12,8 +12,14 @@ module.exports = {
 	home: function (req, res) {
 		var tom ="";
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+		if(req.params.status !== null && req.params.status !== undefined) {
+			logger.warn('status concernés : ', req.params.status);
+			return res.render ('commandes/commandes_liste',{'action': 'COMMANDES A LIVRER', 'status': req.params.status, 'menu': menu});
+		} else {
+			logger.warn('pas de status donc tous');
+			return res.render ('commandes/commandes_liste',{'action': 'COMMANDES', 'status': [1,2,3,4,5,6], 'menu': menu});	
+		}
 		
-		return res.render ('commandes/commandes_liste',{'action': 'commandes', 'menu': menu});
 	},
 	load: function (req, res) {
 		logger.warn(sails.config.appPath);
@@ -82,57 +88,9 @@ module.exports = {
 		});
 	},
 	getCommandes: function(req, res) {
-		var status = null;
-		var dtDebut = null;
-		var dtFin = null;
-		var id_client = null;
-		var tbCritere = [];
-		if (req.body.status !== null && req.body.status !== undefined)
-			tbCritere.push("st.id in (" + req.body.status.join(',') + ")");
-		if (req.body.id_client !== null && req.body.id_client !== undefined)
-			tbCritere.push("id_client = " + req.body.id_client);
-		if (req.body.dtDebut !== null && req.body.dtDebut != undefined) {
-			if(req.body.dtFin !== null && req.body.dtFin !== undefined)
-				tbCritere.push("dt_livraison between '" + req.body.dtDebut + " 00:00:00' and '" + req.body.dtFin + " 23:59:59'");
-			else
-				tbCritere.push("dt_livraison between '" + req.body.dtDebut + " 00:00:00' and '" + req.body.dtDebut + " 23:59:59'");
-		}
-		
-		var sql = "select c.id as idc, ";
-			sql += "c.status as id_status, ";
-			sql += "st.nom_status as nom_status, ";
-			sql += "clt.id as id_client, ";
-			sql += "clt.nom as nom, ";
-			sql += "clt.prenom as prenom, ";
-			sql += "clt.tel as tel, ";
-			sql += "clt.mobile as mobile, ";
-			sql += "clt.adresse as adresse, ";
-			sql += "clt.cp as cp, ";
-			sql += "clt.ville as ville, ";
-			sql += "c.dt_livraison dt_livraison from commandes c ";
-			sql += "inner join clients clt on c.id_client = clt.id ";
-			sql += "inner join status_commande st on st.id = c.status where ";
-			sql += tbCritere.join(' and ');
-
-		logger.warn(sql);
-		sails.models.commandes.query(sql, function(err, datas){
-			if (err !== null && err !== undefined) return res.send({'err':"Erreur de récupération de commandes " + err, 'commandes': null});
-			var retour = [];
-			for (var c = 0; c < datas.length; c++) {
-				var ligne = [];
-				ligne.push(datas[c].idc);
-				ligne.push(datas[c].id_status);
-				ligne.push(datas[c].nom_status);
-				ligne.push(datas[c].nom);
-				ligne.push(datas[c].prenom);
-				ligne.push(datas[c].tel);
-				ligne.push(datas[c].mobile);
-				ligne.push(datas[c].adresse);
-				ligne.push(datas[c].cp);
-				ligne.push(datas[c].ville);
-				ligne.push(moment(datas[c].dt_livraison).format("YYYY-MM-DD"));
-				ligne.push(datas[c].id_client);
-				retour.push(ligne);
+		sails.models.commandes.getCommandes(req, function(err, retour) {
+			if (err !== null && err !== undefined) {
+				return res.send({'err': err,'commandes': null});
 			}
 			var objResult = {"data": []};
 			objResult.data = retour;
@@ -146,6 +104,7 @@ module.exports = {
 		var lignes = req.body.lignes;
 		var id_client = req.body.id_client;
 		var dt_livraison = req.body.dt_livraison;
+		var paiement = req.body.paiement;
 		var cStatus = req.body.status;
 
 		if(dt_livraison == null || dt_livraison == '') {
@@ -191,7 +150,8 @@ module.exports = {
 				var newC= {
 					'id': parseInt(idCmd),
 					'id_client': id_client,
-					'dt_livraison': dt_livraison
+					'dt_livraison': dt_livraison,
+					'paiement': paiement
 				}
 				if(req.body.status !== null && req.body.status !== undefined) {
 					//si ancien status = 2 et nouveau = 3 => prevoir un destockage par requete si com + st=2 et nouv=livré
@@ -264,7 +224,8 @@ module.exports = {
 		var target = {
 			'id': req.body.id_commande,
 			'id_client': req.body.id_client,
-			'status': 2
+			'status': 2,
+			'paiement': req.body.paiement
 		};
 		logger.warn('avant update');
 		sails.models.commandes.update(origine, target).exec(function (err, updated) {
@@ -301,8 +262,10 @@ module.exports = {
 				var target = {
 					'id': req.body.id_commande,
 					'id_client': req.body.id_client,
-					'status': 4
-				};	
+					'status': 4,
+					'dt_livraison': moment().format("YYYY-MM-DD HH:mm:ss")
+				};
+				logger.error(target);	
 				sails.models.commandes.update(origine, target).exec(function (err, updated) {
 					if (err !== null && err !== undefined){
 					 	logger.error(err);

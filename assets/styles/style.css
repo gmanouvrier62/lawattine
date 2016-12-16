@@ -13,6 +13,19 @@ ul, li {margin: 0; padding: 0;}
 #nav { position: relative; background: #292929; float: left;}
 #nav li { float: left; list-style: none; border-right: 1px solid #4a4a4a; border-left: 1px solid black;}
 #nav li a { color: #e3e3e3; position: relative; z-index: 2; float: left; font-size: 22px; font-family: helvetica, arial, sans-serif; text-decoration: none; padding: 10px 35px;}
+.toolbar{
+	text-align: right;
+}
+.colH {
+	background-color: #FCC30A;
+	border: 1px solid black;
+	text-align: center;
+}
+.brd{
+	border: 1px solid black;
+	text-align: center;
+	font-weight: bold;
+}
 .arrondi-commande {
 	margin-top: 10px;
 	margin-bottom:3px; 
@@ -93,6 +106,14 @@ ul, li {margin: 0; padding: 0;}
     width: 34px;
     float: left;
 }
+.somme {
+	background-image: url("/images/somme.png");
+    background-repeat: no-repeat;
+    height: 16px;
+    padding-right: 5px;
+    width: 16px;
+    float: left;
+}
 .pictoImg {
 	
     height: 60px;
@@ -121,6 +142,16 @@ ul, li {margin: 0; padding: 0;}
 	-webkit-box-shadow: 0px 0px 10px 4px rgba(223, 92, 49, 0.75);
 	background-color:#D8251C;
 }
+.fontTitre {
+	font-size: 14px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+.bandeauDate {
+	text-align: center;
+	background-color: #E5E3E3 ;
+	height: 90px;
+}
 .margetop {
 	margin-top:5px;
 }
@@ -130,11 +161,19 @@ ul, li {margin: 0; padding: 0;}
 }
 .col_xxl {
 
-	width:250px;
+	width:280px;
 }
 .col_xl {
 
 	width:90px;
+}
+.col_l {
+
+	width:40px;
+}
+.col_s {
+
+	width:30px;
 }
 .adresse {
 	width:300px;

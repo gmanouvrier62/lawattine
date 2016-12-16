@@ -49,6 +49,16 @@ module.exports = {
 							});
 		});
 	},
+	getFournisseurs: function (req, res) {
+		logger.util("ok dans getTypes ");
+		var sql = " select * from caisse.fournisseurs order by nom asc";
+		sails.models.fournisseurs.query(sql,function(err,results) {
+			logger.warn(err);
+			if (err) return res.send({'err': err});
+			//logger.util(results);
+			return res.send({'err': null, 'data': results});
+		});
+	},
 	add: function (req, res) {
 		logger.info("DANS ADD");
 		var datas = req.body.datas;

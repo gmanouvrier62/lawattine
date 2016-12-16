@@ -46,6 +46,27 @@
           
           
       }
+      function afficheFournisseur(selectedFournisseur) {
+         //remplacement id_type text par un object select
+          
+          var selectFournisseurs = "<select id='id_fournisseur'>"; 
+          $.get('/fournisseurs/getFournisseurs/',{}, function(datas){
+            
+            if(datas.err == null) {
+              var frn = datas.data;
+              for (var cc = 0; cc < frn.length; cc++) {
+                var attrS ="";
+                if(selectedFournisseur == frn[cc].id) attrS = "selected"; 
+                selectFournisseurs += "<option value='" + frn[cc].id + "' " + attrS + " >" + frn[cc].nom + "</option>";
+              }
+              selectFournisseurs += "</select>";
+            }
+            $("#callbackFillFourn").append(selectFournisseurs);
+            return selectFournisseurs;
+          });
+          
+          
+      }
       function afficheCiv(civ) {
         var sl = "<select id='civ'>";
         if (civ == 'Mr')
@@ -67,22 +88,20 @@
         if(opts.resource == 'clients') {
           $("#adresse").addClass('adresse');
           $("#email").addClass('email');
-           
         }
+
         if(opts.resource == 'fournisseurs') {
           $("#adresse1").addClass('adresse');
           $("#adresse2").addClass('adresse');
           $("#email").addClass('email');
-           
         }
+
         if(opts.resource == 'produits') {
          
           $("#ttc_vente").attr('disabled','disabled');
           $("#pht").attr('disabled','disabled'); 
           $("#icone").hide();
           $("#disponibilite").hide();
-
-          
 
           if(datas.data !== undefined && datas.data !== null) {
             if(datas.data["icone"] !== null && datas.data["icone"] !== undefined)
@@ -124,13 +143,12 @@
               if(currentDispo <= 0) {
                 newClass = "disponible"; 
                 $("#disponibilite").val("1");
-               
               }
               else {
                 newClass = "indisponible";
                 $("#disponibilite").val("0");
-                
               }
+
               $("#dvDispo").html(newClass);
               console.log("futur dispo=",newClass);
               $(this).removeClass("indisponible").removeClass("disponible").addClass(newClass);
@@ -167,7 +185,6 @@
                     $("#imgIcon").attr('src',data.filepath);
                 }
               });
-
             }
           });
 
@@ -221,14 +238,18 @@
             var lec = "<table id='fiche' data-entite='"+ opts.resource + "' data-id='" + opts.id + "'>";
             for (var fld in datas.data){
               if (typeof opts.fields[fld] !== 'undefined') {
-                if(fld == 'id_type') {
-                  afficheType(datas.data['id_type']);
-                  lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
-                } else
-                    if(fld == 'civ') {
-                       lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td>" + afficheCiv(datas.data[fld]) + "</td></tr>";
-                    } else
-                        lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value='" + datas.data[fld] + "'></td></tr>";
+                if(fld == 'id_fournisseur') {
+                  afficheFournisseur(datas.data['id_fournisseur']);
+                  lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFillFourn'></td></tr>";
+                } else 
+                  if(fld == 'id_type') {
+                    afficheType(datas.data['id_type']);
+                    lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
+                  } else
+                      if(fld == 'civ') {
+                         lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td>" + afficheCiv(datas.data[fld]) + "</td></tr>";
+                      } else
+                          lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value='" + datas.data[fld] + "'></td></tr>";
 
               }
             }
@@ -245,12 +266,13 @@
             if(opts.height !== undefined && opts.height !== null) 
               frmHeight = opts.height;
             else
-              frmHeight = 500;
+              frmHeight = 520;
             var title = "";
             if(opts.title !== null && opts.title !== undefined)
               title = opts.title;
             else
               title = "Fiche";
+            
             self.dialog({
               title: title,
               resizable: true,
@@ -305,14 +327,18 @@
       var lec = "<table id='fiche' data-entite='"+ opts.resource + "' data-id='" + opts.id + "'>";
       for (var fld in opts.fields){
         if (typeof opts.fields[fld] !== 'undefined') {
-          if(fld == 'id_type') {
-            afficheType("--");
-            lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
-          } else
-            if(fld == 'civ') {
-                lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td>" + afficheCiv('') + "</td></tr>";
-            } else
-                lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value=''></td></tr>";
+           if(fld == 'id_fournisseur') {
+                  afficheFournisseur("--");
+                  lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFillFourn'></td></tr>";
+                } else 
+                  if(fld == 'id_type') {
+                    afficheType("--");
+                    lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td id='callbackFill'></td></tr>";
+                  } else
+                    if(fld == 'civ') {
+                        lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td>" + afficheCiv('') + "</td></tr>";
+                    } else
+                        lec += "<tr><td class='alignLabel'>" + opts.fields[fld] + "</td><td><input type='text' id='" + fld + "' value=''></td></tr>";
 
         }
       }
@@ -367,31 +393,7 @@
         }
       });
     }
-       /*
       
-$( "#generation" ).dialog({
-    title: "Génération système 25",
-      resizable: true,
-      height:440,
-      width:800,
-      modal: true,
-      buttons: {
-        "Ok": function() {
-         
-
-        },
-        Cancel: function() {
-          $( this ).dialog( "close" );
-        }
-      }
-    });
-
-      
-
-
-       */
-
-
 
     };
 })(jQuery);

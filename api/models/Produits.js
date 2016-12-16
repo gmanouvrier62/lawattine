@@ -49,6 +49,28 @@ module.exports = {
         callback(null,result);
       }
     });
+  },
+  getAllCrit: function(crit, callback) {
+    var tbCrit = [];
+    if (crit.nom !== null && crit.nom !== undefined) {
+      tbCrit.push("nom like '%" + crit.nom + "%' "); 
+    } 
+
+    if(tbCrit.length > 0) {
+      sql = "select * from  caisse.produits where " + tbCrit.join(" and ") + " order by nom asc";
+      console.log("DANS MODEL : ", sql);
+      
+      this.query(sql, function creaStat(err,result){
+        if(err != null) {
+          logger.error("ATTENTION ! ", err);
+          callback(err,null);
+        } else {
+          callback(null,result);
+        }
+      });
+    } else {
+      callback(null,result);
+    }
   }
 };
 

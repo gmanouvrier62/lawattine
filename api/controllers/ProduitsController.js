@@ -7,8 +7,8 @@ var mkdirp = require('mkdirp');
 var path = require('path');
 var formidable = require('formidable');
 var importProduits = require("../services/import_produits.js");
-var createJson = require("../services/createJson.js");
-
+//var createJson = require("../services/createJson.js");
+var importeur = require("../services/importeur.js"); 
 module.exports = {
 
 	home: function (req, res) {
@@ -30,19 +30,42 @@ module.exports = {
 		return res.render ('produits/produits_list',{'action': 'produits', 'menu': menu, 'memoType':letype});
 	},
 	import: function (req, res) {
-
+		
 		importProduits(function(result) {
 
 			return res.send(result);
 		});
-
+		
+			
 	},
 	prepare_import_json: function(req, res) {
-
+		/*	
 		createJson(null, function(result){
 			return res.send(result);
 
 		});
+		*/
+
+		var imp = new importeur();
+		imp.getNext();
+		imp.on("error1", function(){
+			logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
+			imp.getNext();
+		});
+		imp.on("error2", function(){
+			logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
+			imp.getNext();	
+		});
+		imp.on("completed", function(){
+			logger.warn("fini pour ", imp.currentLink, " pointeur ", this.pointeur);
+			imp.getNext();
+		});
+		imp.on("all_completed", function(){
+			//voir pour un socketio 
+			logger.warn("oki all finished");
+		});
+		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+		return res.render ('produits/import',{'action': 'import', 'menu': menu});
 
 	},
 	import_rayon_json: function(req, res) {
@@ -52,6 +75,39 @@ module.exports = {
 
 		});
 
+	},
+	getAllCrit: function(req, res) {
+		sails.models.produits.getAllCrit({'nom': req.params.nom}, function(err,results) {
+			if (results !== null) {
+				var objResult = {"data": []};
+				results.map(function(obj,idx) {
+					var tb = [];
+					tb.push(obj.id);
+					tb.push(obj.nom.toString());
+					tb.push(obj.id_type);
+					tb.push(obj.ref_interne.toString());
+					tb.push(obj.ref_externe.toString());
+					tb.push(obj.ttc_externe);
+					tb.push(obj.pht);
+					tb.push(obj.tva);
+					tb.push(obj.tx_com);
+					tb.push(obj.ttc_vente);
+					tb.push(obj.icone.toString());
+					if(obj.conditionnement !== null)
+						tb.push(obj.conditionnement.toString());
+					else
+						tb.push(obj.conditionnement);
+					tb.push(obj.disponibilite);
+					objResult.data.push(tb);
+
+				});
+				logger.util(objResult);
+				return res.send(objResult);
+			} else {
+				return res.send("");
+			}
+			
+		});
 	},
 	getAll: function (req, res) {
 		sails.models.produits.getAll(req.params.id, function(err,results) {

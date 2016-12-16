@@ -30,6 +30,7 @@
  //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
  	//alert($("#mondiv").attr('tom'));
 $(function(){
+  
   function GestionAffichage(fCommande) {
     $(".rawContent").each(function(){
       $(this).remove();
@@ -38,6 +39,7 @@ $(function(){
     $("#statusCommande").html(fCommande.status);
     $("#cmdNet").html(fCommande.total_commande);
     $("#nbArt").html(fCommande.ttlArticles);
+    $("#mode_paiement").html("<b>" + fCommande.paiement + "</b>");
     $("#infoCmd").show();
     $("#btnAchat").show();
     currentIdClient = fCommande.client.id;
@@ -226,35 +228,37 @@ $(function(){
           });
         
     });
-
-    $("#validation").click(function(){
-        var numC = parseInt($("#idCommande").html());
-        if (isNaN(numC)) numC = 0; 
-        $.post('/commandes/valider',{'id_commande': numC, 'id_client': currentIdClient}, function(datas) {
-           if(datas.err != null) {
-               var infos = new PNotify({
-                  title: 'Erreur ',
-                  text: datas.err,
-                  type: 'error',
-                  desktop: {
-                    desktop: true
-                  }
-                }); 
-          } else {
-               var infos = new PNotify({
-                  title: 'OK ',
-                  text: "Commande validée!",
-                  type: 'success',
-                  desktop: {
-                    desktop: true
-                  }
-                }); 
-               fullCommande = datas.commande;
-               GestionAffichage(fullCommande);
-          }
-        });
+    $(".validation").each(function(){
+      console.log("ok val");
+      $(this).click(function(){
+          var numC = parseInt($("#idCommande").html());
+          if (isNaN(numC)) numC = 0; 
+          $.post('/commandes/valider',{'id_commande': numC, 'id_client': currentIdClient, 'paiement': $(this).data('paiement')}, function(datas) {
+             if(datas.err != null) {
+                 var infos = new PNotify({
+                    title: 'Erreur ',
+                    text: datas.err,
+                    type: 'error',
+                    desktop: {
+                      desktop: true
+                    }
+                  }); 
+            } else {
+                 var infos = new PNotify({
+                    title: 'OK ',
+                    text: "Commande validée!",
+                    type: 'success',
+                    desktop: {
+                      desktop: true
+                    }
+                  }); 
+                 fullCommande = datas.commande;
+                 GestionAffichage(fullCommande);
+            }
+            setTimeout(function(){document.location.href = '/commandes';},2000);
+          });
+      });
     });
-  
   <% if (id !== null && id !== undefined) {%>
       var currentID = '<%=id%>';
       if (parseInt(currentID) > 0) {
@@ -283,6 +287,7 @@ $(function(){
         <table>
           <tr><td>Commande : </td><td id='idCommande'></td></tr>
           <tr><td>Status : </td><td id='statusCommande'></td></tr>
+          <tr><td>Paiement : </td><td id='mode_paiement'></td></tr>
         </table>
         
 
@@ -328,7 +333,9 @@ $(function(){
     </ul>
   </div>
   <div style="float:left;">
-    <font id="marchandise">Marchandises</font><font id='ttlMarchandises' style="margin-right:20px"></font><button id="validation" class="btn btn-warning">Validation</button><br>
+    <font id="marchandise">Marchandises</font><font id='ttlMarchandises' style="margin-right:20px"></font><button title="Chèque" data-paiement="chèque" class="btn btn-warning validation"><i class="fa fa-dedent"></i></button>
+    <button title="Espèces" data-paiement="espèce" class="btn btn-warning validation"><i class="fa fa-eur"></i></button>
+    <button title="Carte" data-paiement="cb" class="btn btn-warning validation"><i class="fa fa-cc-visa"></i></button><br>
     <div class="arrondi-plein-net"><b>Net à payer</b><font id="cmdNet" class="txt50"></font></div>
   </div>
 </div>  

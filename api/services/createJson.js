@@ -11,10 +11,8 @@ var rep_base = "/var/leclerc/";
 module.exports = function(idRayon, callback){
 
 	var lCurl = function(ccurl, l_url, callback) {
-
 		ccurl.setOpt( 'URL', l_url );
 	    ccurl.setOpt( 'FOLLOWLOCATION', true );
-	     
 	    ccurl.on( 'end', function( statusCode, body, headers ) {
 	        logger.info('pour' + l_url);     
 	        logger.info( statusCode );
@@ -32,7 +30,7 @@ module.exports = function(idRayon, callback){
 		            var tbFn = l_url.split('rayon-');
 		            var fn = tbFn[1] + '.json';
 		     
-		            fs.writeFile("/var/leclerc/" + fn, leJSON, function (err) {
+		            fs.writeFile(sails.config.importProductsFolder + fn, leJSON, function (err) {
 		                callback(null);
 		                if (err) {
 		                  logger.info("pas bon pour " + l_url);
@@ -157,10 +155,11 @@ module.exports = function(idRayon, callback){
 	'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284692-Chauffage-et-allumage.aspx',
 	'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284689-Fleurs-Jardin-et-Piscine.aspx'];
 	var cpt = 0;
+	
 	if(idRayon !== null) {
 
 	} else {
-		for(var cptL = 0; cptL < tbLiens.length; cptL++) {
+		for (var cptL = 0; cptL < tbLiens.length; cptL++) {
 			var curl = new Curl();
 		    var full_url = tbLiens[cptL];
 		    logger.warn("pour ", full_url);
@@ -168,12 +167,15 @@ module.exports = function(idRayon, callback){
 		    	cpt++;
 		    	//logger.warn("pour ", full_url);
 		    	logger.warn('retour :' , result);
-		    	if(cpt == tbLiens.length-1)
+		    	logger.warn("passe n ", cpt);
+		    	if(cpt == tbLiens.length-1) {
 		    		logger.warn("Fini la création des json");
+		    		callback("C OK");
+		    	}
 		    });
-		    //sleep.sleep(6);
+		    sleep.sleep(1);
 		} 
-		callback("C OK");
+		
 	}
 
 };

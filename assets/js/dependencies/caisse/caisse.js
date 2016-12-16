@@ -1,4 +1,5 @@
 $.prototype.setDataTable = function(l_table,id) {
+	$("div.toolbar").html('<b>Tout rayon:&nbsp;</b><input type="text" id="megaSearch" value="">');
 	var ajaxUrl ='';
 	if(id>0) ajaxUrl = '/' + l_table + '/getAll/' + id;
 	var lTable = $(this).DataTable({
@@ -46,9 +47,15 @@ $.prototype.setDataTable = function(l_table,id) {
         "search": {
             "smart": false
         },
-        "ajax": ajaxUrl
+        "ajax": ajaxUrl,
+        "dom": '<"toolbar">frtip'
 
 	});
-	
+	$("#megaSearch").keydown(function(){
+		var critere = $(this).val();
+		if(critere.length > 3) {
+			lTable.ajax.url('/' + l_table + '/getAllCrit/' + critere).load();
+		}
+	});
 	return lTable;
 }

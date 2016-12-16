@@ -21,8 +21,39 @@
  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
 <script>
 $(function(){
- $('#nav').spasticNav();
- var tableCo = $('#tblCo').DataTable( {
+    var monthNames = [
+      "Janvier", "Février", "Mars",
+      "Avril", "Mai", "Juin", "Juillet",
+      "Août", "Septembre", "Octobre",
+      "Novembre", "Decembre"
+    ];
+    var currentDate1 = new Date();
+    var currentDate2 = new Date();
+
+    var day1 = currentDate1.getDate();
+    var monthIndex1 = currentDate1.getMonth();
+    var year1 = currentDate1.getFullYear();
+    var ladate1 = day1 + ' ' + monthNames[monthIndex1] + ' ' + year1;
+    var myMonth1 = monthIndex1 + 1;
+    myMonth1 = myMonth1  >9?myMonth1: '0' + myMonth1;
+    var myDay1 = day1 > 9?day1: '0' + day1;
+        
+    var day2 = currentDate2.getDate();
+    var monthIndex2 = currentDate2.getMonth();
+    var year2 = currentDate2.getFullYear();
+    var ladate2 = day2 + ' ' + monthNames[monthIndex2] + ' ' + year2;
+    var myMonth2 = monthIndex2 + 1;
+    myMonth2 = myMonth2  >9?myMonth2: '0' + myMonth2;
+    var myDay2 = day2 > 9?day2: '0' + day2;
+        
+    var d1= year1 + '-' + myMonth1 + '-' + myDay1;
+    var d2= year2 + '-' + myMonth2 + '-' + myDay2;
+    
+    $("#bandeauDate").hide();
+    var choixStatus = [<%=status%>];
+   
+    $('#nav').spasticNav();
+    var tableCo = $('#tblCo').DataTable( {
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
@@ -73,7 +104,7 @@ $(function(){
                     if (row[1] == 2) {
                         html += '<button class="btn btn-success btn-xs btn-action action-maj" style="font-size: 13px;" title="Livrer la commande" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-chevron-down"></i>Livraison faite</button>';
                     }
-                    return html;//bitonio
+                    return html;
                 },
                 "targets": 6
             },
@@ -117,10 +148,7 @@ $(function(){
             return nRow;
         }
     });
-    //tableCo.ajax.url( '/commandes/getCommande/' + idRayon ).load();;
-    console.log("dans la page avant le premier post");
-    $.post('/commandes/getCommandes', {'status': [1,2,5]}, function(datas){
-        //alert('dans le post ');
+    $.post('/commandes/getCommandes', {'status': choixStatus}, function(datas){
         console.log('postounet : ', datas);
         $('#tblCo').dataTable().fnClearTable();
         if(datas.data.length > 0){
@@ -170,6 +198,69 @@ $(function(){
        });     
             
     });
+    $('body').on('click', 'button.action-cal', function(){
+        
+        //prévoir une modal tradi ici
+        $("#bandeauDate").dialog({
+              title: "Période de recherche",
+              resizable: false,
+              height: 390,
+              width: 650,
+              modal: true,
+              buttons: {
+                "Save": function() {
+                    //Récup des dates et affichage des commandes
+                    $(this).dialog("close");
+                    if(currentDate2 >= currentDate1) {
+                        $.post('/commandes/getCommandes', {'status': choixStatus, 'dtDebut': currentDate1, 'dtFin': currentDate2}, function(datas){
+                            console.log('postounet : ', datas);
+                            $('#tblCo').dataTable().fnClearTable();
+                            if(datas.data.length > 0){
+                                $('#tblCo').dataTable().fnAddData(datas.data);    
+                            }
+                        });
+                    } else {
+                        var infos = new PNotify({
+                            title: 'Erreur ',
+                            text: "La date de fin est antérieure à la date de début...",
+                            type: 'error',
+                            desktop: {
+                              desktop: true
+                            }
+                        }); 
+                    }
+                },
+                "Annuler": function() {
+                    $(this).dialog("close");
+                }
+              }
+        });
+
+        //
+        $( "#dt1" ).datepicker({
+          defaultDate: currentDate1,
+          changeMonth: true,
+          changeYear: true,
+          dateFormat: "yy-mm-dd",
+          onSelect: function( selectedDate ) {
+            currentDate1 = selectedDate;
+
+          }
+        });
+        $("#dt1").show();
+
+        $( "#dt2" ).datepicker({
+          defaultDate: currentDate2,
+          changeMonth: true,
+          changeYear: true,
+          dateFormat: "yy-mm-dd",
+          onSelect: function( selectedDate ) {
+            currentDate2 = selectedDate;
+
+          }
+        });
+        $("#dt2").show();
+    });
 });
 </script>
 </head>
@@ -177,8 +268,12 @@ $(function(){
 <div id="dvHeader" class="row">
 <%- menu %>
 </div>
-<div style="text-align:center"><H1><font >COMMANDES A LIVRER</font></H1></div>
+<div style="text-align:center"><H1><font ><%=action%></font></H1>
+<button id="print" class="btn btn-success btn-xs btn-action action-cal" style="font-size: 13px;margin-bottom:5px" title="Choisir le jour" ><i class="fa fa-calendar"></i></button></div>
+<div id='bandeauDate' class='row bandeauDate modal container'><font class='fontTitre' style="float:left">DU</font><div  style="float:left" id="dt1"></div><font class='fontTitre' style="float:left">AU</font><div id="dt2" style="float:left"></div>
 
+
+</div>
 <div id="dvMiddle" class="row">
 
 	<div id="rowCommandes" class="col-md-8" style="margin-left:100px;margin-top:20px;">
@@ -191,7 +286,10 @@ $(function(){
                     <th>Client</th>
                     <th>Adresse</th>
                     <th>Status</th>
-                    <th><button class="btn btn-danger btn-xs btn-action action-allmaj" style="font-size: 13px;" title="Tout modifier comme livré" ><i class="fa fa-chevron-down"></i>Tout livrer</button></th>
+                    <th><% if(action == 'COMMANDES A LIVRER') {%>
+                    <button class="btn btn-danger btn-xs btn-action action-allmaj" style="font-size: 13px;" title="Tout modifier comme livré" ><i class="fa fa-chevron-down"></i>Tout livrer</button>
+                    <% } %>
+                    </th>
                 </tr>
             </thead>
             

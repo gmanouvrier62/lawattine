@@ -36,6 +36,7 @@ module.exports.routes = {
   '/admin':                 'AdminController.home',
   '/produits':              'ProduitsController.home',
   '/produits/getAll/:id':       'ProduitsController.getAll',
+  '/produits/getAllCrit/:nom':       'ProduitsController.getAllCrit',
   '/produits/getOneById/:id':   'ProduitsController.getOneById',
   '/produits/upload':       'ProduitsController.upload',
   '/produits/types/list':     'ProduitsController.getTypes',
@@ -51,6 +52,7 @@ module.exports.routes = {
   '/fournisseurs/getAll':        'FournisseursController.getAll',
   '/fournisseurs/getOneById/:id':   'FournisseursController.getOneById',  
   '/commandes':                     'CommandesController.home',
+  '/commandes/status/:status':          'CommandesController.home',
   '/commandes/addormodify':             'CommandesController.addormodify',
   '/commandes/livrer':             'CommandesController.livrer',
   '/commandes/valider':              'CommandesController.valider',
@@ -58,7 +60,9 @@ module.exports.routes = {
   '/commandes/load/:id/client/:id_client':              'CommandesController.load',
   '/achats':                        'AchatsController.home',
   '/achats/achat_todo':             'AchatsController.achat_todo',
-  '/stocks':                        'StocksController.home' 
+  '/stocks':                        'StocksController.home',
+  '/stats/ventes':             'StatsController.home',
+  '/stats/ventes_jour':        'StatsController.ventes_jour' 
   
   /***************************************************************************
   *                                                                          *

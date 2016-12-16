@@ -1,0 +1,86 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">  
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+ 
+ <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jauge/src/jquery.gauge.js"></script>
+<script src="http://localhost:5222/socket.io/socket.io.js"></script>
+<script>
+$(function(){
+	PNotify.prototype.options.styling = "jqueryui";
+	$("#errored").gauge(0, {
+		min: 0,
+		max: 100,
+		unit: "%",
+		color: "lightred",
+		colorAlpha: 1,
+		bgcolor: "#222",
+		type: "default"
+	});
+	$("#ok").gauge(0, {
+		min: 0,
+		max: 100,
+		unit: "%",
+		color: "lightgreen",
+		colorAlpha: 1,
+		bgcolor: "#222",
+		type: "default"
+	});
+
+	var socket = window.io.connect("//localhost:5222").on('welcome', function(data) {
+        alert(data);
+
+        //socket.emit('i am client', {data: 'foo!'});
+    });
+    socket.on('completed', function(data) {
+    	$("#ok").gauge(data.value);
+    });
+    socket.on('error', function(data) {
+    	console.log(data.value);
+    	$("#errored").gauge(data.value);
+    });
+
+});
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+<div style="text-align:center"><H1><font >IMPORTATION PRODUITS</font></H1></div>
+
+<div id="dvMiddle" class="row">
+	<div id="rowImportG" class="col-md-4" style="margin-left:100px;margin-top:20px;">
+		<canvas id="errored" width="300" height="300"></canvas>
+	</div>
+	<div id="rowImportM" class="col-md-4" style="margin-left:20px;margin-top:20px;">
+		<table>
+			<thead>
+				<tr>
+					<th>index</th>
+					<th>lien</th>
+					<th>status</th>
+				</tr>
+			</thead>
+			<tbody>
+				
+			</tbody>
+		</table>
+	</div>
+	<div id="rowImportR" class="col-md-4" style="margin-left:20px;margin-top:20px;">
+		<canvas id="ok" width="300" height="300"></canvas>
+	</div>
+</div>
+
+</body>
