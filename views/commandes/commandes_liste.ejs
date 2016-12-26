@@ -100,7 +100,7 @@ $(function(){
             {
                 "render": function ( data, type, row ) {
                     
-                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir la commande" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
+                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir la commande" data-status="' + row[2] + '" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
                     if (row[1] == 2) {
                         html += '<button class="btn btn-success btn-xs btn-action action-maj" style="font-size: 13px;" title="Livrer la commande" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-chevron-down"></i>Livraison faite</button>';
                     }
@@ -164,7 +164,11 @@ $(function(){
     $('body').on('click', 'button.action-view', function(){
         var idx = $(this).data('id');
         var id_client = $(this).data('id_client');
-        document.location.href = '/commandes/load/' + idx + '/client/' + id_client;
+        var status = $(this).data('status');
+        if(status == 'Livrée')
+            document.location.href = '/commandes/histo/' + idx + '/client/' + id_client;
+        else    
+            document.location.href = '/commandes/load/' + idx + '/client/' + id_client;
     });
     $('body').on('click', 'button.action-maj', function(){
         var id_commande = $(this).data('id');

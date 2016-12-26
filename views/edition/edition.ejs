@@ -1,0 +1,67 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
+  
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+  <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
+  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+<script>
+$(function(){
+	PNotify.prototype.options.styling = "jqueryui";
+	var selectProduits = "<select id='id_type'>"; 
+	$.get('/produits/getTypes/',{}, function(datas){
+	    var selectedType = '';
+	    if(datas.err == null) {
+	      var types = datas.data;
+	      for (var cc = 0; cc < types.length; cc++) {
+	        var attrS ="";
+	        if(selectedType == types[cc].id) attrS = "selected"; 
+	        selectProduits += "<option value='" + types[cc].id + "' " + attrS + " >" + types[cc].nom + "</option>";
+	      }
+	      selectProduits += "</select>";
+	    }
+	    //$("#rayon").append(selectProduits);
+	    
+    });
+	$('body').on('click', 'button.action-add', function(){
+
+
+	});
+
+});
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+<div style="text-align:center"><H1><font >EDITION CATALOGUE</font></H1></div>
+<button id="print" class="btn btn-success btn-xs btn-action action-add" style="font-size: 13px;" title="Ajouter un catalogue" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter catalogue</button>
+
+<button id="print" class="btn btn-success btn-xs btn-action action-view" style="font-size: 13px;" title="Lister les catalogues" ><i class="fa fa-database" style="margin-right:4px"></i>Liste des catalogues</button>
+
+<button id="print" class="btn btn-success btn-xs btn-action action-print" style="font-size: 13px;" title="Imprimer le catalogue courrant" ><i class="fa fa-print" style="margin-right:4px"></i>Imprimer</button>
+<div id="dvMiddle" class="row">
+	<div id="container_edition" class="col-md-12" style="border:1px solid black; margin-left:20px;margin-top:20px">
+	<% if (action == 'ajouter') { %>
+	<%- include ajouter.ejs %>
+	<%}%>
+	<% if (action == 'lister') { %>
+	coucou lister
+	<%}%>	
+	</div>
+	
+</div>
+
+</body>

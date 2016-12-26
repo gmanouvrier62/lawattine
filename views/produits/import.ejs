@@ -14,42 +14,49 @@
  <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
  
  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
- <script type="text/javascript" src="/js/dependencies/jauge/src/jquery.gauge.js"></script>
-<script src="http://localhost:5222/socket.io/socket.io.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.knob.min.js"></script>
+<script src="http://localhost:1112/socket.io/socket.io.js"></script>
 <script>
 $(function(){
 	PNotify.prototype.options.styling = "jqueryui";
-	$("#errored").gauge(0, {
-		min: 0,
-		max: 100,
-		unit: "%",
-		color: "lightred",
-		colorAlpha: 1,
-		bgcolor: "#222",
-		type: "default"
-	});
-	$("#ok").gauge(0, {
-		min: 0,
-		max: 100,
-		unit: "%",
-		color: "lightgreen",
-		colorAlpha: 1,
-		bgcolor: "#222",
-		type: "default"
-	});
+	 $(".dial1").knob(); 
+	 $(".dial2").knob();
 
-	var socket = window.io.connect("//localhost:5222").on('welcome', function(data) {
-        alert(data);
+	
 
+	var socket = window.io.connect("//localhost:1112").on('welcome', function(data) {
+        //alert(data);
+        console.log("connected");
         //socket.emit('i am client', {data: 'foo!'});
     });
-    socket.on('completed', function(data) {
-    	$("#ok").gauge(data.value);
+    socket.on('completed', function(d_ko, d_ok) {
+    	console.log(d_ko, " , ", d_ok);
+    	$('.dial1')
+        .val(d_ko)
+        .trigger('change');
+        $('.dial2')
+        .val(d_ok)
+        .trigger('change');
     });
-    socket.on('error', function(data) {
-    	console.log(data.value);
-    	$("#errored").gauge(data.value);
+    socket.on('bad', function(d_ko, d_ok, l_lnk) {
+    	console.log("BADOUNET : ", d_ko, " , ", d_ok);
+    	$('.dial1')
+        .val(d_ko)
+        .trigger('change');
+        $('.dial2')
+        .val(d_ok)
+        .trigger('change');
+        $("#badLinks").append("<li>" + l_lnk + "</li>");
+
     });
+    socket.on('json_completed', function(){
+    	console.log("jason completed");
+    });
+    socket.on('all_completed', function(){
+    	console.log("tout est ok");
+    });
+
+
 
 });
 </script>
@@ -59,28 +66,27 @@ $(function(){
 <%- menu %>
 </div>
 <div style="text-align:center"><H1><font >IMPORTATION PRODUITS</font></H1></div>
+<table>
+	<tr>
+		<td style="width:200px;margin-bottom:20px">IMPORTS EN ERREUR</td><td style="width:700px;margin-bottom:20px">LIENS KO</td><td style="width:300px;margin-bottom:20px">IMPORTS OK</td>
+	</tr>
+	<tr>
+		<td>
+		<input type="text" class="dial1" value="0" data-displayprevious="true" data-min="0" data-width="100" style="width: 104px; height: 66px; position: absolute; vertical-align: middle; margin-top: 66px; margin-left: -152px; border: 0px none; background: none repeat scroll ;margin-bottom:10px0% 0% transparent; font: bold 40px Arial; text-align: center; color: rgb(135, 206, 235); padding: 0px;">
+		</td>
+		<td>
+          <div id="container_links">
+    		  <ul id="badLinks">
 
-<div id="dvMiddle" class="row">
-	<div id="rowImportG" class="col-md-4" style="margin-left:100px;margin-top:20px;">
-		<canvas id="errored" width="300" height="300"></canvas>
-	</div>
-	<div id="rowImportM" class="col-md-4" style="margin-left:20px;margin-top:20px;">
-		<table>
-			<thead>
-				<tr>
-					<th>index</th>
-					<th>lien</th>
-					<th>status</th>
-				</tr>
-			</thead>
-			<tbody>
-				
-			</tbody>
-		</table>
-	</div>
-	<div id="rowImportR" class="col-md-4" style="margin-left:20px;margin-top:20px;">
-		<canvas id="ok" width="300" height="300"></canvas>
-	</div>
-</div>
+
+              </ul>	
+          </div>
+		</td>
+		<td>
+		<input type="text" class="dial2" value="0" data-displayprevious="true" data-min="0" data-width="100" style="width: 104px; height: 66px; position: absolute; vertical-align: middle; margin-top: 66px; margin-left: -152px; border: 0px none; background: none repeat scroll 0% 0% transparent; font: bold 40px Arial; text-align: center; color: rgb(135, 206, 235); padding: 0px;">
+		</td>
+	</tr>
+</table>
+
 
 </body>

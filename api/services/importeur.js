@@ -6,17 +6,17 @@ var sleep = require('sleep');
 var Immutable = require('immutable');
 var mkdirp = require('mkdirp');
 var Curl = require( 'node-libcurl' ).Curl;
+var importProduits = require("./import_produits.js");
 //var http = require('http').Server(app);
-var http = require('http');
+var app = require('express')();
+var http = require('http').Server(app);
 var logger = require('../services/logger.init.js').logger("tom.txt");
 /*
 J'ai un tb de liens(pointeur)
 Je lance getNext
 Lors de la fin de traitement il retourne un event error 1 2 ou completed
 */
-http.listen(5222, function(){
-  console.log('listening on *:5222');
-});
+
 var lCurl = function(ccurl, l_url, self) {
 	ccurl.setOpt( 'URL', l_url );
     ccurl.setOpt( 'FOLLOWLOCATION', true );
@@ -41,31 +41,63 @@ var lCurl = function(ccurl, l_url, self) {
 	                if (err) {
 	                  logger.error("pas bon pour " + l_url);
 	                  self.nbErr ++;
-	                  var pct = parseInt( (self.nbErr*100)/(self.tbLiens.length-1) );
-	                  self.emit("error2");
-	                  self.sockets.emit("error", pct);
+	                  self.pct_ko = parseInt( (self.nbErr*100)/(self.tbLiens.length-1) );
+	                  if (self.sockets !== null && self.sockets !== undefined) {
+	                  		self.sockets.emit("error", self.pct_ko, self.pct_ok, l_url);
+	                  }	
+	                  self.emit('pasbon');
 	                } else {
 	                    logger.info("ok ducky");
 	                    self.nbOk ++;
-	                    var pct = parseInt( (self.nbOk*100)/(self.tbLiens.length-1) );
-	                    self.sockets.emit("completed", pct);
-	                    if(self.pointeur == self.tbLiens.length-1)
-	                    	self.emit("all_completed");
-	                    else
-	                    	self.emit("completed");
+	                    self.pct_ok = parseInt( (self.nbOk*100)/(self.tbLiens.length-1) );
+	                    
+	                    if(self.pointeur == self.tbLiens.length-1) {
+	                    	if (self.sockets !== null && self.sockets !== undefined) {
+	                    		self.sockets.emit("json_completed");
+	                    	}
+	                    	importProduits(function(result) {
+	                    		self.emit('all_completed');
+	                    		if (self.sockets !== null && self.sockets !== undefined) {
+	                    			self.sockets.emit("all_completed");
+	                    		}
+	                    	});
+	                    } else {
+	                    	logger.warn('va emttre un completed ', "");
+	                    	if (self.sockets !== null && self.sockets !== undefined) {
+	                    		self.sockets.emit("completed",self.pct_ko, self.pct_ok);	
+	                    	}
+	                    	self.emit('completed');
+	                    }
 	                }
 	            });
+	        } else {
+	        	if (self.sockets !== null && self.sockets !== undefined) {
+	        		self.nbErr ++;
+	        		self.pct_ko = parseInt( (self.nbErr*100)/(self.tbLiens.length-1) );
+    				self.sockets.emit("bad", self.pct_ko, self.pct_ok, l_url);
+	    		}
+	    		self.emit('pasbon');		
 	        }
+        } else {
+        	//visiblement la page ne matche pas avec les élémets html à trouver
+        	if (self.sockets !== null && self.sockets !== undefined) {
+        		self.nbErr ++;
+        		self.pct_ko = parseInt( (self.nbErr*100)/(self.tbLiens.length-1) );
+    			self.sockets.emit("bad", self.pct_ko, self.pct_ok, l_url);
+    		}
+    		self.emit('pasbon');	
         }
         this.close();
     });
     ccurl.on( 'error', function(err) {
     	logger.error("erreur curl");
     	self.nbErr ++;
-    	var pct = parseInt( (self.nbErr*100)/(self.tbLiens.length-1) );
+    	self.pct_ko = parseInt( (self.nbErr*100)/(self.tbLiens.length-1) );
     	ccurl.close.bind( ccurl  );
-    	self.sockets.emit("error", pct);
-    	self.emit("error2");
+    	if (self.sockets !== null && self.sockets !== undefined) {
+    		self.sockets.emit("bad", self.pct_ko, self.pct_ok);
+    	}
+    	
     	
 	});
     ccurl.perform();
@@ -74,11 +106,18 @@ var lCurl = function(ccurl, l_url, self) {
 
 
 function importeur(dest) {
+	http.listen(1112, function(){
+	  console.log('listening on *:1112');
+	});
 	events.EventEmitter.call(this); 
 	self = this;
 	this.nbOk = 0;
 	this.nbErr = 0;
+	this.pct_ok = 0;
+	this.pct_ko = 0;
 	this.sockets = null;
+
+	
 	this.io = require('socket.io')(http);
 	this.io.on('connection', function(socket){
 	  console.log("ok connect");
@@ -86,8 +125,8 @@ function importeur(dest) {
 	  socket.emit('welcome', "bou du");
 	  //socket.emit('meteo_done', {msg:"bou du2"});
 	  
-	  this.sockets = socket;
-	  self.emit("unclient",socket);
+	  self.sockets = socket;
+	  self.poil ="de cul";
 	});
 
 
@@ -98,8 +137,7 @@ function importeur(dest) {
 	}
 	this.currentLink = null;
 	this.pointeur = -1;	
-	this.tbLiens = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284322-Viandes-Poissons.aspx',
-		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284325-Boucherie.aspx',
+	this.tbLiens = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284325-Boucherie.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284326-Volailles-et-Gibiers.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284327-Poissonnerie.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-285187-Traiteur-de-la-mer.aspx',
@@ -205,6 +243,7 @@ importeur.prototype.getNext = function() {
 	var curl = new Curl();
     var full_url = this.tbLiens[this.pointeur];
     logger.warn("pour ", full_url);
+    logger.error("soc : ", this.poil);
     lCurl(curl, full_url, this);
 };
 

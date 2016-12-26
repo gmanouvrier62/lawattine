@@ -6,9 +6,9 @@ var sleep = require("sleep");
 var mkdirp = require('mkdirp');
 var path = require('path');
 var formidable = require('formidable');
-var importProduits = require("../services/import_produits.js");
-//var createJson = require("../services/createJson.js");
+
 var importeur = require("../services/importeur.js"); 
+//Penser à supprimer createJson
 module.exports = {
 
 	home: function (req, res) {
@@ -29,33 +29,31 @@ module.exports = {
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 		return res.render ('produits/produits_list',{'action': 'produits', 'menu': menu, 'memoType':letype});
 	},
+	marge: function(req, res) {
+
+
+		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+		return res.render ('produits/marge',{'action': 'marge', 'menu': menu});
+	},
 	import: function (req, res) {
 		
-		importProduits(function(result) {
+		//importProduits(function(result) {
 
-			return res.send(result);
-		});
+		//	return res.send(result);
+		//});
 		
 			
 	},
 	prepare_import_json: function(req, res) {
-		/*	
-		createJson(null, function(result){
-			return res.send(result);
-
-		});
-		*/
+		
 
 		var imp = new importeur();
 		imp.getNext();
-		imp.on("error1", function(){
+		imp.on("pasbon", function(){
 			logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
 			imp.getNext();
 		});
-		imp.on("error2", function(){
-			logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
-			imp.getNext();	
-		});
+		
 		imp.on("completed", function(){
 			logger.warn("fini pour ", imp.currentLink, " pointeur ", this.pointeur);
 			imp.getNext();
@@ -70,10 +68,7 @@ module.exports = {
 	},
 	import_rayon_json: function(req, res) {
 
-		createJson(req.params.id, function(result){
-			return res.send(result);
-
-		});
+		
 
 	},
 	getAllCrit: function(req, res) {

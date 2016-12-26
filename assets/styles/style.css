@@ -13,6 +13,16 @@ ul, li {margin: 0; padding: 0;}
 #nav { position: relative; background: #292929; float: left;}
 #nav li { float: left; list-style: none; border-right: 1px solid #4a4a4a; border-left: 1px solid black;}
 #nav li a { color: #e3e3e3; position: relative; z-index: 2; float: left; font-size: 22px; font-family: helvetica, arial, sans-serif; text-decoration: none; padding: 10px 35px;}
+#badLinks{
+	font-size:10px;
+	list-style-type: none;
+}
+#container_links {
+	width:680px;
+	height:400px;
+	overflow: auto;
+
+}
 .toolbar{
 	text-align: right;
 }

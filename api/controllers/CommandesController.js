@@ -7,7 +7,7 @@
 var fs = require('fs');
 var moment = require('moment');
 var logger = require('../services/logger.init.js').logger("tom.txt");
-
+var fixePrice = require("../services/fixePrice.js");
 module.exports = {
 	home: function (req, res) {
 		var tom ="";
@@ -40,7 +40,31 @@ module.exports = {
 			}
 			logger.util(fCom);
 			//Je renvoie directement l'objet commande complet
-			return res.render ('home/caisse.ejs',{'id': idCmd, 'f_com': JSON.stringify(fCom), 'menu': menu});
+			return res.render ('home/caisse.ejs',{'id': idCmd,'status_com': fCom.status, 'f_com': JSON.stringify(fCom), 'menu': menu});
+		});
+		
+	},
+	load_history: function (req, res) {
+		logger.warn(sails.config.appPath);
+		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+		//chargement d'une commande en vue d'un affichage
+		var idCmd = 0;
+		if (req.params.id !== null && req.params.id !== undefined) {
+			idCmd = req.params.id;
+		}
+		var id_client = 0;
+		if (req.params.id_client !== null && req.params.id_client !== undefined) {
+			id_client = req.params.id_client;
+		}
+		sails.models.commandes.getOneFullCommandeHistorique(idCmd, id_client, function(err, fCom) {
+			if (err !== null && err !== undefined) {
+				logger.error(err);
+				return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
+			}
+			logger.util("avant res.send : ", fCom);
+			//Je renvoie directement l'objet commande complet
+			
+			return res.render ('home/caisse.ejs',{'id': idCmd,'status_com': fCom.status, 'f_com': JSON.stringify(fCom), 'menu': menu});
 		});
 		
 	},
@@ -106,7 +130,7 @@ module.exports = {
 		var dt_livraison = req.body.dt_livraison;
 		var paiement = req.body.paiement;
 		var cStatus = req.body.status;
-
+		logger.warn("status = ", cStatus);
 		if(dt_livraison == null || dt_livraison == '') {
 			dt_livraison =  moment().add(1,"days").format("YYYY-MM-DD");
 		}
@@ -126,7 +150,7 @@ module.exports = {
 					logger.util("ligne : ", ligne);
 					
 					sails.models.cmd_pr.findOrCreate(ligne,ligne).exec(function creaStat(err,created){
-						if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande", 'commande': null});
+						if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande " + err, 'commande': null});
 					
 						//sur retour ok, on recupere la comm créé et on affiche le prix
 						sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
@@ -160,33 +184,33 @@ module.exports = {
 
 				}
 
-					sails.models.commandes.update(oldC, newC).exec(function creaStat(err,updated){
-						if(err !== null && err !== undefined) return res.send({'err':"Erreur de modification d'une commande : " + err, 'commande': null});
-						if(lignes !== null && lignes !== undefined) {
-							for(var cpt = 0; cpt < lignes.length; cpt++) {
-								var ligne = {
-									id_commande: idCmd,
-									id_produit: lignes[cpt].id_produit,
-									qte: lignes[cpt].qte
-								};
-								logger.util("ligne : ", ligne);
+				sails.models.commandes.update(oldC, newC).exec(function creaStat(err,updated){
+					if(err !== null && err !== undefined) return res.send({'err':"Erreur de modification d'une commande : " + err, 'commande': null});
+					if(lignes !== null && lignes !== undefined) {
+						for(var cpt = 0; cpt < lignes.length; cpt++) {
+							var ligne = {
+								id_commande: idCmd,
+								id_produit: lignes[cpt].id_produit,
+								qte: lignes[cpt].qte
+							};
+							logger.util("ligne : ", ligne);
+							
+							sails.models.cmd_pr.findOrCreate(ligne,ligne).exec(function creaStat(err,created){
+								if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande", 'commande': null});
+								//sur retour ok, on recupere la comm créé et on affiche le prix
 								
-								sails.models.cmd_pr.findOrCreate(ligne,ligne).exec(function creaStat(err,created){
-									if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande", 'commande': null});
-									//sur retour ok, on recupere la comm créé et on affiche le prix
-									
-									sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
-										if (err !== null && err !== undefined) {
-											logger.error(err);
-											return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
-										}
-										logger.util(fCom);
-										return res.send({'err': null,'commande': fCom});
-									});
+								sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
+									if (err !== null && err !== undefined) {
+										logger.error(err);
+										return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
+									}
+									logger.util(fCom);
+									return res.send({'err': null,'commande': fCom});
 								});
-							}
+							});
 						}
-					});
+					}
+				});
 				
 				
 			} else {
@@ -279,6 +303,7 @@ module.exports = {
 							}
 							var ccc = 0;
 							for(var cpt = 0; cpt < fCom.produits.length; cpt++) {
+								
 								var ins = {
 									'id_produit': fCom.produits[cpt].id,
 									'qte': fCom.produits[cpt].qte * -1,
@@ -294,13 +319,16 @@ module.exports = {
 									}
 									logger.warn('le ccc ', ccc, 'le max ', fCom.produits.length) ;
 									if (ccc == fCom.produits.length-1) {
-										if(allErr != "")
-											res.send({"err": allErr, "msg": 'KO'});
-										else 
-											res.send({"err": null, "msg": 'OK'});
+										//FIXER LES PRIX au moment de la livraison, les prix ne peuvent plus bouger aprés
+										fixePrice(fCom, function(err, retourFinal) {
+											logger.warn("retour de fixeprice!!!!");
+											if(allErr + err != "")
+												res.send({"err": allErr, "msg": 'KO'});
+											else 
+												res.send({"err": null, "msg": 'OK'});		
+										});
 									}
 									ccc++;
-									
 								});
 								//
 							}

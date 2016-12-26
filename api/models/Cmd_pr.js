@@ -10,8 +10,19 @@ module.exports = {
     id_produit: { type: 'int' },
 
     qte: {type: 'int'},
+    qte_ok: {type: 'int'},
+    histo_qte: {type: 'int'},
+    
+    histo_tva: {type: 'decimal'},
+    histo_tva_total: {type: 'decimal'},
+    
+    histo_pht: {type: 'decimal'},
+    histo_pht_total: {type: 'decimal'},
 
-    qte_ok: {type: 'int'}
+    histo_tx_com: {type: 'decimal'},
+        
+    histo_ttc_externe: {type: 'decimal'},
+    histo_ttc_vente: {type: 'decimal'}
 
   },
   ventes_jour: function(d1,d2, callback) {

@@ -1,0 +1,119 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">  
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+ 
+ <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.knob.min.js"></script>
+<script src="http://localhost:1112/socket.io/socket.io.js"></script>
+<script>
+$(function(){
+	PNotify.prototype.options.styling = "jqueryui";
+	//
+    var tableAchats = $('#tblCurCom').DataTable( {
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                    return row[0];
+                },
+                "targets": 0
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    return row[1];
+                },
+                "targets": 1
+            },
+            {
+                "render": function ( data, type, row ) {
+                    var html = row[2];
+                    
+                    return html;
+                },
+                "targets": 2
+            },
+            {
+                "render": function ( data, type, row ) {
+                    //ttl ttc
+                    return "bitonios";
+                },
+                "targets": 3
+            },
+            { "className": "col_xxl", "targets": [ 1 ] },
+            { "className": "col_xl", "targets": [ 8 ] }
+        ],
+        "oLanguage": {"sZeroRecords": "", "sEmptyTable": "<b>Pas de produits achetés</b>"},
+        "processing": false,
+        "serverSide": false,
+        'searching': false,
+        'bInfo': false,
+        "paging": false,
+        "ordering": true,
+        "defaultOrdering": [[1, 'desc']],
+        "search": {
+            "smart": false
+        },
+        "ajax": '/produits/marge_actuelle'
+    });
+	
+    //
+	var socket = window.io.connect("//localhost:1112").on('welcome', function(data) {
+        //alert(data);
+        console.log("connected");
+        //socket.emit('i am client', {data: 'foo!'});
+    });
+    socket.on('completed', function(d_ko, d_ok) {
+    	console.log(d_ko, " , ", d_ok);
+    	
+    });
+    socket.on('bad', function(d_ko, d_ok, l_lnk) {
+    	console.log("BADOUNET : ", d_ko, " , ", d_ok);
+    	
+
+    });
+    socket.on('json_completed', function(){
+    	console.log("jason completed");
+    });
+    socket.on('all_completed', function(){
+    	console.log("tout est ok");
+    });
+
+
+
+});
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+<div style="text-align:center"><H1><font >PARAMETRAGE COMMISSION</font></H1></div>
+<div id="dvMiddle" class="row">
+<H3><font style="margin-left:30px">Répartition actuelle</font></H3>
+    <div id="rowAchats" class="col-md-4" style="margin-left:100px;margin-top:20px;">
+        <table id="tblCurCom" class="order-column" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Quantité</th>
+                    <th>Tx Comm</th>
+                    <th>Rayons</th>
+                    <th>Actions</th>
+                </tr>
+            
+            </thead>
+        </table>
+    </div>
+</div>
+
+</body>

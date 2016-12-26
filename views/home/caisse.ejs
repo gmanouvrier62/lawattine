@@ -45,11 +45,18 @@ $(function(){
     currentIdClient = fCommande.client.id;
    
     for(var f = 0; f < fCommande.produits.length; f++) {
-      AjouterUneLigne(fCommande.produits[f]);
+      if (fCommande.status == "Livrée") {
+        console.log('livré');
+        //AjouterUneLigneHistoric(fCommande.produits[f], fCommande);
+        //voir pour afficher depuis le nanani historic
+        AjouterUneLigne(fCommande.produits[f], fCommande.status);
+      } else {
+        AjouterUneLigne(fCommande.produits[f], fCommande.status);
+      }
     }          
   }
 
-  function AjouterUneLigne(obj) {
+  function AjouterUneLigne(obj,state) {
      var produit_ligne = "<tr class='rawContent' data-id='" +  obj.index_ligne + "'>";
           produit_ligne += "<td class='rayon_pr'>" +  obj.rayon  + "</td>";
           produit_ligne += "<td class='ref_pr'>" +  obj.ref_interne  + "</td>";
@@ -58,10 +65,15 @@ $(function(){
           produit_ligne += "<td class='prqte'>" +   obj.qte   + "</td>";
           produit_ligne += "<td class='pu_pr'>" +  obj.pu  + "</td>";
           produit_ligne += "<td class='prix_ttc'>" +  obj.ttc   + "</td>";
-          produit_ligne += "<td><button class='btn btn-danger action-suppr'>-</button></td>";
+          if(state != "Livrée") {
+            produit_ligne += "<td><button class='btn btn-danger action-suppr'>-</button></td>";
+          } else {
+             produit_ligne += "<td></td>";
+          }
           produit_ligne += "</tr>";
      $(produit_ligne).appendTo($("#tblCommande").find('tbody:last'));
   }
+  
   var currentIdClient = 0;
   PNotify.prototype.options.styling = "jqueryui";
   //init des box
@@ -139,6 +151,7 @@ $(function(){
     if(currentIdClient > 0) {
       $("#slClient").val(currentIdClient);
       rechercheClient(currentIdClient);
+      
     }
       $("#slClient").change(function() {
       	currentClient = $(this).val();
@@ -274,7 +287,7 @@ $(function(){
 </script>
 </head>
 <body>
-
+ <% if (!this.status_com) { this.status_com = 1;} %>
 <div id="dvHeader" class="row">
 <%- menu%>
 </div>
@@ -299,7 +312,9 @@ $(function(){
 <div id="dvMiddle" class="row">
  
  <div class="col-md-10 arrondi-commande" style="margin-bottom:0px"><br>
+ <% if (status_com != "Livrée" && status_com != "4") { %>
  <button id="firstP" class="btn btn-success action-newL" value="">Ajouter +</button>
+ <%}%>
   <table id="tblCommande" class="order-column" cellspacing="0" width="100%">
     <thead>
         <tr>
@@ -333,9 +348,15 @@ $(function(){
     </ul>
   </div>
   <div style="float:left;">
-    <font id="marchandise">Marchandises</font><font id='ttlMarchandises' style="margin-right:20px"></font><button title="Chèque" data-paiement="chèque" class="btn btn-warning validation"><i class="fa fa-dedent"></i></button>
+    <font id="marchandise">Marchandises</font><font id='ttlMarchandises' style="margin-right:20px"></font>
+   
+    
+    <% if (status_com != "Livrée" && status_com != "4") { %> 
+    <button title="Chèque" data-paiement="chèque" class="btn btn-warning validation"><i class="fa fa-dedent"></i></button>
     <button title="Espèces" data-paiement="espèce" class="btn btn-warning validation"><i class="fa fa-eur"></i></button>
-    <button title="Carte" data-paiement="cb" class="btn btn-warning validation"><i class="fa fa-cc-visa"></i></button><br>
+    <button title="Carte" data-paiement="cb" class="btn btn-warning validation"><i class="fa fa-cc-visa"></i></button>
+    <% } %>
+    <br>
     <div class="arrondi-plein-net"><b>Net à payer</b><font id="cmdNet" class="txt50"></font></div>
   </div>
 </div>  

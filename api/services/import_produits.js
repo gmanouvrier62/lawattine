@@ -8,7 +8,7 @@ var Entities = require('html-entities').XmlEntities;
 var Immutable = require('immutable');
 var mkdirp = require('mkdirp');
 var logger = require('../services/logger.init.js').logger("tom.txt");
-var rep_base = "/var/leclerc/";
+var rep_base = sails.config.importProductsFolder;
 
 module.exports = function(callback){
 
@@ -83,7 +83,7 @@ module.exports = function(callback){
 			  	if(results == null || results == undefined) {
 			  		//C'est une création
 					//logger.util("prd : ", prd);
-
+					
 					sails.models.produits.findOrCreate(prd,prd).exec(function creaStat(err,created){
 						if (err !== null && err !== undefined) {
 						 	logger.warn("il y aurait une err : ", err);
@@ -95,6 +95,7 @@ module.exports = function(callback){
 					});
 			  	} else {
 			  		//C'est un update
+			  		delete prd.icone;//Je ne prends pas en compte les images 
 			  		var datasInitial = {ref_externe: prd.ref_externe};
 			  		sails.models.produits.update(datasInitial,prd).exec(function creaStat(err,updated){
 						
