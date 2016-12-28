@@ -50,6 +50,16 @@ module.exports = {
       }
     });
   },
+  getRayonFromCom: function(txCom, callback) {
+    var sql = " select t.nom as rayon from produits p inner join typesproduits t on p.type=t.id where tx_com=" + tx_com;
+    this.query(sql, function(err, resultat) {
+      if(err !== null && err !== undefined) {
+        callback(err, null);
+      } else {
+        callback(null, "OK");
+      }
+    });
+  },
   getAllCrit: function(crit, callback) {
     var tbCrit = [];
     if (crit.nom !== null && crit.nom !== undefined) {

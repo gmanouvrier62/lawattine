@@ -45,6 +45,7 @@ module.exports.routes = {
   '/produits/prepare_import_json': 'ProduitsController.prepare_import_json',
   '/produits/import_rayon_json/:id': 'ProduitsController.import_rayon_json',
   '/produits/marge':        'ProduitsController.marge',
+  '/produits/repartition_com':  'ProduitsController.repartition_com',
   '/clients':               'ClientsController.home',
   '/clients/getAll':        'ClientsController.getAll',
   '/clients/getAllJson':        'ClientsController.getAllJson',

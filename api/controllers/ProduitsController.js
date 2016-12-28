@@ -71,6 +71,30 @@ module.exports = {
 		
 
 	},
+	repartition_com: function(req, res) {
+		var sql = "select count(*) as ttl, tx_com from produits group by tx_com";
+		sails.models.produits.query(sql, function(err, results){
+			if (err !== null & err !== undefined) {
+				var objResult = {"data": []};
+				var cpt = 0;
+				results.map(function(obj,idx) {
+					var tb = [];
+					tb.push(obj.ttl);
+					tb.push(obj.tx_com);
+					sails.model.produits.getRayonFromCom(obj.tx_com, function(err, retour) {
+						if(err !== null && err !== undefined) return res.send(null);
+						logger.util(objResult);
+						if(cpt == results.length)
+							return res.send(objResult);
+						cpt++;
+					})
+				});
+				
+			} else {
+				return res.send("");
+			}
+		});
+	},
 	getAllCrit: function(req, res) {
 		sails.models.produits.getAllCrit({'nom': req.params.nom}, function(err,results) {
 			if (results !== null) {
