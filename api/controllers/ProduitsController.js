@@ -51,6 +51,13 @@ module.exports = {
 		});
 		
 	},
+	apply_com: function(req, res) {
+		sails.models.produits.majFromCom(function(err, results) {
+
+			res.send("OK");
+		});
+
+	},
 	import: function (req, res) {
 		
 		//importProduits(function(result) {

@@ -86,6 +86,31 @@ module.exports = {
     } else {
       callback(null,result);
     }
+  },
+  majFromCom: function(callback) {
+    var apply = function calculPV(ht,txCom,tva) {
+        ht = parseFloat(ht);
+        txCom = parseFloat(txCom);
+        tva = parseFloat(tva);
+
+        var tt1 = ht +( (txCom*ht)/100 );
+        var resultat = tt1 + ((tt1*tva)/100);
+       
+        return Math.round(resultat *100)/100;
+    }
+
+    this.find().exec(function(err,prds) {
+      if(err !== null && err !== undefined) return callback(err, null);
+      for(var c = 0; c < prds.length;c++) {
+        logger.warn("id: ", prds[c].id, " vente actu : ", prds[c].ttc_vente, " recalc : ", apply(prds[c].pht, prds[c].tx_com, prds[c].tva));
+
+      }
+      callback(null, "OK");
+    });
+
+
+
+
   }
 };
 

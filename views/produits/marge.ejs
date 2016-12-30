@@ -14,7 +14,7 @@
  <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
  <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
-<script src="http://momentjs.com/downloads/moment.min.js"></script>
+
  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery.knob.min.js"></script>
  <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>   
@@ -24,6 +24,8 @@
 <script>
 $(function(){
     var id_rp = 0;
+    var inclusion = false;
+    var tbRanges = new Array();
     $("#dv_rayon").hide();
     $('#tblRayon tr:nth-child(even)').addClass('ligne1');
     $('#tblRayon tr:nth-child(odd)').addClass('ligne2');
@@ -105,7 +107,7 @@ function selPrct() {
 }
 function addRulePrice(obj, idx) {
 
-    $(obj).prepend(RangeBar({
+     tbRanges.push($(obj).prepend(RangeBar({
       min: 0, // value at start of bar
       max: 40, // value at end of bar
       valueFormat: function(a) {return parseInt(a);}, // formats a value on the bar for output
@@ -116,7 +118,7 @@ function addRulePrice(obj, idx) {
         ]
       ],
       label: function(a) {
-        var label = "De " + a[0] + " à " + a[1] + " €";
+        var label = "De <font class='pMin'>" + a[0] + "</font> à <font class='pMax'>" + a[1] + "</font> €";
         $("#lbl_" + idx).html(label);
         return ". De " + a[0] + " à " + a[1] + " €";
 
@@ -131,15 +133,15 @@ function addRulePrice(obj, idx) {
     }).on('change', function(ev, ranges, changed) {
       console.log(changed);
       $('pre.changing').after($('<pre>').html('changed'+JSON.stringify(ranges,null,2)));
-    }).$el);
+    }).$el));
 
 }
 
     $('body').on('click', 'button.action-newRulePrice', function(){
        
         $("#rule_price_empty").hide();
-         $("#rule_price").append("<tr><td><font id='lbl_" + id_rp + "' class='lblRange'></font></td><td class='lblRange'>Taux de com = " + selPrct()  +" %</td><td style='text-align:right'><button class='btn btn-danger action-del'>X</button></td></tr>");
-        $("#rule_price").append("<tr><td colspan='3'><div id='rp_" + id_rp + "'></div></td></tr>");
+         $("#rule_price").append("<tr class='rowRange'><td><font id='lbl_" + id_rp + "' class='lblRange'></font></td><td class='lblRanges'>Taux de com = " + selPrct()  +" %</td><td style='text-align:right'><button class='btn btn-danger action-del'>X</button></td></tr>");
+        $("#rule_price").append("<tr><td colspan='3'><div id='rp_" + id_rp + "' class='range'></div></td></tr>");
         addRulePrice($("#rp_" + id_rp), id_rp);
 
         id_rp ++;
@@ -152,19 +154,44 @@ function addRulePrice(obj, idx) {
        curTRNext.hide();
 
     });
-     $('body').on('click', 'button.action-newRuleRayon', function(){
+    $('body').on('click', 'button.action-newRuleRayon', function(){
          if($("#dv_rayon").is(":visible")) {
             $("#rule_rayon_empty").show();
             $("#dv_rayon").hide();
             $("#addRuleRayon").html("Ajouter +");
-
+            inclusion = false;
          } else {
              $("#rule_rayon_empty").hide();
              $("#dv_rayon").show();
              $("#addRuleRayon").html("Pas de règle rayon");
+             inclusion = true;
          }
         
-     });
+    });
+    $('body').on('click', 'button.action-appliquer', function(){
+        //On va appliquer les nouveaux prix basés sur les nouveaux tx_com
+        tbRanges = Array();
+        tbRayons = Array();
+        $(".rowRange").each(function(){
+            var p_min = $(this).find(".pMin").html();
+            var p_max = $(this).find(".pMax").html();
+            var tx_c = $(this).find("select").val();
+            console.log("de ", p_min, " à ", p_max, " ", tx_c);
+            var cRange = {'min': p_min, 'max': p_max, 'tx': tx_c};
+            tbRanges.push(cRange);
+        });
+        if(inclusion) {
+            console.log('ok inclision');
+            //Prendre en compte les rayons
+            $("input[type='checkbox']:checked").each(function(){
+                 tbRayons.push($(this).data('id'));
+
+            });
+        } 
+        var dataToSend = {'ranges': tbRanges, 'rayons': tbRayons};
+        
+    });
+        
 });
 </script>
 </head>
