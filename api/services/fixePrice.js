@@ -35,7 +35,7 @@ module.exports = function(commande, callback){
 		    tx_tva: currP.tx_tva,
 		    tva: currP.tva,
 		    ttl_tva: currP.ttl_tva,
-		    totale_commande: commande.totale_commande,
+		    ttl_commande: commande.total_commande,
 		    nb_articles: commande.ttlArticles,
 		    createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
 		    updatedAt: moment().format("YYYY-MM-DD HH:mm:ss"),

@@ -94,48 +94,51 @@ module.exports = {
         if (err !== null && err !== undefined)  return callback("pb de récupération des produits d'une commande", null);
         if (commandes == null || commandes == undefined) return callback("La commande est vide", null);     
         logger.warn("remplissage des produits : ", commandes.length);
-        var ttlArticles = 0;
-        for(var c = 0; c < commandes.length; c++) { 
-          fullCommande.id = commandes[0].id_commande;
-          fullCommande.status = commandes[0].nom_status;
-          fullCommande.dt_livraison = commandes[0].dt_livraison;
-          fullCommande.paiement = commandes[0].paiement;
-          var produit = {};
-          produit.index_ligne = commandes[c].id_cmd_pr;
-          produit.id = commandes[c].id_produit;
-          produit.nom = commandes[c].nom;
-          produit.qte = commandes[c].qte;
-          produit.qte_ok = 0;
-          ttlArticles += produit.qte;
-          produit.pu = commandes[c].pu;
-          produit.achat_ttc = commandes[c].achat_ttc;
-          produit.ttc = parseInt((commandes[c].pu * produit.qte) * 100)/100;
-          produit.ref_interne = commandes[c].ref_interne;
-          produit.ref_externe = commandes[c].ref_externe;
-          produit.icone = commandes[c].icone;
-          produit.rayon = commandes[c].rayon;
-          produit.idr = commandes[c].idr;
-          produit.pht = commandes[c].pht;
-          //produit.ttl_ht = parseInt((produit.pht * produit.qte) * 100) / 100;
-          produit.ttl_ht = commandes[c].ttl_ht;
-          produit.tx_com = commandes[c].tx_com;
-          //produit.commission = parseInt((produit.pht * produit.tx_com)) / 100; //Comm unitaire
-          produit.commission = commandes[c].commission;
-          //produit.ttl_com = parseInt((produit.commission * produit.qte) * 100) / 100;//Comm totale
-          produit.ttl_com = commandes[c].ttl_com;
-          produit.tx_tva = commandes[c].tx_tva;
-          //produit.tva = parseInt(produit.pht * (produit.tx_tva / 100) * 100 )/100;
-          produit.tva = commandes[c].tva;
-          //produit.ttl_tva = parseInt(produit.tva * produit.qte * 100)/100;
-          produit.ttl_tva = commandes[c].ttl_tva;
+        if(commandes.length > 0) {
+          var ttlArticles = 0;
+          for(var c = 0; c < commandes.length; c++) { 
+            fullCommande.id = commandes[0].id_commande;
+            fullCommande.status = commandes[0].nom_status;
+            fullCommande.dt_livraison = commandes[0].dt_livraison;
+            fullCommande.paiement = commandes[0].paiement;
+            var produit = {};
+            produit.index_ligne = commandes[c].id_cmd_pr;
+            produit.id = commandes[c].id_produit;
+            produit.nom = commandes[c].nom;
+            produit.qte = commandes[c].qte;
+            produit.qte_ok = 0;
+            ttlArticles += produit.qte;
+            produit.pu = commandes[c].pu;
+            produit.achat_ttc = commandes[c].achat_ttc;
+            produit.ttc = parseInt((commandes[c].pu * produit.qte) * 100)/100;
+            produit.ref_interne = commandes[c].ref_interne;
+            produit.ref_externe = commandes[c].ref_externe;
+            produit.icone = commandes[c].icone;
+            produit.rayon = commandes[c].rayon;
+            produit.idr = commandes[c].idr;
+            produit.pht = commandes[c].pht;
+            //produit.ttl_ht = parseInt((produit.pht * produit.qte) * 100) / 100;
+            produit.ttl_ht = commandes[c].ttl_ht;
+            produit.tx_com = commandes[c].tx_com;
+            //produit.commission = parseInt((produit.pht * produit.tx_com)) / 100; //Comm unitaire
+            produit.commission = commandes[c].commission;
+            //produit.ttl_com = parseInt((produit.commission * produit.qte) * 100) / 100;//Comm totale
+            produit.ttl_com = commandes[c].ttl_com;
+            produit.tx_tva = commandes[c].tx_tva;
+            //produit.tva = parseInt(produit.pht * (produit.tx_tva / 100) * 100 )/100;
+            produit.tva = commandes[c].tva;
+            //produit.ttl_tva = parseInt(produit.tva * produit.qte * 100)/100;
+            produit.ttl_tva = commandes[c].ttl_tva;
 
 
 
-          fullCommande.produits.push(produit);
+            fullCommande.produits.push(produit);
+          }
+          fullCommande.ttlArticles = ttlArticles;
+          logger.util(commandes[0]);
+          fullCommande.total_commande = commandes[0].total_commande;
+          logger.warn('ready to back histo');
         }
-        fullCommande.ttlArticles = ttlArticles;
-        fullCommande.total_commande = commandes[0].total_commande;
-        logger.warn('ready to back histo');
         callback(null,fullCommande);
       });
 

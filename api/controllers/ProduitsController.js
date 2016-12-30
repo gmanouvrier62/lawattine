@@ -30,10 +30,26 @@ module.exports = {
 		return res.render ('produits/produits_list',{'action': 'produits', 'menu': menu, 'memoType':letype});
 	},
 	marge: function(req, res) {
+		sql = "select distinct cl.nom nom, dt_livraison, ttl_commande, c.id idc from historique h inner join commandes c on h.id_commande=c.id ";
+		sql += " inner join clients cl on cl.id=c.id_client where c.status=4 order by c.dt_livraison desc limit 5";
+		logger.warn("sql : ", sql);
+		sails.models.historique.query(sql, function(errh, histos){
+			if(errh !== null && errh !== undefined) {
+				logger.error("Erreur de récupérations d'historiques");
+			}
+			for(var c = 0; c < histos.length; c++)
+				histos[c].dt_livraison = moment(histos[c].dt_livraison).format("DD-MM-YYYY");
+			sails.models.typesproduits.getAll(function(err,results) {
+				if (err !== null && err !== undefined) {
+					logger.error("Erreur de récupération des rayons");
+				}
 
+				var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+				return res.render ('produits/marge',{'action': 'marge', 'rayons': results,'commandes':histos, 'menu': menu});
 
-		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
-		return res.render ('produits/marge',{'action': 'marge', 'menu': menu});
+			});
+		});
+		
 	},
 	import: function (req, res) {
 		
@@ -72,26 +88,38 @@ module.exports = {
 
 	},
 	repartition_com: function(req, res) {
+		logger.warn('DANS REPARTITION');
 		var sql = "select count(*) as ttl, tx_com from produits group by tx_com";
 		sails.models.produits.query(sql, function(err, results){
 			if (err !== null & err !== undefined) {
+				logger.error(err);
+				return res.send("");
+				
+			} else {
 				var objResult = {"data": []};
 				var cpt = 0;
 				results.map(function(obj,idx) {
 					var tb = [];
 					tb.push(obj.ttl);
 					tb.push(obj.tx_com);
-					sails.model.produits.getRayonFromCom(obj.tx_com, function(err, retour) {
-						if(err !== null && err !== undefined) return res.send(null);
-						logger.util(objResult);
-						if(cpt == results.length)
+					objResult.data.push(tb);
+					/*
+					sails.models.produits.getRayonFromCom(obj.tx_com, tb, function(err, retour) {
+						if(err !== null && err !== undefined) {
+							logger.error("erreur : ", err);
+							return res.send(null);
+						} 
+						logger.util(" obj result : ", retour);
+						objResult.data.push(retour);
+						if(idx == results.length -1){
+							logger.warn("va retourner le resultat");
 							return res.send(objResult);
+						}
 						cpt++;
-					})
+					});
+					*/
 				});
-				
-			} else {
-				return res.send("");
+				return res.send(objResult);
 			}
 		});
 	},

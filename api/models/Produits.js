@@ -50,13 +50,18 @@ module.exports = {
       }
     });
   },
-  getRayonFromCom: function(txCom, callback) {
-    var sql = " select t.nom as rayon from produits p inner join typesproduits t on p.type=t.id where tx_com=" + tx_com;
+  getRayonFromCom: function(txCom,tb,  callback) {
+    var sql = " select t.nom as rayon from produits p inner join typesproduits t on p.id_type=t.id where tx_com=" + txCom;
     this.query(sql, function(err, resultat) {
       if(err !== null && err !== undefined) {
         callback(err, null);
       } else {
-        callback(null, "OK");
+        var les_rayons = [];
+        for(var c = 0 ; c < resultat.length; c++) {
+          les_rayons.push(resultat[c].rayon);
+        }
+        tb.push(les_rayons);
+        callback(null, tb);
       }
     });
   },

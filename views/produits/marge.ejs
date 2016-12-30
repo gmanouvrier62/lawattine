@@ -7,18 +7,31 @@
 <link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
 <link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">  
+ <link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
+ <link rel="stylesheet" type="text/css" href="/js/dependencies/Elessar-master/elessar.css">
  <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
  <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
  <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
- 
+<script src="http://momentjs.com/downloads/moment.min.js"></script>
  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery.knob.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>   
+<script src="/js/dependencies/Elessar-master/dist/elessar.min.js"></script>
+
 <script src="http://localhost:1112/socket.io/socket.io.js"></script>
 <script>
 $(function(){
-	PNotify.prototype.options.styling = "jqueryui";
+    var id_rp = 0;
+    $("#dv_rayon").hide();
+    $('#tblRayon tr:nth-child(even)').addClass('ligne1');
+    $('#tblRayon tr:nth-child(odd)').addClass('ligne2');
+	
+    $('#tblHisto tr:nth-child(even)').addClass('ligne1');
+    $('#tblHisto tr:nth-child(odd)').addClass('ligne2');
+    
+    PNotify.prototype.options.styling = "jqueryui";
 	//
     var tableAchats = $('#tblCurCom').DataTable( {
         "columnDefs": [
@@ -37,21 +50,15 @@ $(function(){
             },
             {
                 "render": function ( data, type, row ) {
-                    var html = row[2];
+                     var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir les rayons" data-id_rayon="' + row[1] + '"><i class="fa fa-eye"></i></button>';
                     
                     return html;
                 },
                 "targets": 2
             },
-            {
-                "render": function ( data, type, row ) {
-                    //ttl ttc
-                    return "bitonios";
-                },
-                "targets": 3
-            },
-            { "className": "col_xxl", "targets": [ 1 ] },
-            { "className": "col_xl", "targets": [ 8 ] }
+            { "className": "col_xxl", "targets": [ 2 ] },
+            { "className": "tbl_content", "targets": [ 0 ] },
+            { "className": "tbl_content", "targets": [ 1 ] }           
         ],
         "oLanguage": {"sZeroRecords": "", "sEmptyTable": "<b>Pas de produits achetés</b>"},
         "processing": false,
@@ -68,7 +75,8 @@ $(function(){
     });
 	
     //
-	var socket = window.io.connect("//localhost:1112").on('welcome', function(data) {
+	/*
+    var socket = window.io.connect("//localhost:1112").on('welcome', function(data) {
         //alert(data);
         console.log("connected");
         //socket.emit('i am client', {data: 'foo!'});
@@ -88,9 +96,75 @@ $(function(){
     socket.on('all_completed', function(){
     	console.log("tout est ok");
     });
+*/
+function selPrct() {
+    var ct = "<select>";
+    for(var pp = 10; pp <=100 ; pp++) ct+="<option value='" + pp + "'>" + pp + "</option>";
+    ct += "</select>";
+    return ct;
+}
+function addRulePrice(obj, idx) {
 
+    $(obj).prepend(RangeBar({
+      min: 0, // value at start of bar
+      max: 40, // value at end of bar
+      valueFormat: function(a) {return parseInt(a);}, // formats a value on the bar for output
+      valueParse: function(a) {return parseInt(a);}, // parses an output value for the bar
+      values: [ 
+        [
+          1,10
+        ]
+      ],
+      label: function(a) {
+        var label = "De " + a[0] + " à " + a[1] + " €";
+        $("#lbl_" + idx).html(label);
+        return ". De " + a[0] + " à " + a[1] + " €";
 
+      },
+      snap: 1,   
+      minSize:1,
+      bgLabels: 5,
+      maxRanges: 1
+    }).on('changing', function(ev, ranges, changed) {
+      console.log(changed);
+      $('pre.changing').html(JSON.stringify(ranges,null,2));
+    }).on('change', function(ev, ranges, changed) {
+      console.log(changed);
+      $('pre.changing').after($('<pre>').html('changed'+JSON.stringify(ranges,null,2)));
+    }).$el);
 
+}
+
+    $('body').on('click', 'button.action-newRulePrice', function(){
+       
+        $("#rule_price_empty").hide();
+         $("#rule_price").append("<tr><td><font id='lbl_" + id_rp + "' class='lblRange'></font></td><td class='lblRange'>Taux de com = " + selPrct()  +" %</td><td style='text-align:right'><button class='btn btn-danger action-del'>X</button></td></tr>");
+        $("#rule_price").append("<tr><td colspan='3'><div id='rp_" + id_rp + "'></div></td></tr>");
+        addRulePrice($("#rp_" + id_rp), id_rp);
+
+        id_rp ++;
+    });
+    $('body').on('click', 'button.action-del', function(){
+       
+       var curTR = $(this).parent().parent();
+       var curTRNext = curTR.next();
+       curTR.hide();
+       curTRNext.hide();
+
+    });
+     $('body').on('click', 'button.action-newRuleRayon', function(){
+         if($("#dv_rayon").is(":visible")) {
+            $("#rule_rayon_empty").show();
+            $("#dv_rayon").hide();
+            $("#addRuleRayon").html("Ajouter +");
+
+         } else {
+             $("#rule_rayon_empty").hide();
+             $("#dv_rayon").show();
+             $("#addRuleRayon").html("Pas de règle rayon");
+         }
+        
+     });
 });
 </script>
 </head>
@@ -98,22 +172,80 @@ $(function(){
 <div id="dvHeader" class="row">
 <%- menu %>
 </div>
-<div style="text-align:center"><H1><font >PARAMETRAGE COMMISSION</font></H1></div>
+<div style="text-align:center"><H1><font >PARAMETRAGE COMMISSION</font><button id="appliquer" class="btn btn-danger action-appliquer" value="" style="margin-left:20px">Appliquer</button>
+</H1></div>
 <div id="dvMiddle" class="row">
-<H3><font style="margin-left:30px">Répartition actuelle</font></H3>
-    <div id="rowAchats" class="col-md-4" style="margin-left:100px;margin-top:20px;">
-        <table id="tblCurCom" class="order-column" cellspacing="0" width="100%">
+    <H4><font style="margin-left:30px">Répartition actuelle</font></H4>
+    <div id="rowAchats" class="col-md-4" style="margin-left:80px;margin-top:10px;">
+        <table id="tblCurCom" class="order-column" cellspacing="0" width="80%">
             <thead>
-                <tr>
+                <tr style="font-size:10px">
                     <th>Quantité</th>
                     <th>Tx Comm</th>
                     <th>Rayons</th>
-                    <th>Actions</th>
+                    
                 </tr>
             
             </thead>
         </table>
     </div>
+    <div id="rowAchats" class="col-md-6" style="border:1px solid black">
+    <font>Simulation de pricing sur les 5 dernières commandes</font><br>
+    <table id="tblHisto" style="width:100%">
+        <tr style="font-size:14px;background-color:#F9D234"><td>Commande</td><td>Total payé</td><td>Total simulé</td></tr>
+        <% for (var d = 0; d < commandes.length; d++) { %>
+            <tr><td><%=commandes[d].nom%>(<%=commandes[d].dt_livraison%>)</td><td><%=commandes[d].ttl_commande%></td><td data-id="<%=commandes[d].idc%>"></td></tr>
+
+        <% } %>
+
+
+
+
+    </table>
+    </div>
+</div>
+<div id="dvMiddle" class="row">
+    <H4><font style="margin-left:30px">Ajouter une règle de limite de prix</font><button id="addRulePrice" class="btn btn-success action-newRulePrice" value="" style="margin-left:20px">Ajouter +</button></H4>
+    <div id="rowAchats" class="col-md-12" style="margin-left:100px;margin-top:10px;">
+        <table id="rule_price" style="width:800px;">
+            <tr id="rule_price_empty"><td colspan="3">Pas de règles</td></tr>   
+        </table>
+    </div>
 </div>
 
+<div id="dvMiddle" class="row">
+    <H4><font style="margin-left:30px">Ajouter une règle de Rayon</font><button id="addRuleRayon" class="btn btn-success action-newRuleRayon" value="" style="margin-left:20px">Ajouter +</button></H4>
+    <div id="rowAchats" class="col-md-12" style="margin-left:100px;margin-top:10px;">
+        <font id="rule_rayon_empty">Pas de règle</font>
+        <div id="dv_rayon">
+        <table id="tblRayon">
+            <thead>
+                <tr style="font-size:14px;background-color:#F9D234">
+                    <th>Rayon</th>
+                    <th>Choisir</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+                for(var t = 0 ; t < rayons.length; t++) {%>
+                <tr><td><%= rayons[t].nom %></td><td><input type="checkbox" data-id="<%=rayons[t].id%>"></td></tr>
+            <%}%>
+            
+
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+<script>
+
+$('#tblRayon tr').hover( function() {
+        
+       $(this).addClass( 'highlighted' );
+    }, function() {
+        $(this).removeClass('highlighted');
+    } );
+    
+
+</script>
 </body>
