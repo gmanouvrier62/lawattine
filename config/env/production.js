@@ -17,22 +17,29 @@ module.exports = {
    * environment (see config/connections.js and config/models.js )           *
    ***************************************************************************/
 
-  // models: {
-  //   connection: 'someMysqlServer'
-  // },
-
-  /***************************************************************************
-   * Set the port in the production environment to 80                        *
-   ***************************************************************************/
-
-  // port: 80,
-
-  /***************************************************************************
-   * Set the log level in production environment to "silent"                 *
-   ***************************************************************************/
-
-  // log: {
-  //   level: "silent"
-  // }
+  models: {
+     connection: 'someMysqlServer'
+   },
+  port : 900,
+  log: {
+            appenders: [
+                {type: 'console'},
+                {
+                    type: 'dateFile',
+                    filename: '/var/log/lawattine.log',
+                    "pattern": "-yyyy-MM-dd",
+                    "alwaysIncludePattern": true
+                }
+            ],
+            replaceConsole: true,
+            path: '/var/log/lawattine.log'
+        },
+  productImages: "/home/gilles/node/git/caisse/assets/images/uploads/leclerc/",
+  relativProductImages: "/images/uploads/leclerc/",
+  importProductsFolder: "/var/leclerc/",
+  archives: "/var/log/leclerc/",
+  ip_dev: "176.151.197.161",
+  ip_mavad01: "88.178.175.187",
+  ip_master: ""
 
 };

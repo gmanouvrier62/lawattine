@@ -30,8 +30,8 @@ module.exports = {
 		return res.render ('produits/produits_list',{'action': 'produits', 'menu': menu, 'memoType':letype});
 	},
 	marge: function(req, res) {
-		sql = "select distinct cl.nom nom, dt_livraison, ttl_commande, c.id idc from historique h inner join commandes c on h.id_commande=c.id ";
-		sql += " inner join clients cl on cl.id=c.id_client where c.status=4 order by c.dt_livraison desc limit 5";
+		sql = "select distinct cl.nom nom, cl.id id_client,  dt_livraison, ttl_commande, c.id idc from historique h inner join commandes c on h.id_commande=c.id ";
+		sql += " inner join clients cl on cl.id=c.id_client where c.status=4 order by c.dt_livraison desc limit 7";
 		logger.warn("sql : ", sql);
 		sails.models.historique.query(sql, function(errh, histos){
 			if(errh !== null && errh !== undefined) {
@@ -52,11 +52,13 @@ module.exports = {
 		
 	},
 	apply_com: function(req, res) {
-		sails.models.produits.majFromCom(function(err, results) {
-
-			res.send("OK");
-		});
-
+		if(req.body.datas !== null && req.body.datas !== undefined) {
+			sails.models.produits.majFromCom(req.body.datas, function(err, results) {
+				res.send(results);
+			});
+		} else {
+			res.send("Aucunes mise à jour, pas de critères établis");
+		}
 	},
 	import: function (req, res) {
 		

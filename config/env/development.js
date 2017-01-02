@@ -39,8 +39,9 @@ module.exports = {
   importProductsFolder: "/var/leclerc/",
   archives: "/var/log/leclerc/",
   ip_dev: "176.151.197.161",
-  ip_mavad01: "",
+  ip_mavad01: "88.178.175.187",
   ip_master: ""
+
 
 
 };

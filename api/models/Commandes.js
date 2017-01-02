@@ -146,6 +146,7 @@ module.exports = {
 
 
   },
+  
   getOneFullCommande: function(id_commande, id_client, callback) {
   	//Préparation de l'objet de retour
   	var fullCommande = {

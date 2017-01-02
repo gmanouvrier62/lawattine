@@ -64,6 +64,7 @@ module.exports.routes = {
   '/commandes/valider':              'CommandesController.valider',
   '/commandes/retirer_produit':      'CommandesController.retirer_produit',
   '/commandes/load/:id/client/:id_client':              'CommandesController.load',
+  '/commandes/get/:id/client/:id_client' :              'CommandesController.getCommandeById',
   '/commandes/histo/:id/client/:id_client':     "CommandesController.load_history", 
   '/achats':                        'AchatsController.home',
   '/achats/achat_todo':             'AchatsController.achat_todo',

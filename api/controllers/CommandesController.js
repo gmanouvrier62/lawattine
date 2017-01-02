@@ -44,6 +44,28 @@ module.exports = {
 		});
 		
 	},
+	getCommandeById: function(req, res) {
+		logger.warn(sails.config.appPath);
+		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+		//chargement d'une commande en vue d'un affichage
+		var idCmd = 0;
+		if (req.params.id !== null && req.params.id !== undefined) {
+			idCmd = req.params.id;
+		}
+		var id_client = 0;
+		if (req.params.id_client !== null && req.params.id_client !== undefined) {
+			id_client = req.params.id_client;
+		}
+		sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
+			if (err !== null && err !== undefined) {
+				logger.error(err);
+				return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
+			}
+			logger.util(fCom);
+			//Je renvoie directement l'objet commande complet
+			return res.send(fCom);
+		});
+	},
 	load_history: function (req, res) {
 		logger.warn(sails.config.appPath);
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
@@ -106,8 +128,8 @@ module.exports = {
 			if(err !== null && err !== undefined) return res.send({"data": null, "err":err});
 			logger.error(err);
 			return res.send({
-							  'data': results,
-							  'err': null
+			  'data': results,
+			  'err': null
 			});
 		});
 	},
@@ -119,6 +141,7 @@ module.exports = {
 			var objResult = {"data": []};
 			objResult.data = retour;
 			//return res.send({'err': null,'commandes': retour});
+			logger.util("avant retour ", objResult);
 			return res.send(objResult);
 		});
 	},
