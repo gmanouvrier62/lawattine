@@ -99,10 +99,10 @@ module.exports = {
         criteres.rayons = [];
       }
       if(criteres.rayons.length > 0) {
-        sql = "update produits set tx_com = " + tx + ", ttc_vente = pht * ( 1 +" + tx + " /100 ) * ( 1 + tva /100 )";
+        sql = "update produits set tx_com = " + tx + ", ttc_vente = ROUND(pht * ( 1 +" + tx + " /100 ) * ( 1 + tva /100 ),2)";
         sql +=" where id_type in(" + criteres.rayons.join(",") + ") and pht >=" + min + " and pht<=" + max;
       } else {
-        sql = "update produits set tx_com = " + tx + ", ttc_vente = pht * ( 1 +" + tx + " /100 ) * ( 1 + tva /100 )";
+        sql = "update produits set tx_com = " + tx + ", ttc_vente = ROUND(pht * ( 1 +" + tx + " /100 ) * ( 1 + tva /100 ),2)";
         sql+= " where pht >=" + min + " and pht<=" + max;
       }
       logger.warn(sql);
