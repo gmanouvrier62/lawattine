@@ -69,7 +69,8 @@ module.exports.routes = {
   '/achats':                        'AchatsController.home',
   '/achats/achat_todo':             'AchatsController.achat_todo',
   '/stocks':                        'StocksController.home',
-  '/stats/ventes':             'StatsController.home',
+  '/stats/ventes/:periode':             'StatsController.home',
+  '/stats/ventes/:periode/:debut/:fin':  'StatsController.home',
   '/stats/ventes_jour':        'StatsController.ventes_jour' 
   
   /***************************************************************************

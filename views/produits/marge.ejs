@@ -101,46 +101,44 @@ $(function(){
     	console.log("tout est ok");
     });
 */
-function selPrct() {
-    var ct = "<select>";
-    for(var pp = 10; pp <=100 ; pp++) ct+="<option value='" + pp + "'>" + pp + "</option>";
-    ct += "</select>";
-    return ct;
-}
-function addRulePrice(obj, idx) {
+    function selPrct() {
+        var ct = "<select>";
+        for(var pp = 10; pp <=100 ; pp++) ct+="<option value='" + pp + "'>" + pp + "</option>";
+        ct += "</select>";
+        return ct;
+    }
+    function addRulePrice(obj, idx) {
 
-     tbRanges.push($(obj).prepend(RangeBar({
-      min: 0, // value at start of bar
-      max: 40, // value at end of bar
-      valueFormat: function(a) {return parseInt(a);}, // formats a value on the bar for output
-      valueParse: function(a) {return parseInt(a);}, // parses an output value for the bar
-      values: [ 
-        [
-          1,10
-        ]
-      ],
-      label: function(a) {
-        var label = "De <font class='pMin'>" + a[0] + "</font> à <font class='pMax'>" + a[1] + "</font> €";
-        $("#lbl_" + idx).html(label);
-        return ". De " + a[0] + " à " + a[1] + " €";
+         tbRanges.push($(obj).prepend(RangeBar({
+          min: 0, // value at start of bar
+          max: 40, // value at end of bar
+          valueFormat: function(a) {return parseInt(a);}, // formats a value on the bar for output
+          valueParse: function(a) {return parseInt(a);}, // parses an output value for the bar
+          values: [ 
+            [
+              1,10
+            ]
+          ],
+          label: function(a) {
+            var label = "De <font class='pMin'>" + a[0] + "</font> à <font class='pMax'>" + a[1] + "</font> €";
+            $("#lbl_" + idx).html(label);
 
-      },
-      snap: 1,   
-      minSize:1,
-      bgLabels: 5,
-      maxRanges: 1
-    }).on('changing', function(ev, ranges, changed) {
-      console.log(changed);
-      $('pre.changing').html(JSON.stringify(ranges,null,2));
-    }).on('change', function(ev, ranges, changed) {
-      console.log(changed);
-      $('pre.changing').after($('<pre>').html('changed'+JSON.stringify(ranges,null,2)));
-    }).$el));
-
-}
+            return ". De " + a[0] + " à " + a[1] + " €";
+          },
+          snap: 1,   
+          minSize:1,
+          bgLabels: 5,
+          maxRanges: 1
+        }).on('changing', function(ev, ranges, changed) {
+          console.log(changed);
+          $('pre.changing').html(JSON.stringify(ranges,null,2));
+        }).on('change', function(ev, ranges, changed) {
+          console.log(changed);
+          $('pre.changing').after($('<pre>').html('changed'+JSON.stringify(ranges,null,2)));
+        }).$el));
+    }
 
     $('body').on('click', 'button.action-newRulePrice', function(){
-       
         $("#rule_price_empty").hide();
          $("#rule_price").append("<tr class='rowRange'><td><font id='lbl_" + id_rp + "' class='lblRange'></font></td><td class='lblRanges'>Taux de com = " + selPrct()  +" %</td><td style='text-align:right'><button class='btn btn-danger action-del'>X</button></td></tr>");
         $("#rule_price").append("<tr><td colspan='3'><div id='rp_" + id_rp + "' class='range'></div></td></tr>");
@@ -148,14 +146,14 @@ function addRulePrice(obj, idx) {
 
         id_rp ++;
     });
+
     $('body').on('click', 'button.action-del', function(){
-       
        var curTR = $(this).parent().parent();
        var curTRNext = curTR.next();
-       curTR.hide();
-       curTRNext.hide();
-
+       curTR.remove();
+       curTRNext.remove();
     });
+
     $('body').on('click', 'button.action-newRuleRayon', function(){
          if($("#dv_rayon").is(":visible")) {
             $("#rule_rayon_empty").show();
@@ -168,17 +166,13 @@ function addRulePrice(obj, idx) {
              $("#addRuleRayon").html("Pas de règle rayon");
              inclusion = true;
          }
-        
     });
     
     $(".rowH").each(function(){
-    
         $(this).click(function() {
             console.log("ee ", $(this).data('id'));
         });  
-        
     });
-    
     
     $('body').on('click', 'button.action-appliquer', function(){
         //On va appliquer les nouveaux prix basés sur les nouveaux tx_com
@@ -188,37 +182,50 @@ function addRulePrice(obj, idx) {
             var p_min = $(this).find(".pMin").html();
             var p_max = $(this).find(".pMax").html();
             var tx_c = $(this).find("select").val();
-            //console.log("de ", p_min, " à ", p_max, " ", tx_c);
             var cRange = {'min': p_min, 'max': p_max, 'tx': tx_c};
             tbRanges.push(cRange);
         });
+
         if(inclusion) {
-            console.log('ok inclision');
             //Prendre en compte les rayons
             $("input[type='checkbox']:checked").each(function(){
                  tbRayons.push($(this).data('id'));
-
             });
         } 
         var dataToSend = {'ranges': tbRanges, 'rayons': tbRayons};
+        console.log(dataToSend);
         $.post("/produits/apply_com/",{'datas': dataToSend}, function(result) {
             //rechargement des nouvelles valeurs
-            //console.log("retour de fct ", result);
+            var title = "";
+            var l_type = "";
+            if(result == 'OK') {
+                title = "Succès";
+                l_type = "succès";
+            } else {
+                title = "Echec";
+                l_type = "error";
+            }
+            var infos = new PNotify({
+                title: title,
+                text: result,
+                type: l_type,
+                desktop: {
+                  desktop: true
+                }
+            }); 
+            console.log("retour : ", result);
             tableAchats.ajax.url('/produits/repartition_com').load();
             $(".prix_sim").each(function() {
                 var id_com = $(this).data('id');
                 var id_client = $(this).data('id_client');
-                //console.log("id courrant : ", id_com);
                 $.get("/commandes/get/" + id_com + "/client/" + id_client,{},function(cmds) {
-                    //console.log("current cmds", cmds);
                     var la_comm = cmds;
-                    //console.log("la commande : ", la_comm.total_commande);
                     $("#cmd_" + la_comm.id).html(la_comm.total_commande);
                 });
             });
         });
     });
-//init de l'affichage des prix simulés
+    //init de l'affichage des prix simulés
     $(".prix_sim").each(function() {
         $(this).parent().find("font").tooltipster();
         
@@ -226,11 +233,8 @@ function addRulePrice(obj, idx) {
         var id_client = $(this).data('id_client');
         var selfSpan = $(this).parent().find("span");
 
-        //console.log("id courrant : ", id_com);
         $.get("/commandes/get/" + id_com + "/client/" + id_client,{},function(cmds) {
-            //console.log("current cmds", cmds);
             var la_comm = cmds;
-            //console.log("la commande : ", la_comm.total_commande);
             $("#cmd_" + la_comm.id).html(la_comm.total_commande);
             var bLi = "";
             for(var c = 0; c < la_comm.produits.length; c++) {
@@ -260,7 +264,6 @@ function addRulePrice(obj, idx) {
                     <th>Rayons</th>
                     
                 </tr>
-            
             </thead>
         </table>
     </div>
@@ -277,17 +280,12 @@ function addRulePrice(obj, idx) {
 
                         </span>
                     </div>
-
                 </td>
                 <td><%=commandes[d].ttl_commande%></td>
                 <td id='cmd_<%=commandes[d].idc%>' data-id='<%=commandes[d].idc%>' data-id_client='<%=commandes[d].id_client%>'class='prix_sim'></td>
                 </tr>
 
         <% } %>
-
-
-
-
     </table>
     </div>
 </div>
@@ -317,27 +315,23 @@ function addRulePrice(obj, idx) {
                 for(var t = 0 ; t < rayons.length; t++) {%>
                 <tr><td><%= rayons[t].nom %></td><td><input type="checkbox" data-id="<%=rayons[t].id%>"></td></tr>
             <%}%>
-            
-
             </tbody>
         </table>
         </div>
     </div>
 </div>
 <script>
-
-$('#tblRayon tr').hover( function() {
-        
-       $(this).addClass( 'highlighted' );
-    }, function() {
-        $(this).removeClass('highlighted');
-    } );
-$('#tblHisto tr').hover( function() {
-        
-       $(this).addClass( 'highlighted' );
-    }, function() {
-        $(this).removeClass('highlighted');
-    } );    
-
+    $('#tblRayon tr').hover( function() {
+            
+           $(this).addClass( 'highlighted' );
+        }, function() {
+            $(this).removeClass('highlighted');
+        } );
+    $('#tblHisto tr').hover( function() {
+            
+           $(this).addClass( 'highlighted' );
+        }, function() {
+            $(this).removeClass('highlighted');
+        } );    
 </script>
 </body>

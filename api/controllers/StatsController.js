@@ -11,11 +11,24 @@ var moment = require("moment");
 
 module.exports = {
 	home: function (req, res) {
-		var tom ="";
+		var debut = moment().format("YYYY-MM-DD");
+		var fin = moment().format("YYYY-MM-DD");
+		var periode = 1;
+
+		if(req.params.debut !== null && req.params.debut !== undefined) {
+			debut = req.params.debut;
+		}
+		if(req.params.fin !== null && req.params.fin !== undefined) {
+			fin = req.params.fin;
+		}
+		if (req.params.periode !== null && req.params.periode !== undefined) {
+			periode = req.params.periode;
+		}
+
 		logger.warn("OK dans le controller stocks");
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 
-		return res.render ('stats/ventes',{'action': 'stats', 'menu': menu});
+		return res.render ('stats/ventes',{'action': 'stats', 'periode': periode, 'd1': debut, 'd2': fin, 'menu': menu});
 	},
 
 	ventes_jour: function (req, res) {

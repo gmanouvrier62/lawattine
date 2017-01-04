@@ -22,27 +22,40 @@
  
 <script>
 
-
 $(function(){
-	$("#dt1").hide();
+	$(".simple_middle").hide();
 	var monthNames = [
 	  "Janvier", "Février", "Mars",
 	  "Avril", "Mai", "Juin", "Juillet",
 	  "Août", "Septembre", "Octobre",
 	  "Novembre", "Decembre"
 	];
-	var currentDate = new Date();
+    //d1
+	var currentDate = new Date('<%=d1%>');
 	var day = currentDate.getDate();
 	var monthIndex = currentDate.getMonth();
 	var year = currentDate.getFullYear();
-	var ladate = day + ' ' + monthNames[monthIndex] + ' ' + year;
 	var myMonth = monthIndex + 1;
 	myMonth = myMonth  >9?myMonth: '0' + myMonth;
 	var myDay = day > 9?day: '0' + day;
-		
 	var d1= year + '-' + myMonth + '-' + myDay;
-	var d2= year + '-' + myMonth + '-' + myDay;
+	//d2
+    var currentDate2 = new Date('<%=d2%>');
+    var day2 = currentDate2.getDate();
+    var monthIndex2 = currentDate2.getMonth();
+    var year2 = currentDate2.getFullYear();
+    var myMonth2 = monthIndex2 + 1;
+    myMonth2 = myMonth2  >9?myMonth2: '0' + myMonth2;
+    var myDay2 = day2 > 9?day2: '0' + day2;
+    var d2= year2 + '-' + myMonth2 + '-' + myDay2;
 	
+<% if (d1 == d2) {%>
+    var ladate = day + ' ' + monthNames[monthIndex] + ' ' + year;
+<%} else { %>
+    var ladate = day + ' ' + monthNames[monthIndex] + ' ' + year + " au " + day2 + ' ' + monthNames[monthIndex2] + ' ' + year2;
+<%}%>
+
+
 	console.log(d1);
 	console.log(d2); 
 	$("#fdt").html(ladate);
@@ -145,8 +158,10 @@ $(function(){
         }
     });
 	PNotify.prototype.options.styling = "jqueryui";
-	$.post("/stats/ventes_jour",{'dtDebut': d1, 'dtFin': d2, 'status': [4]}, function(datas) {
-		if(datas.err != "" && datas.err !== null) {
+	function afficheStats(dDebut, dFin) {
+
+        $.post("/stats/ventes_jour",{'dtDebut': dDebut, 'dtFin': dFin, 'status': [4]}, function(datas) {
+    		if(datas.err != "" && datas.err !== null) {
 			 var infos = new PNotify({
                 title: 'Erreur ',
                 text: datas.err,
@@ -155,36 +170,71 @@ $(function(){
                   desktop: true
                 }
               }); 
-		} else {
-			//rêmplissage
-			console.log(datas.data);
-			$('#tblVentes').dataTable().fnClearTable();
-	        if(datas.data.length > 0){
-	        	$('#tblVentes').dataTable().fnAddData(datas.data);    
-	        	$("#somme_ht").html(datas.recap.somme_ht);
-	        	$("#somme_tva").html(datas.recap.somme_tva);
-	        	$("#somme_ttc").html(datas.recap.somme_ttc);
-	        	$("#somme_com").html(datas.recap.somme_com);
-	        		
-	        }
-		}
+    		} else {
+    			//rêmplissage
+    			console.log(datas.data);
+    			$('#tblVentes').dataTable().fnClearTable();
+    	        if(datas.data.length > 0){
+    	        	$('#tblVentes').dataTable().fnAddData(datas.data);    
+    	        	$("#somme_ht").html(datas.recap.somme_ht);
+    	        	$("#somme_tva").html(datas.recap.somme_tva);
+    	        	$("#somme_ttc").html(datas.recap.somme_ttc);
+    	        	$("#somme_com").html(datas.recap.somme_com);
+    	        }
+    		}
 
-	});
-    
+    	});
+    }
 	$('body').on('click', 'button.action-cal', function(){
-		console.log('ok');
 		$( "#dt1" ).datepicker({
 	      defaultDate: currentDate,
 	      changeMonth: true,
 	      changeYear: true,
 	      dateFormat: "yy-mm-dd",
-	      onClose: function( selectedDate ) {
+          maxDate: new Date(),
+	      onClose: function(selectedDate) {
 	        currentDate = selectedDate;
-
-	      }
+	      },
+          onSelect: function(selectedDate) {
+            console.log("youhou ", selectedDate);
+            d1 = selectedDate;
+            d2 = selectedDate;
+            
+            <% if(periode == 1) {%>
+                $("#simpleText").hide();
+                var l_url = "/stats/ventes/1/" + d1 + "/" + d2; 
+                console.log(l_url);
+                document.location.href = l_url;
+            <%}%>
+          }
      	});
-     	$("#dt1").show();
+     	$(".simple_middle").show();
+
+        <% if (periode == 2) {%>
+          $( "#dt2" ).datepicker({
+              defaultDate: currentDate,
+              changeMonth: true,
+              changeYear: true,
+              dateFormat: "yy-mm-dd",
+              maxDate: new Date(),
+              onClose: function(selectedDate) {
+                currentDate = selectedDate;
+              },
+              onSelect: function(selectedDate) {
+                console.log("youhou ", selectedDate);
+                d2 = selectedDate;
+               
+                var l_url = "/stats/ventes/2/" + d1 + "/" + d2;
+                console.log(l_url);
+                document.location.href = l_url;
+              }
+            });
+           $(".simple_middle").show();
+        <% } %>
+
 	});
+
+    afficheStats(d1, d2);
 });
 
 </script>
@@ -193,7 +243,11 @@ $(function(){
 <div id="dvHeader" class="row">
 <%- menu %>
 </div>
-<div style="text-align:center"><H1><font >VENTES DU JOUR</font></H1>
+<div style="text-align:center"><H1>
+<font >
+<% if(periode == 1){%>VENTES DU JOUR<%}%>
+<% if(periode == 2){%>VENTES SUR PERIODE DU<%}%>
+</font></H1>
 <font id='fdt'></font>
 <div style="width:600px;text-align:center;margin: 0 auto;margin-bottom:10px">
 	
@@ -212,7 +266,7 @@ $(function(){
 		</tr>
 	</table>
 </div>
-<button id="print" class="btn btn-success btn-xs btn-action action-cal" style="font-size: 13px;margin-bottom:5px" title="Choisir le jour" ><i class="fa fa-calendar"></i></button><div id="dt1"></div><br><button id="print" class="btn btn-success btn-xs btn-action action-print" style="font-size: 13px;" title="Imprimer" ><i class="fa fa-print"></i>Imprimer</button></div>
+<button id="print" class="btn btn-success btn-xs btn-action action-cal" style="font-size: 13px;margin-bottom:5px" title="Choisir le jour" ><i class="fa fa-calendar"></i></button><div  class="simple_middle"><div id="dt1" style="width:290px;float:left"></div><div style="float:left"><font id="simpleText">AU</font></div><div id="dt2" style="margin-left:20px;width:290px;float:left"></div></div><br><button id="print" class="btn btn-success btn-xs btn-action action-print" style="font-size: 13px;" title="Imprimer" ><i class="fa fa-print"></i>Imprimer</button></div>
 
 <div id="dvMiddle" class="row">
 
@@ -253,3 +307,9 @@ $(function(){
 	</div>
 
 </div>
+<script>
+
+ <% if(periode == 1) {%>
+    $("#simpleText").hide();
+ <%}%>
+</script>

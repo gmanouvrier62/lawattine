@@ -130,8 +130,6 @@ module.exports = {
             //produit.ttl_tva = parseInt(produit.tva * produit.qte * 100)/100;
             produit.ttl_tva = commandes[c].ttl_tva;
 
-
-
             fullCommande.produits.push(produit);
           }
           fullCommande.ttlArticles = ttlArticles;
@@ -144,9 +142,7 @@ module.exports = {
 
     });
 
-
   },
-  
   getOneFullCommande: function(id_commande, id_client, callback) {
   	//Préparation de l'objet de retour
   	var fullCommande = {

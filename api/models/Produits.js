@@ -88,61 +88,35 @@ module.exports = {
     }
   },
   majFromCom: function(criteres, callback) {
-    
-    var update_price = function(id, tx, pht, tva, callback) {
-       var apply = function calculPV(ht,txCom,tva) {
-        ht = parseFloat(ht);
-        txCom = parseFloat(txCom);
-        tva = parseFloat(tva);
-
-        var tt1 = ht +( (txCom*ht)/100 );
-        var resultat = tt1 + ((tt1*tva)/100);
-       
-        return Math.round(resultat *100)/100;
-       };
-
-       var origine = {'id': id};
-       var cible = {
-        'tx_com': tx,
-        'ttc_vente':  apply(pht, tx, tva)
-       }
-       sails.models.produits.update(origine, cible, function(err, updated) {
-          if(err !== null && err !== undefined) return callback(err, null);
-          //for(var c = 0; c < prds.length;c++) {
-          //  logger.warn("id: ", prds[c].id, " vente actu : ", prds[c].ttc_vente, " recalc : ", apply(prds[c].pht, prds[c].tx_com, prds[c].tva));
-
-          //}
-          callback(null, "OK");
-          
-       });
-    };
-    //Début code
-    //logger.util ("le critere : ", criteres);
+    var ccc = 0;
     for (var rg = 0; rg < criteres.ranges.length; rg++) {
       logger.util ("range courrant : ", criteres.ranges[rg]);
       var min = criteres.ranges[rg].min;
       var max = criteres.ranges[rg].max;
       var tx = criteres.ranges[rg].tx;
-      
+      logger.warn(criteres);
+      if(criteres.rayons === null || criteres.rayons === undefined) {
+        criteres.rayons = [];
+      }
       if(criteres.rayons.length > 0) {
-        sql = "select * from produits where id_type in(" + criteres.rayons.join(",") + ") and pht >=" + min + " and pht<=" + max;
+        sql = "update produits set tx_com = " + tx + ", ttc_vente = pht * ( 1 +" + tx + " /100 ) * ( 1 + tva /100 )";
+        sql +=" where id_type in(" + criteres.rayons.join(",") + ") and pht >=" + min + " and pht<=" + max;
       } else {
-        sql = "select * from produits where pht >=" + min + " and pht<=" + max;
+        sql = "update produits set tx_com = " + tx + ", ttc_vente = pht * ( 1 +" + tx + " /100 ) * ( 1 + tva /100 )";
+        sql+= " where pht >=" + min + " and pht<=" + max;
       }
       logger.warn(sql);
+      
       this.query(sql, function(err, pertinents) {
-        if(err !== null && err !== undefined) return callback(err,null);
-        var all_msg = "";
-        var cur = 0;
-        logger.warn("nb : ", pertinents.length);
-        for (var c = 0; c < pertinents.length; c++) {
-          logger.warn(pertinents[c]);
-          update_price(pertinents[c].id, tx, pertinents[c].pht, pertinents[c].tva, function(err, updated){
-            if (err !== null && err !== undefined) all_msg += 1;
-            if (cur == pertinents.length-1) return callback(all_msg, "OK");
-            cur ++;
-          })
+        if(err !== null && err !== undefined) {
+          logger.error("erreur : ", err);
+          return callback(err,null);
         }
+        if(ccc == criteres.ranges.length-1) {
+          logger.warn("majour prix ok");
+          return callback(null,"OK");
+        }
+        ccc++;
       });
     }
   }

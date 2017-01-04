@@ -61,7 +61,7 @@ module.exports = {
 				logger.error(err);
 				return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
 			}
-			logger.util(fCom);
+			//logger.util(fCom);
 			//Je renvoie directement l'objet commande complet
 			return res.send(fCom);
 		});
