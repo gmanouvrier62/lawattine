@@ -2,34 +2,42 @@
 	$(function(){
 		$("#frmEditionSection").hide();
 		var selProd = 0;
- 		
+ 		function fillThumb(datas) {
+ 			var max = datas.data.length;
+ 			var compteur = 0;
+			var slideH = "";
+			console.log("max : ", max);
+			for(var c=0; c<6;c++) {
+				slideH += "<tr>";
+				for (var cc = 0; cc < 5; cc++) {
+					if(compteur >= max) {
+						slideH += "<td></td>";
+					} else {
+						rayon = datas.data[compteur][2];
+						slideH += '<td><div class="pellicule"><a href="#" class="chkImg" data-rayon="' + rayon + '" data-ico="' + datas.data[compteur][10] + '"><img src="/images/images_rayons/' + rayon + '/' + datas.data[compteur][10] + '" /></a></div></td>';
+					}
+					compteur ++;
+				}
+				slideH += "</tr>";
+			}
+			$("#tblThumb").html(slideH);
+ 		}
 		function imagesSlide(rayon) {
 			///produits/getAll/:type
 			$.get("/produits/getAll/" + rayon,{},function(datas) {
-				var max = datas.data.length;
-				var compteur = 0;
-				var slideH = "";
-				console.log("max : ", max);
-				for(var c=0; c<6;c++) {
-					slideH += "<tr>";
-					for (var cc = 0; cc < 5; cc++) {
-						if(compteur >= max) {
-							slideH += "<td></td>";
-						} else {
-							slideH += '<td><div class="pellicule"><img src="/images/images_rayons/' + rayon + '/' + datas.data[compteur][10] + '" /><br><center><input class="chkImg" type="checkbox" data-rayon="' + rayon + '" data-ico="' + datas.data[compteur][10] + '"></center></div></td>';
-						}
-						compteur ++;
-					}
-					slideH += "</tr>";
-				}
-				$("#tblThumb").html(slideH);
-				//console.log("ok", slideH);
 				
-				return slideH;
+				fillThumb(datas);
 			});
 			
 		}
-		
+		$("#search").keypress(function(){
+			if($(this).val().length > 2) {
+				$.get("/produits/getAllCrit/" + $(this).val(),{},function(datas) {
+					
+					fillThumb(datas);
+				});
+			}
+		});
 		$.get('/produits/getTypes/',{}, function(datas){
 			var selectProduits = "<select id='slRayon'>"; 
  	        if(datas.err == null) {
@@ -71,7 +79,10 @@
 				
 			}
 		});
-		$(document).on('change','.chkImg', function(){
+		$(document).on('click','.imgPetite', function(){
+			$(this).remove();
+		});
+		$(document).on('click','.chkImg', function(){
 			var img = $(this).data('ico');
 			var ry = $(this).data('rayon');
 			var image_choisie = "<img class='imgPetite' src='/images/images_rayons/" + ry + "/" + img + "'></img>";
