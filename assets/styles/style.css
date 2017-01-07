@@ -18,6 +18,15 @@ ul, li {margin: 0; padding: 0;}
 	font-size:10px;
 	list-style-type: none;
 }
+#my-thumbs-list{
+  overflow: auto;
+  width: 800px;
+  height: auto;
+}
+.colG {
+	margin-right: 10px;
+	list-style-type: none;
+}
 .liToolTip {
 	font-size:10px;
 	list-style-type: none;
@@ -150,6 +159,10 @@ ul, li {margin: 0; padding: 0;}
     width: 34px;
     float: left;
 }
+.imgPetite {
+	width:40px;
+	height: 40px;
+}
 .somme {
 	background-image: url("/images/somme.png");
     background-repeat: no-repeat;
@@ -166,6 +179,26 @@ ul, li {margin: 0; padding: 0;}
     width: 60px;
     float: left;
 }
+.pellicule {
+	background-color: #555555;
+    height: 125px;
+    padding-left: 1px;
+    padding-top: 2px;
+    margin-left: 10px;
+    margin-bottom: 10px;
+    width: 110px;
+    float: left;
+}
+.pellicule img {
+	
+    height: 100px;
+    padding-left: 1px;
+    padding-top: 2px;
+    margin-left: 3px;
+    width: 100px;
+    float: left;
+}
+
 .disponible {
 	padding-left:3px;
 	padding-right:3px;

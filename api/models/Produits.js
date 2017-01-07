@@ -87,6 +87,19 @@ module.exports = {
       callback(null,result);
     }
   },
+  majPrix: function(callback) {
+      sql = "update produits set ttc_vente = ROUND(pht * ( 1 + tx_com /100 ) * ( 1 + tva /100 ),2)";
+      logger.warn(sql);
+      
+      this.query(sql, function(err, pertinents) {
+        if(err !== null && err !== undefined) {
+          logger.error("erreur : ", err);
+          return callback(err,null);
+        }
+        logger.warn("OK majPrix effectuée");
+        return callback(null,"OK");
+      });
+  },
   majFromCom: function(criteres, callback) {
     var ccc = 0;
     for (var rg = 0; rg < criteres.ranges.length; rg++) {

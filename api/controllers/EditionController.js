@@ -9,7 +9,8 @@ home: function(req, res) {
 		action = req.params.act;
 	}
 	var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
-	return res.render ('edition/edition',{'action': action, 'menu': menu});
+	return res.render ('edition/edition',{'action': action, 'menu': menu});		
+	
 }
 
 

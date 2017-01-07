@@ -1,21 +1,119 @@
 <script type="text/javascript">
 	$(function(){
-		alert('r');
-
+		$("#frmEditionSection").hide();
+		var selProd = 0;
+ 		
+		function imagesSlide(rayon) {
+			///produits/getAll/:type
+			$.get("/produits/getAll/" + rayon,{},function(datas) {
+				var max = datas.data.length;
+				var compteur = 0;
+				var slideH = "";
+				console.log("max : ", max);
+				for(var c=0; c<6;c++) {
+					slideH += "<tr>";
+					for (var cc = 0; cc < 5; cc++) {
+						if(compteur >= max) {
+							slideH += "<td></td>";
+						} else {
+							slideH += '<td><div class="pellicule"><img src="/images/images_rayons/' + rayon + '/' + datas.data[compteur][10] + '" /><br><center><input class="chkImg" type="checkbox" data-rayon="' + rayon + '" data-ico="' + datas.data[compteur][10] + '"></center></div></td>';
+						}
+						compteur ++;
+					}
+					slideH += "</tr>";
+				}
+				$("#tblThumb").html(slideH);
+				//console.log("ok", slideH);
+				
+				return slideH;
+			});
+			
+		}
+		
+		$.get('/produits/getTypes/',{}, function(datas){
+			var selectProduits = "<select id='slRayon'>"; 
+ 	        if(datas.err == null) {
+	          var types = datas.data;
+	          for (var cc = 0; cc < types.length; cc++) {
+	            var attrS ="";
+	            //if(selectedType == types[cc].id) attrS = "selected"; 
+	            selectProduits += "<option value='" + types[cc].id + "' " + attrS + " >" + types[cc].nom + "</option>";
+	          }
+	          selectProduits += "</select>";
+	          $('.liRayon').append(selectProduits);
+	          $("#slRayon").change(function() {
+	          		imagesSlide($(this).val());
+	          });
+	        }
+        });
+		$('body').on('click', 'button.action-addSection', function(){
+		  	console.log("okokok");
+			$("#frmEditionSection").dialog({
+		      height: 160,
+		      width: 300,
+		      modal: true,
+		      resizable: false,
+		      buttons: {
+		        "OK": function() {
+		        	var ajout = "<h3>" + $("#titre_section").val() + "</h3><div class='content_section'></div>";
+			  		$("#accordion").append(ajout);
+				  	$("#accordion").accordion("refresh");
+			        $(this).dialog( "close" );
+			    }
+		      }
+		    });
+		    console.log("fin");
+		  
+		});
+		$("#accordion").accordion({
+			'activate' : function(event, ui) {
+				console.log(" le ui" ,ui);
+				
+			}
+		});
+		$(document).on('change','.chkImg', function(){
+			var img = $(this).data('ico');
+			var ry = $(this).data('rayon');
+			var image_choisie = "<img class='imgPetite' src='/images/images_rayons/" + ry + "/" + img + "'></img>";
+			console.log("alors : ", image_choisie);
+			var currentUi =  $("#accordion .ui-accordion-content-active");
+			currentUi.append(image_choisie);
+		});
+		
 	});
-
-
 </script>
-<table>
-<tr>
-<td colspan="3">
-Nom du catalogue
-</td>
-<td>
-<input type='text' id="cata_nom">
-</td>
-</tr>
-<tr>
-<td>Nom</td><td>Qté</td><td>editer</td><td>supprimer</td>
-</tr>
-</table>
+
+<div id="dvHeader" class="row">
+	<div id="container_edition" class="col-md-12" style="border:1px solid black; margin-left:20px;margin-top:20px">
+	Nom du catalogue<input type='text' id="cata_nom">
+	</div>
+</div>
+<div id="dvP" class="row">
+	<div id="container_sommaire" class="col-md-4" style="border:1px solid black; margin-left:20px;margin-top:10px;height:400px">
+		<ul>
+			<li class="colG"><font >Search</font><input type='text' id='search'></li>
+			<li class='liRayon colG'><font>Rayons</font></li>
+		</ul>
+
+		<button id="print" class="btn btn-success btn-xs btn-action action-addSection" style="font-size: 13px;" title="Ajouter une section" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter une section</button><br>
+		
+		<div id="accordion">
+		 
+		 
+		</div>
+
+	</div>
+	<div id="container_e" class="col-md-6" style="margin-left:10px;margin-top:20px">
+	<table id="tblThumb">
+
+	</table>
+	</div>
+</div>
+<div id="frmEditionSection" class="ui-widget" title="Titre de la Section">
+    <table id="sct" class="ui-widget ui-widget-content">
+      <tr>
+        <td><input id="titre_section" type="text"></td>
+      </tr>
+    
+  </table>
+</div>

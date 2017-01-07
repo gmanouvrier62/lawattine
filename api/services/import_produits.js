@@ -136,8 +136,6 @@ module.exports = function(callback){
 				var fileN = tbPath[tbPath.length-1];
 				var imgName = fileN.split('&use=')[0].replace('image.ashx?id=','') + '.jpg';
 
-				logger.warn("avant download");
-				logger.warn("ok down fini");
         		importAProduct(produits[cpt].objElement,full_url, function(err) {
         			if(err.current_url != "" && err.current_url !== null && err.current_url != undefined)
 					lesurl += err.current_url + '\r\n';

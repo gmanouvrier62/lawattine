@@ -86,6 +86,9 @@ module.exports = {
 		imp.on("all_completed", function(){
 			//voir pour un socketio 
 			logger.warn("oki all finished");
+			//sails.models.produits.majPrix(function(result){
+			//	logger.warn("OK mise à jour prix !!!!")
+			//});
 		});
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 		return res.render ('produits/import',{'action': 'import', 'menu': menu});

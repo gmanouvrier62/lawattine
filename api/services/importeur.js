@@ -51,24 +51,25 @@ var lCurl = function(ccurl, l_url, self) {
 	                    self.nbOk ++;
 	                    self.pct_ok = parseInt( (self.nbOk*100)/(self.tbLiens.length-1) );
 	                    
-	                    if(self.pointeur == self.tbLiens.length-1) {
-	                    	if (self.sockets !== null && self.sockets !== undefined) {
-	                    		self.sockets.emit("json_completed");
-	                    	}
-	                    	importProduits(function(result) {
-	                    		self.emit('all_completed');
-	                    		if (self.sockets !== null && self.sockets !== undefined) {
-	                    			self.sockets.emit("all_completed");
-	                    		}
-	                    	});
-	                    } else {
-	                    	logger.warn('va emttre un completed ', "");
-	                    	if (self.sockets !== null && self.sockets !== undefined) {
-	                    		self.sockets.emit("completed",self.pct_ko, self.pct_ok);	
-	                    	}
-	                    	self.emit('completed');
-	                    }
+                       	logger.warn('va emttre un completed ', "");
+                    	if (self.sockets !== null && self.sockets !== undefined) {
+                    		self.sockets.emit("completed",self.pct_ko, self.pct_ok);	
+                    	}
+                    	self.emit('completed');
+	                    
 	                }
+	                if(self.pointeur == self.tbLiens.length-1) {
+                    	if (self.sockets !== null && self.sockets !== undefined) {
+                    		self.sockets.emit("json_completed");
+                    	}
+                    	logger.error("!!!!!!!!!OK FINI!!!!!!!!!avant import db");
+                    	importProduits(function(result) {
+                    		self.emit('all_completed');
+                    		if (self.sockets !== null && self.sockets !== undefined) {
+                    			self.sockets.emit("all_completed");
+                    		}
+                    	});
+	                } 
 	            });
 	        } else {
 	        	if (self.sockets !== null && self.sockets !== undefined) {
@@ -116,7 +117,6 @@ function importeur(dest) {
 	this.pct_ok = 0;
 	this.pct_ko = 0;
 	this.sockets = null;
-
 	
 	this.io = require('socket.io')(http);
 	this.io.on('connection', function(socket){
@@ -124,11 +124,8 @@ function importeur(dest) {
 	  
 	  socket.emit('welcome', "bou du");
 	  //socket.emit('meteo_done', {msg:"bou du2"});
-	  
 	  self.sockets = socket;
-	  self.poil ="de cul";
 	});
-
 
 	if (dest !== null && dest !== undefined) {
 		this.destinationFolder = dest;
@@ -242,9 +239,10 @@ importeur.prototype.getNext = function() {
 	this.currentLink = this.tbLiens[this.pointeur];
 	var curl = new Curl();
     var full_url = this.tbLiens[this.pointeur];
-    logger.warn("pour ", full_url);
-    logger.error("soc : ", this.poil);
-    lCurl(curl, full_url, this);
+    if(full_url !== null && full_url !== undefined) {
+    	logger.warn("pour ", full_url);
+    	lCurl(curl, full_url, this);
+	}
 };
 
 importeur.prototype.__proto__ = events.EventEmitter.prototype;
