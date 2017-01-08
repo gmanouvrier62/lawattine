@@ -1,5 +1,13 @@
 <script type="text/javascript">
 	$(function(){
+		var currentCatalogue = "";
+		<% if (id != "") {%>
+		 currentCatalogue = '<%=id%>';
+		 $.get("/edition/get/<%=id%>", {}, function(datas) {
+
+		 });
+		<% } %>
+		console.log("current cata : ", currentCatalogue);
 		$("#frmEditionSection").hide();
 		var selProd = 0;
  		function fillThumb(datas) {
@@ -14,7 +22,7 @@
 						slideH += "<td></td>";
 					} else {
 						rayon = datas.data[compteur][2];
-						slideH += '<td><div class="pellicule"><a href="#" class="chkImg" data-rayon="' + rayon + '" data-ico="' + datas.data[compteur][10] + '"><img src="/images/images_rayons/' + rayon + '/' + datas.data[compteur][10] + '" /></a></div></td>';
+						slideH += '<td><div class="pellicule"><a href="#" class="chkImg" data-id="' + datas.data[compteur][0]  + '" data-rayon="' + rayon + '" data-ico="' + datas.data[compteur][10] + '"><img src="/images/images_rayons/' + rayon + '/' + datas.data[compteur][10] + '" /></a></div></td>';
 					}
 					compteur ++;
 				}
@@ -63,7 +71,7 @@
 		      resizable: false,
 		      buttons: {
 		        "OK": function() {
-		        	var ajout = "<h3>" + $("#titre_section").val() + "</h3><div class='content_section'></div>";
+		        	var ajout = "<h3>" + $("#titre_section").val() + "</h3><div class='content_section' data-section='" + $("#titre_section").val() + "'></div>";
 			  		$("#accordion").append(ajout);
 				  	$("#accordion").accordion("refresh");
 			        $(this).dialog( "close" );
@@ -85,18 +93,72 @@
 		$(document).on('click','.chkImg', function(){
 			var img = $(this).data('ico');
 			var ry = $(this).data('rayon');
-			var image_choisie = "<img class='imgPetite' src='/images/images_rayons/" + ry + "/" + img + "'></img>";
+			var id_produit = $(this).data('id');
+			var image_choisie = "<img class='imgPetite' src='/images/images_rayons/" + ry + "/" + img + "' data-id='" + id_produit + "'></img>";
 			console.log("alors : ", image_choisie);
 			var currentUi =  $("#accordion .ui-accordion-content-active");
 			currentUi.append(image_choisie);
 		});
-		
+		$("#save").click(function() {
+			var ttl = 0;
+			var catalogue = {};
+			var nom = $("#cata_nom").val();
+			if(nom !== "") {
+				catalogue.nom = nom;
+				catalogue.sections = [];
+				$(".content_section").each(function(){
+					var section = {
+						'section': $(this).data('section'),
+						'produits': []
+					};
+					$(this).find(".imgPetite").each(function(){
+						var prd = {
+							'id': $(this).data('id'),
+							'icone': $(this).attr('src')
+						}
+						section.produits.push(prd);
+						ttl ++;
+					});
+					catalogue.sections.push(section);
+				});
+				catalogue.ttl = ttl;
+				console.log("cata : ", catalogue);
+				$.post("/edition/action/create",{'catalogue': catalogue}, function(result) {
+					var title = "";
+		            var l_type = "";
+		            if(result == 'OK') {
+		                title = "Succès";
+		                l_type = "succès";
+		            } else {
+		                title = "Echec";
+		                l_type = "error";
+		            }
+		            var infos = new PNotify({
+		                title: title,
+		                text: result,
+		                type: l_type,
+		                desktop: {
+		                  desktop: true
+		                }
+		            }); 
+				});
+			} else {
+				var infos = new PNotify({
+	                title: "catalogue",
+	                text: "il faut mettre un nom",
+	                type: "error",
+	                desktop: {
+	                  desktop: true
+	                }
+		        }); 
+			}
+		});
 	});
 </script>
 
 <div id="dvHeader" class="row">
 	<div id="container_edition" class="col-md-12" style="border:1px solid black; margin-left:20px;margin-top:20px">
-	Nom du catalogue<input type='text' id="cata_nom">
+	Nom du catalogue<input type='text' id="cata_nom" value="<%=currentCatalogue%>"><button id="save" class="btn btn-danger btn-xs btn-action action-save" style="font-size: 13px;" title="Ajouter une section" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter une section</button>
 	</div>
 </div>
 <div id="dvP" class="row">

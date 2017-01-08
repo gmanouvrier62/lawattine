@@ -12,8 +12,6 @@ module.exports = {
     id_produit: { type: 'int' },
     section: { type: 'string'},
 
-    settings: { type: 'string'},
-
     createdAt: { type: 'datetime'},
     updatedAt: { type: 'datetime'}
 

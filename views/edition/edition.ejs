@@ -19,9 +19,11 @@
   
 <script>
 $(function(){
+	$("#frmEditionLecture").hide();
 	PNotify.prototype.options.styling = "jqueryui";
 	var selectProduits = "<select id='id_type'>"; 
 	$.get('/produits/getTypes/',{}, function(datas){
+	    
 	    var selectedType = '';
 	    if(datas.err == null) {
 	      var types = datas.data;
@@ -35,9 +37,41 @@ $(function(){
 	    //$("#rayon").append(selectProduits);
 	    
     });
+    $.get('/edition/catalogue/getAll',{}, function(datas){
+    	console.log(datas);
+	    var selectCata = '<select id="choixCata"><option value="" selected>--</option>';
+	    if(datas.err == null) {
+	      var ct = datas.data;
+	      for (var cc = 0; cc < ct.length; cc++) {
+	        var attrS ="";
+	       // if(selectedType == types[cc].id) attrS = "selected"; 
+	        selectCata += "<option value='" + ct[cc] + "' " + attrS + " >" + ct[cc]+ "</option>";
+	      }
+	      selectCata += "</select>";
+	    }
+	    $("#td_cata").append(selectCata);
+	    $("#choixCata").change(function() {
+	    	document.location.href = "/edition/ajouter/" + $(this).val();
+	    });
+    });
 	$('body').on('click', 'button.action-add', function(){
 		document.location.href = "/edition/ajouter";
 
+	});
+	$('body').on('click', 'button.action-view', function(){
+		$("#frmEditionLecture").dialog({
+			      height: 160,
+			      width: 300,
+			      top: 110,
+			      modal: true,
+			      resizable: false,
+			      buttons: {
+			        "OK": function() {
+			        		
+				        $(this).dialog( "close" );
+				    }
+			      }
+		});
 	});
 
 });
@@ -50,7 +84,7 @@ $(function(){
 <div style="text-align:center"><H1><font >EDITION CATALOGUE</font></H1></div>
 <button id="print" class="btn btn-success btn-xs btn-action action-add" style="font-size: 13px;" title="Ajouter un catalogue" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter catalogue</button>
 
-<button id="print" class="btn btn-success btn-xs btn-action action-view" style="font-size: 13px;" title="Lister les catalogues" ><i class="fa fa-database" style="margin-right:4px"></i>Liste des catalogues</button>
+<button id="print" class="btn btn-success btn-xs btn-action action-view" style="font-size: 13px;" title="Lister les catalogues" ><i class="fa fa-database" style="margin-right:4px"></i>voir un catalogue</button>
 
 <button id="print" class="btn btn-success btn-xs btn-action action-print" style="font-size: 13px;" title="Imprimer le catalogue courrant" ><i class="fa fa-print" style="margin-right:4px"></i>Imprimer</button>
 <div id="dvMiddle" class="row">
@@ -64,7 +98,14 @@ $(function(){
 	</div>
 	
 </div>
-
+<div id="frmEditionLecture" class="ui-widget" title="Titre de la Section">
+    <table id="sct" class="ui-widget ui-widget-content">
+      <tr>
+        <td id="td_cata"></td>
+      </tr>
+    
+  </table>
+</div>
 
 
 </body>

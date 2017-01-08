@@ -53,6 +53,10 @@ module.exports.routes = {
   '/clients/getOneById/:id':   'ClientsController.getOneById',  
   '/edition':                  'EditionController.home',
   '/edition/:act':             'EditionController.home',
+  '/edition/action/create':             'EditionController.save',
+  '/edition/catalogue/getAll':          'EditionController.getAll',
+  '/edition/ajouter/:id':               'EditionController.home',
+  '/edition/get/:id':                   'EditionController.getCatalogue',
   '/fournisseurs':               'FournisseursController.home',
 
   '/fournisseurs/getAll':        'FournisseursController.getAll',
