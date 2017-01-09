@@ -38,6 +38,7 @@ module.exports = {
   relativProductImages: "/images/uploads/leclerc/",
   importProductsFolder: "/var/leclerc/",
   archives: "/var/log/leclerc/",
+  impressions: "/var/impression/",
   ip_dev: "176.151.197.161",
   ip_mavad01: "88.178.175.187",
   ip_master: ""

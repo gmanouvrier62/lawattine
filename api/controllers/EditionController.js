@@ -6,22 +6,96 @@ module.exports = {
 home: function(req, res) {
 	var action = "edition";
 	var id = "";
+	var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+	
 	if(req.params.act !== null && req.params.act !== undefined) {
 		action = req.params.act;
 	}
-	if(req.params.id !== null && req.params.id !== undefined) {
+	
+	return res.render ('edition/edition',{'action': action,'id': id, 'menu': menu});		
+},
+editer_catalogue: function(req, res) {
+if(req.params.id !== null && req.params.id !== undefined) {
 		id = req.params.id;
 		action = "ajouter";
+		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+		return res.render ('edition/edition',{'action': action, 'id': id, 'menu': menu});	
+		
 	}
-	var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
-	return res.render ('edition/edition',{'action': action,'id': id, 'menu': menu});		
-	
 },
-get: function (req, res) {
+print: function(req, res) {
+	if (req.body.edition !== null && req.body.content !== undefined) return res.send("Echec, pas de contenu");
+	var catalogue = req.body.edition;
+	logger.util("le catalogue print : ", catalogue);
+	var template = fs.readFileSync(sails.config.appPath + '/assets/images/template_catalogue.txt').toString();
+	template = template.replace("@@TITRE@@", catalogue.nom);
+	var content = "";
+	for(var c = 0; c < catalogue.sections.length; c++) {
+		content += "<H3>" + catalogue.sections[c].section + "</H3><br>";
+		var colRef = 4;
+		var col = colRef;
+		content += "<table>";
+
+		for(var cc = 0; cc < catalogue.sections[c].produits.length; cc++) {
+			if(col == colRef) content += "<tr>";
+			col --;
+			if(col == 0) {
+    		 content += "</tr><tr>";
+			 col = colRef;
+			}
+			content += "<td><img src='" + catalogue.sections[c].produits[cc].icone + "'></td>";
+		}
+		content += "</tr>";
+	}
+	template = template.replace("@@CONTENT@@", content);
+	logger.warn("tpl : ", template);
+
+	fs.writeFile("/var/impression/last_catalogue.html", template, function (err) {
+    	if (err) {
+    		logger.error(err);
+    		return res.send("le fichier n'est pas créé ");
+    	}
+
+    	return res.send("OK");
+    });
+},
+getFormatedCatalogue: function (req, res) {
+	//formté pour la mise en place dans accordion 
+	if(req.params.id !== null && req.params.id !== undefined) {
+		id = req.params.id;
+		sails.models.catalogue.get(id, function(err, results) {
+			logger.util("affiche results : ", results);
+			var tb = [];
+			var memo = [];
+			for(var c = 0; c < results.length; c++) {
+				var s = results[c].section;
+				if(memo.indexOf(s) <= -1) {
+					logger.warn("memo[" ,s,"] est undefined");
+					tb.push({'section': s, 'prds': []});
+					memo.push(s);
+					logger.util(memo);
+				} else {
+					logger.warn("memo[" ,s,"] est defined");
+				}
+				for(v = 0;v < tb.length; v++) {
+						if(tb[v].section == s)
+							tb[v].prds.push({'id': results[c].id, 'icone': results[c].icone});		
+				}
+				
+			}
+			//TODO suivre ce raisonnement pour afficher en ejs les differentes sections
+			logger.util("tb : ", tb);
+			logger.error("fin");
+			res.send(tb);
+		});
+	}
+},
+getCatalogue: function (req, res) {
+	logger.warn("dans GET, params id = ", req.params.id);
 	if(req.params.id !== null && req.params.id !== undefined) {
 		sails.models.catalogue.get(req.params.id, function(err, results) {
 			logger.util(results);
-
+			return res.send(results);
 		});
 
 	} else {

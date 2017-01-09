@@ -19,6 +19,7 @@
   
 <script>
 $(function(){
+	var ttl = 0;
 	$("#frmEditionLecture").hide();
 	PNotify.prototype.options.styling = "jqueryui";
 	var selectProduits = "<select id='id_type'>"; 
@@ -58,6 +59,33 @@ $(function(){
 		document.location.href = "/edition/ajouter";
 
 	});
+	$('body').on('click', 'button.action-print', function(){
+		var nom = $("#cata_nom").val();
+		var populatedCatalogue = {'nom': nom, 'sections' :[]};
+		
+		populatingCatalogue(populatedCatalogue);
+		console.log("popu", populatedCatalogue);
+		$.post("/edition/catalogue/print", {'edition': populatedCatalogue}, function(toPrint){
+			var title = "Impression";
+			var text, l_type;
+			if(toPrint !== "OK") {
+				text = toPrint;
+				l_type = "error";
+			} else {
+				text = "OK";
+				l_type = "success";
+			} 
+			var infos = new PNotify({
+                title: title,
+                text: text,
+                type: l_type,
+                desktop: {
+                  desktop: true
+                }
+            }); 
+		});
+
+	});
 	$('body').on('click', 'button.action-view', function(){
 		$("#frmEditionLecture").dialog({
 			      height: 160,
@@ -73,7 +101,23 @@ $(function(){
 			      }
 		});
 	});
-
+	function populatingCatalogue(catalogue) {
+			$(".content_section").each(function(){
+					var section = {
+						'section': $(this).data('section'),
+						'produits': []
+					};
+					$(this).find(".imgPetite").each(function(){
+						var prd = {
+							'id': $(this).data('id'),
+							'icone': $(this).attr('src')
+						}
+						section.produits.push(prd);
+						ttl ++;
+					});
+					catalogue.sections.push(section);
+			});
+	}
 });
 </script>
 </head>
@@ -84,7 +128,7 @@ $(function(){
 <div style="text-align:center"><H1><font >EDITION CATALOGUE</font></H1></div>
 <button id="print" class="btn btn-success btn-xs btn-action action-add" style="font-size: 13px;" title="Ajouter un catalogue" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter catalogue</button>
 
-<button id="print" class="btn btn-success btn-xs btn-action action-view" style="font-size: 13px;" title="Lister les catalogues" ><i class="fa fa-database" style="margin-right:4px"></i>voir un catalogue</button>
+<button class="btn btn-success btn-xs btn-action action-view" style="font-size: 13px;" title="Lister les catalogues" ><i class="fa fa-database" style="margin-right:4px"></i>voir un catalogue</button>
 
 <button id="print" class="btn btn-success btn-xs btn-action action-print" style="font-size: 13px;" title="Imprimer le catalogue courrant" ><i class="fa fa-print" style="margin-right:4px"></i>Imprimer</button>
 <div id="dvMiddle" class="row">

@@ -55,10 +55,11 @@ module.exports.routes = {
   '/edition/:act':             'EditionController.home',
   '/edition/action/create':             'EditionController.save',
   '/edition/catalogue/getAll':          'EditionController.getAll',
-  '/edition/ajouter/:id':               'EditionController.home',
+  '/edition/ajouter/:id':               'EditionController.editer_catalogue',
   '/edition/get/:id':                   'EditionController.getCatalogue',
+  '/edition/get_formated_catalogue/:id':    'EditionController.getFormatedCatalogue',
+  '/edition/catalogue/print':                         'EditionController.print',
   '/fournisseurs':               'FournisseursController.home',
-
   '/fournisseurs/getAll':        'FournisseursController.getAll',
   '/fournisseurs/getOneById/:id':   'FournisseursController.getOneById',  
   '/commandes':                     'CommandesController.home',

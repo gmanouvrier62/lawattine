@@ -21,13 +21,12 @@ module.exports = {
 
   },
   get: function(id, callback) {
-    var sql = "select * from caisse.catalogue where nom = " + id + " order by section_pos";
+    var sql = "select * from caisse.catalogue where nom ='" + id + "' order by section_pos";
+    
     this.query(sql, function recup(err, results) {
         if(err !== null && err !== undefined) return callback(err, null);
-        logger.util("get catalogue : ", results);
-        for(var c = 0; c < results.length; c++) {
-            
-        }
+       
+        callback(null, results);
     });    
   },
   getAll: function(callback) {

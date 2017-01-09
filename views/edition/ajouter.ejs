@@ -1,13 +1,26 @@
 <script type="text/javascript">
 	$(function(){
+		
 		var currentCatalogue = "";
 		<% if (id != "") {%>
 		 currentCatalogue = '<%=id%>';
-		 $.get("/edition/get/<%=id%>", {}, function(datas) {
+		 $.get("/edition/getFormatedCatalogue/<%=id%>", {}, function(datas) {
+		 	for(var c = 0; c < datas.length; c++) {
+		 		console.log("sect : ", datas[c].section);
+		 		var section = datas[c].section;
+		 		var all_images = "";
+		 		for (var i = 0 ; i < datas[c].prds.length; i++) {
+		 			all_images += "<img class='imgPetite' src='" + datas[c].prds[i].icone + "' data-id='" + datas[c].prds[i].id + "'></img>";
+		 		}
 
+		 		var ajout = "<h3 id='" + section + "'>" + section + "</h3><div class='content_section' data-section='" + section + "'>" +  all_images  + "</div>";
+		  		$("#accordion").append(ajout);
+			  	$("#accordion").accordion("refresh");
+		 	}
 		 });
+
 		<% } %>
-		console.log("current cata : ", currentCatalogue);
+		
 		$("#frmEditionSection").hide();
 		var selProd = 0;
  		function fillThumb(datas) {
@@ -71,7 +84,7 @@
 		      resizable: false,
 		      buttons: {
 		        "OK": function() {
-		        	var ajout = "<h3>" + $("#titre_section").val() + "</h3><div class='content_section' data-section='" + $("#titre_section").val() + "'></div>";
+		        	var ajout = "<h3 id='" + $("#titre_section").val() + "'>" + $("#titre_section").val() + "</h3><div class='content_section' data-section='" + $("#titre_section").val() + "'></div>";
 			  		$("#accordion").append(ajout);
 				  	$("#accordion").accordion("refresh");
 			        $(this).dialog( "close" );
@@ -84,7 +97,6 @@
 		$("#accordion").accordion({
 			'activate' : function(event, ui) {
 				console.log(" le ui" ,ui);
-				
 			}
 		});
 		$(document).on('click','.imgPetite', function(){
@@ -100,32 +112,19 @@
 			currentUi.append(image_choisie);
 		});
 		$("#save").click(function() {
-			var ttl = 0;
+			ttl = 0;
 			var catalogue = {};
 			var nom = $("#cata_nom").val();
 			if(nom !== "") {
 				catalogue.nom = nom;
 				catalogue.sections = [];
-				$(".content_section").each(function(){
-					var section = {
-						'section': $(this).data('section'),
-						'produits': []
-					};
-					$(this).find(".imgPetite").each(function(){
-						var prd = {
-							'id': $(this).data('id'),
-							'icone': $(this).attr('src')
-						}
-						section.produits.push(prd);
-						ttl ++;
-					});
-					catalogue.sections.push(section);
-				});
+				populatingCatalogue(catalogue);
 				catalogue.ttl = ttl;
 				console.log("cata : ", catalogue);
 				$.post("/edition/action/create",{'catalogue': catalogue}, function(result) {
 					var title = "";
 		            var l_type = "";
+		            
 		            if(result == 'OK') {
 		                title = "Succès";
 		                l_type = "succès";
@@ -158,7 +157,7 @@
 
 <div id="dvHeader" class="row">
 	<div id="container_edition" class="col-md-12" style="border:1px solid black; margin-left:20px;margin-top:20px">
-	Nom du catalogue<input type='text' id="cata_nom" value="<%=currentCatalogue%>"><button id="save" class="btn btn-danger btn-xs btn-action action-save" style="font-size: 13px;" title="Ajouter une section" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter une section</button>
+	Nom du catalogue<input type='text' id="cata_nom" value="<%=id%>"><button id="save" class="btn btn-danger btn-xs btn-action action-save" style="font-size: 13px;" title="Ajouter une section" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter une section</button>
 	</div>
 </div>
 <div id="dvP" class="row">
@@ -168,12 +167,12 @@
 			<li class='liRayon colG'><font>Rayons</font></li>
 		</ul>
 
-		<button id="print" class="btn btn-success btn-xs btn-action action-addSection" style="font-size: 13px;" title="Ajouter une section" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter une section</button><br>
+		<button class="btn btn-success btn-xs btn-action action-addSection" style="font-size: 13px;" title="Ajouter une section" ><i class="fa fa-plus" style="margin-right:4px"></i>Ajouter une section</button><br>
 		
 		<div id="accordion">
-		 
-		 
+		
 		</div>
+		
 
 	</div>
 	<div id="container_e" class="col-md-6" style="margin-left:10px;margin-top:20px">
