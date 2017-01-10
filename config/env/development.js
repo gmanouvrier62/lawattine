@@ -37,6 +37,7 @@ module.exports = {
   productImages: "/home/gilles/node/git/caisse/assets/images/uploads/leclerc/",
   relativProductImages: "/images/uploads/leclerc/",
   importProductsFolder: "/var/leclerc/",
+  template_catalogue: "/home/gilles/node/git/caisse/assets/images/template_catalogue.txt",
   archives: "/var/log/leclerc/",
   impressions: "/var/impression/",
   ip_dev: "176.151.197.161",

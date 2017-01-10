@@ -1,6 +1,22 @@
 <script type="text/javascript">
 	$(function(){
-		
+		function populatingCatalogue(catalogue) {
+			$(".content_section").each(function(){
+					var section = {
+						'section': $(this).data('section'),
+						'produits': []
+					};
+					$(this).find(".imgPetite").each(function(){
+						var prd = {
+							'id': $(this).data('id'),
+							'icone': $(this).attr('src')
+						}
+						section.produits.push(prd);
+						ttl ++;
+					});
+					catalogue.sections.push(section);
+			});
+		}
 		var currentCatalogue = "";
 		<% if (id != "") {%>
 		 currentCatalogue = '<%=id%>';

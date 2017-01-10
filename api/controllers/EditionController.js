@@ -24,26 +24,24 @@ if(req.params.id !== null && req.params.id !== undefined) {
 	}
 },
 print: function(req, res) {
+	var colRef = 4;
 	if (req.body.edition !== null && req.body.content !== undefined) return res.send("Echec, pas de contenu");
 	var catalogue = req.body.edition;
 	logger.util("le catalogue print : ", catalogue);
-	var template = fs.readFileSync(sails.config.appPath + '/assets/images/template_catalogue.txt').toString();
+	var template = fs.readFileSync(sails.config.template_catalogue).toString();
 	template = template.replace("@@TITRE@@", catalogue.nom);
 	var content = "";
 	for(var c = 0; c < catalogue.sections.length; c++) {
-		content += "<H3>" + catalogue.sections[c].section + "</H3><br>";
-		var colRef = 4;
+		content += "<tr><td colspan='" + colRef + "' style='font-size:20px;font-weight:bold;text-align:center;border:1px solid black;background-color:#DDDDDD;margin-bottom:30px'>" + catalogue.sections[c].section + "</td></tr><tr>";
+		
 		var col = colRef;
-		content += "<table>";
-
 		for(var cc = 0; cc < catalogue.sections[c].produits.length; cc++) {
-			if(col == colRef) content += "<tr>";
-			col --;
 			if(col == 0) {
     		 content += "</tr><tr>";
 			 col = colRef;
 			}
-			content += "<td><img src='" + catalogue.sections[c].produits[cc].icone + "'></td>";
+			col --;
+			content += "<td><img style='width:100px;height:100px' src='" + catalogue.sections[c].produits[cc].icone + "'></td>";
 		}
 		content += "</tr>";
 	}
