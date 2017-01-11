@@ -66,6 +66,7 @@ module.exports.routes = {
   '/commandes/status/:status':          'CommandesController.home',
   '/commandes/addormodify':             'CommandesController.addormodify',
   '/commandes/livrer':             'CommandesController.livrer',
+  '/commandes/print/:id':          'CommandesController.print',
   '/commandes/valider':              'CommandesController.valider',
   '/commandes/retirer_produit':      'CommandesController.retirer_produit',
   '/commandes/load/:id/client/:id_client':              'CommandesController.load',

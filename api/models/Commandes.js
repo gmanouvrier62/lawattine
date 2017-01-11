@@ -15,6 +15,22 @@ module.exports = {
     dt_livraison: { type: 'datetime'}
 
   },
+  arrondi: function(p) {
+    var last = "";
+    var step1 = parseInt(p * 100);
+    step1 = step1.toString();
+    var tb = [];
+    for(var c = 0; c < step1.length; c++) tb.push(step1[c]);
+
+    if(tb[tb.length-1] == 1 || tb[tb.length-1] == 2) tb[tb.length-1] = 0;
+    if(tb[tb.length-1] == 3 || tb[tb.length-1] == 4 || tb[tb.length-1] == 6) tb[tb.length-1] = 5;
+    if(tb[tb.length-1] == 7 || tb[tb.length-1] == 8 || tb[tb.length-1] == 9) {
+      tb[tb.length-1] = 0;
+      tb[tb.length-2] = parseInt(tb[tb.length-2]) + 1;  
+    } 
+    var resultat = tb.join("");
+    return parseInt(resultat) / 100;
+  },
   getCommandes: function(req, callback) {
          
     var status = null;
@@ -220,6 +236,7 @@ module.exports = {
 			}
       fullCommande.ttlArticles = ttlArticles;
       logger.warn('ready to back');
+      fullCommande.total_commande = sails.models.commandes.arrondi(fullCommande.total_commande);
 			callback(null,fullCommande);
     	});
     });

@@ -16,9 +16,27 @@
  <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
   <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
   <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
- <script type="text/javascript" src="/js/dependencies/tools.js"></script> 
+ 
 <script>
 $(function(){
+	function impression(content){
+	    var fen = window.open("", "", "height=500, width=600,toolbar=0, menubar=0, scrollbars=1, resizable=1,status=0, location=0, left=10, top=10");
+	    // style du popup
+	    fen.document.body.style.color = '#000000';
+	    //fen.document.body.style.backgroundColor = '#FFFFFF';
+	    fen.document.body.style.padding = "20px";
+	     
+	    // Ajout des données a imprimer
+	    fen.document.title = "";
+	    fen.document.body.innerHTML += " " + content + " ";
+	     
+	    // Impression du popup
+	    fen.window.print();
+	     
+	    //Fermeture du popup
+	    fen.window.close();
+	    return true;
+	}
 	var ttl = 0;
 	$("#frmEditionLecture").hide();
 	PNotify.prototype.options.styling = "jqueryui";
@@ -68,13 +86,13 @@ $(function(){
 		$.post("/edition/catalogue/print", {'edition': populatedCatalogue}, function(toPrint){
 			var title = "Impression";
 			var text, l_type;
-			if(toPrint !== "OK") {
+			if(toPrint == "" || toPrint == null) {
 				text = toPrint;
 				l_type = "error";
 			} else {
 				text = "OK";
 				l_type = "success";
-				impression(populatedCatalogue);
+				impression(toPrint);
 			} 
 			var infos = new PNotify({
                 title: title,

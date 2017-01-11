@@ -32,18 +32,18 @@ print: function(req, res) {
 	template = template.replace("@@TITRE@@", catalogue.nom);
 	var content = "";
 	for(var c = 0; c < catalogue.sections.length; c++) {
-		content += "<tr><td colspan='" + colRef + "' style='font-size:20px;font-weight:bold;text-align:center;border:1px solid black;background-color:#DDDDDD;margin-bottom:30px'>" + catalogue.sections[c].section + "</td></tr><tr>";
+		content += "<div style='height:40px;background-color:#F4C558;font-size:20px;font-weight:bold;text-align:center;border:1px solid black;background-color:#F4C558;margin-bottom:30px;margin-top:30px'>" + catalogue.sections[c].section + "</div><table>";
 		
 		var col = colRef;
 		for(var cc = 0; cc < catalogue.sections[c].produits.length; cc++) {
 			if(col == 0) {
-    		 content += "</tr><tr>";
+    		 content += "</tr><tr><td colspan='" + colRef + "'></td></tr><tr>";
 			 col = colRef;
 			}
 			col --;
-			content += "<td><img style='width:100px;height:100px' src='" + catalogue.sections[c].produits[cc].icone + "'></td>";
+			content += "<td><img style='width:100px;height:100px' src='http://localhost:800" + catalogue.sections[c].produits[cc].icone + "'></td>";
 		}
-		content += "</tr>";
+		content += "</tr></table>";
 	}
 	template = template.replace("@@CONTENT@@", content);
 	logger.warn("tpl : ", template);
@@ -51,10 +51,10 @@ print: function(req, res) {
 	fs.writeFile("/var/impression/last_catalogue.html", template, function (err) {
     	if (err) {
     		logger.error(err);
-    		return res.send("le fichier n'est pas créé ");
+    		return res.send(null);
     	}
 
-    	return res.send("OK");
+    	return res.send(template);
     });
 },
 getFormatedCatalogue: function (req, res) {

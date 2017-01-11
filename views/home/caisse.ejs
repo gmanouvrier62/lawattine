@@ -30,7 +30,24 @@
  //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
  	//alert($("#mondiv").attr('tom'));
 $(function(){
-  
+  function impression(content){
+      var fen = window.open("", "", "height=500px, width=1000px,toolbar=0, menubar=0, scrollbars=1, resizable=1,status=0, location=0, left=10, top=10");
+      // style du popup
+      fen.document.body.style.color = '#000000';
+      //fen.document.body.style.backgroundColor = '#FFFFFF';
+      fen.document.body.style.padding = "20px";
+       
+      // Ajout des données a imprimer
+      fen.document.title = "";
+      fen.document.body.innerHTML += " " + content + " ";
+       
+      // Impression du popup
+      fen.window.print();
+       
+      //Fermeture du popup
+      fen.window.close();
+      return true;
+  }
   function GestionAffichage(fCommande) {
     $(".rawContent").each(function(){
       $(this).remove();
@@ -207,7 +224,28 @@ $(function(){
         if(q>1) $(this).parent().find(".fontQte").html( q-1 );
     });
     ////
-
+    $('body').on('click', 'button.action-print', function (event) {
+      $.post("/commandes/print", {'id': $("#idCommande").html(), 'id_client': currentIdClient}, function(toPrint){
+        var title = "Impression";
+        var text, l_type;
+        if(toPrint.err !== "" && toPrint.err !== null) {
+          text = toPrint.err;
+          l_type = "error";
+        } else {
+          text = "OK";
+          l_type = "success";
+          impression(toPrint.content);
+        } 
+        var infos = new PNotify({
+                  title: title,
+                  text: text,
+                  type: l_type,
+                  desktop: {
+                    desktop: true
+                  }
+        }); 
+      });
+    });
     $('body').on('click', 'button.action-okpr', function (event) {
         //On a choisi un produit 
         var qte = $(this).parent().parent().find(".fontQte").html();
@@ -268,7 +306,9 @@ $(function(){
                  fullCommande = datas.commande;
                  GestionAffichage(fullCommande);
             }
-            setTimeout(function(){document.location.href = '/commandes';},2000);
+            //setTimeout(function(){document.location.href = '/commandes';},2000);
+
+
           });
       });
     });
@@ -355,7 +395,12 @@ $(function(){
     <button title="Chèque" data-paiement="chèque" class="btn btn-warning validation"><i class="fa fa-dedent"></i></button>
     <button title="Espèces" data-paiement="espèce" class="btn btn-warning validation"><i class="fa fa-eur"></i></button>
     <button title="Carte" data-paiement="cb" class="btn btn-warning validation"><i class="fa fa-cc-visa"></i></button>
+
     <% } %>
+     <% if(status_com == 3 || status_com == 4 || status_com == 'Validée' || status_com == 'Livrée') { %>
+         <button title="print" class="btn btn-success action-print"><i class="fa fa-print"></i></button>
+
+      <% } %>
     <br>
     <div class="arrondi-plein-net"><b>Net à payer</b><font id="cmdNet" class="txt50"></font></div>
   </div>

@@ -34,10 +34,13 @@ module.exports = {
             replaceConsole: true,
             path: '/var/log/lawattine.log'
         },
+  chemin_impression_catalogue: "/var/impression/last_catalogue.html",
+  chemin_impression_commande: "/var/impression/commande/",
   productImages: "/home/gilles/node/git/caisse/assets/images/uploads/leclerc/",
   relativProductImages: "/images/uploads/leclerc/",
   importProductsFolder: "/var/leclerc/",
   template_catalogue: "/home/gilles/node/git/caisse/assets/images/template_catalogue.txt",
+  template_commande: "/home/gilles/node/git/caisse/assets/images/template_commande.html",
   archives: "/var/log/leclerc/",
   impressions: "/var/impression/",
   ip_dev: "176.151.197.161",
@@ -47,3 +50,4 @@ module.exports = {
 
 
 };
+//SELECT (<value> DIV 0.05) * 0.05 + IF(<value> MOD 0.05 = 0, 0, 0.05)

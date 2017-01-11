@@ -1,0 +1,28 @@
+<div>BANDEAU AVEC LE LOGO</div>
+<div id="mondiv" style="float:left;margin-top: 10px;margin-bottom:3px;margin-left:30px;margin-right:30px;border: 1px solid black;width:100%;padding: 10px 20px 20px;line-height: 1; color:#000000;-moz-border-radius: 30px;-webkit-border-radius: 30px;border-radius: 30px;">
+	<div style="margin-left: 10px;font-size: 12px;float: right;list-style-type: none;">
+		<ul>
+			<li>@@PRENOM@@ @@NOM@@</li>
+			<li style="margin-top:10px">@@ADRESSE@@</li>
+			<li>@@CP@@ @@VILLE@@</li>
+			<li style="margin-top:12px;font-weight:bold">Tel : @@TEL@@</li>
+			<li style="font-weight:bold">Mobile : @@MOBIL@@</li>
+		</ul>
+	</div>
+	<div id="infoCmd" style="display: block;">
+		<table>
+			<tbody>
+				<tr>
+					<td>Commande : </td>
+					<td >@@ID_COMMANDE@@</td>
+				</tr>
+				<tr>
+					<td>Paiement : </td>
+					<td>
+						<b>@@MODE_PAIEMENT@@</b>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
