@@ -50,6 +50,10 @@ module.exports = {
       }
     });
   },
+  getDistinctProductByClient: function(id_client, callback) {
+    var sql += "select distinct * from caisse.produits where id in (select id_produit from caisse.cmd_pr where ";
+
+  }
   getRayonFromCom: function(txCom,tb,  callback) {
     var sql = " select t.nom as rayon from produits p inner join typesproduits t on p.id_type=t.id where tx_com=" + txCom;
     this.query(sql, function(err, resultat) {

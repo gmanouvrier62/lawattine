@@ -108,7 +108,11 @@ $(function(){
                 },
                 "targets": 6
             },
+            { "className": "col_date", "targets": [ 0 ] },
+            { "className": "col_ref", "targets": [ 1 ] },
+            { "className": "col_std", "targets": [ 2 ] },
             { "className": "col_xxl", "targets": [ 4 ] },
+            { "className": "col_status", "targets": [ 5 ] },
             { "className": "col_xl", "targets": [ 3 ] }
         ],
         "oLanguage": {"sZeroRecords": "", "sEmptyTable": "<b>Pas de commandes</b>"},
@@ -122,6 +126,25 @@ $(function(){
             "smart": false
         },
         "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            var cl = "";
+            if(aData[1] == '4') {
+                cl = "vert";
+            }
+            if(aData[1] == '1') {
+                cl = "rouge";
+            }
+            if(aData[1] == '2') {
+                cl = "orange";
+            }
+            //console.log("le content : ", aData[1]);
+            $('td:eq(0)', nRow).addClass( cl );
+            
+            $('td:eq(1)', nRow).addClass( cl );
+            $('td:eq(2)', nRow).addClass( cl );
+            $('td:eq(3)', nRow).addClass( cl );
+            $('td:eq(4)', nRow).addClass( cl );
+            $('td:eq(5)', nRow).addClass( cl );
+            $('td:eq(6)', nRow).addClass( cl );
             /*
             var cl = '';
             if(aData[4] < aData[12]) cl = 'complet';
@@ -280,7 +303,7 @@ $(function(){
 </div>
 <div id="dvMiddle" class="row">
 
-	<div id="rowCommandes" class="col-md-8" style="margin-left:100px;margin-top:20px;">
+	<div id="rowCommandes" class="col-md-10" style="margin-left:100px;margin-top:20px;">
 		<table id="tblCo" class="order-column" cellspacing="0" width="100%">
             <thead>
                 <tr>

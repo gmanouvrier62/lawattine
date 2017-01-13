@@ -25,8 +25,17 @@ module.exports = {
     if(tb[tb.length-1] == 1 || tb[tb.length-1] == 2) tb[tb.length-1] = 0;
     if(tb[tb.length-1] == 3 || tb[tb.length-1] == 4 || tb[tb.length-1] == 6) tb[tb.length-1] = 5;
     if(tb[tb.length-1] == 7 || tb[tb.length-1] == 8 || tb[tb.length-1] == 9) {
-      tb[tb.length-1] = 0;
-      tb[tb.length-2] = parseInt(tb[tb.length-2]) + 1;  
+      //Attention dans ce cas il faut ajouter 1 au regroupement du tableau
+      //pour la problématique d'ajout d'une dizaine
+      var tmp = parseInt(tb.join(""));
+      logger.warn('avant calcul ', tmp);
+      var offset = 10 - tb[tb.length-1];
+      tmp += offset;
+      step1 = tmp.toString();
+      logger.warn("1299 + 1", step1);
+      tb = [];
+      for(var c = 0; c < step1.length; c++) tb.push(step1[c]);
+      
     } 
     var resultat = tb.join("");
     return parseInt(resultat) / 100;

@@ -57,17 +57,17 @@ module.exports = {
 			}
 			logger.util(fCom);
 			var template = fs.readFileSync(sails.config.template_commande).toString();
-			template = template.replace("@@PRENOM@@", fCom.client.prenom);
-			template = template.replace("@@NOM@@", fCom.client.nom);
-			template = template.replace("@@ADRESSE@@", fCom.client.adresse);
-			template = template.replace("@@CP@@", fCom.client.cp);
-			template = template.replace("@@VILLE@@", fCom.client.ville);
-			template = template.replace("@@TEL@@", fCom.client.tel);
-			template = template.replace("@@MOBILE@@", fCom.client.mobile);
+			template = template.replace(/@@PRENOM@@/g, fCom.client.prenom);
+			template = template.replace(/@@NOM@@/g, fCom.client.nom);
+			template = template.replace(/@@ADRESSE@@/g, fCom.client.adresse);
+			template = template.replace(/@@CP@@/g, fCom.client.cp);
+			template = template.replace(/@@VILLE@@/g, fCom.client.ville);
+			template = template.replace(/@@TEL@@/g, fCom.client.tel);
+			template = template.replace(/@@MOBILE@@/g, fCom.client.mobile);
 			
-			template = template.replace("@@ID_COMMANDE@@", fCom.id);
-			template = template.replace("@@MODE_PAIEMENT@@", fCom.paiement);
-			template = template.replace("@@DT_LIVRAISON@@", moment(fCom.dt_livraison).format("DD-MM-YYYY"));
+			template = template.replace(/@@ID_COMMANDE@@/g, fCom.id);
+			template = template.replace(/@@MODE_PAIEMENT@@/g, fCom.paiement);
+			template = template.replace(/@@DT_LIVRAISON@@/g, moment(fCom.dt_livraison).format("DD-MM-YYYY"));
 			var content = "";
 			var s = 'style="border-left:1px solid black;border-right:1px solid black"';
 			var s2 = 'style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black"';
@@ -77,7 +77,7 @@ module.exports = {
 			}
 			content += "<tr><td " + s2 + " colspan='2'></td><td " + s2 + ">" + fCom.ttlArticles + "</td><td " + s2 + ">" + fCom.total_commande + "</td></tr>";
 
-			template = template.replace("@@CONTENT@@", content);
+			template = template.replace(/@@CONTENT@@/g, content);
 			var content_file = '<html><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></head><body>' + template + '</html>';
 			fs.writeFile(sails.config.chemin_impression_commande + fCom.id + ".html", content_file, function (err) {
 		    	if (err) {

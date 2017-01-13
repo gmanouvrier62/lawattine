@@ -23,6 +23,15 @@ ul, li {margin: 0; padding: 0;}
   width: 800px;
   height: auto;
 }
+.vert {
+	background-color: #AEEFBF;
+}
+.rouge {
+	background-color: #EF6B74;
+}
+.orange {
+	background-color: #EFB66B;
+}
 .colG {
 	margin-right: 10px;
 	list-style-type: none;
@@ -239,10 +248,27 @@ ul, li {margin: 0; padding: 0;}
 .col_xxl {
 
 	width:280px;
+	font-size: 11px;
 }
 .col_xl {
 
 	width:90px;
+	font-size: 11px;
+}
+.col_std {
+	font-size: 11px;
+}
+.col_status {
+	font-size: 11px;
+	width:40px;
+}
+.col_date {
+	font-size: 11px;
+	width:60px;
+}
+.col_ref {
+	font-size: 11px;
+	width:60px;
 }
 .col_l {
 
