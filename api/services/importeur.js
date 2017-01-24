@@ -27,6 +27,12 @@ var lCurl = function(ccurl, l_url, self) {
         logger.info( body.length );
         logger.info( '---' );
         logger.info( this.getInfo( 'TOTAL_TIME' ) );
+        //transformer le l_url de promo en rayon pour tromper la mécanique
+        if(l_url.indexOf("-offres")>-1) {
+        	//hack
+        	l_url.replace("-offres","-rayon");
+        }
+        //
         var tb = body.split("('ctl00_main_ctl05_pnlElementProduit',");
         if(tb.length > 0) {
             var part2 = tb[1];
@@ -63,7 +69,7 @@ var lCurl = function(ccurl, l_url, self) {
                     		self.sockets.emit("json_completed");
                     	}
                     	logger.error("!!!!!!!!!OK FINI!!!!!!!!!avant import db");
-                    	importProduits(function(result) {
+                    	importProduits(self,function(result) {
                     		self.emit('all_completed');
                     		if (self.sockets !== null && self.sockets !== undefined) {
                     			self.sockets.emit("all_completed");
@@ -141,7 +147,6 @@ function importeur(dest) {
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284323-Fruits-Legumes.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284321-Pains-Patisseries.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284320-Frais.aspx',
-		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284246-Surgeles.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284319-Epicerie-salee.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284309-Epicerie-sucree.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284310-Boissons.aspx',
@@ -202,7 +207,6 @@ function importeur(dest) {
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284555-Couches-lingettes-et-cotons.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284556-Soins-et-puericulture.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284557-Le-marche-Bio.aspx',
-		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284558-Frais-et-Surgeles-Bio.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284559-Epicerie-salee-Bio.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284560-Epicerie-sucree-Bio.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284561-Boissons-Bio.aspx',
@@ -232,6 +236,7 @@ function importeur(dest) {
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284690-Piles-Ampoules-et-Electricite.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284692-Chauffage-et-allumage.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284689-Fleurs-Jardin-et-Piscine.aspx'];
+		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/offres-288597-Promotions.aspx'
 };
 
 importeur.prototype.getNext = function() {

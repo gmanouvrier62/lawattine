@@ -30,6 +30,7 @@
  //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
  	//alert($("#mondiv").attr('tom'));
 $(function(){
+  var globalTable;
   function impression(content){
       var fen = window.open("", "", "height=500px, width=1000px,toolbar=0, menubar=0, scrollbars=1, resizable=1,status=0, location=0, left=10, top=10");
       // style du popup
@@ -59,6 +60,7 @@ $(function(){
     $("#mode_paiement").html("<b>" + fCommande.paiement + "</b>");
     $("#infoCmd").show();
     $("#btnAchat").show();
+    
     currentIdClient = fCommande.client.id;
    
     for(var f = 0; f < fCommande.produits.length; f++) {
@@ -70,7 +72,8 @@ $(function(){
       } else {
         AjouterUneLigne(fCommande.produits[f], fCommande.status);
       }
-    }          
+    } 
+    $("#megaSearch").val("");         
   }
 
   function AjouterUneLigne(obj,state) {
@@ -122,6 +125,8 @@ $(function(){
         var ligne_mobile = "<li style='font-weight:bold'>Mobile : " + datas.data.mobile + "</li>";
         $("#infos").html("<ul>" + ligne_nom + ligne_adr + ligne_ville + ligne_tel + ligne_mobile + "</ul>");
         fullCommande.client = datas.data;
+        $("#txtAvoir").val(datas.data.current_avoir);
+        $("#txtDebit").val(datas.data.current_debit);
     });
   }
  	$.get('/clients/getAllJson',{}, function(datas){
@@ -149,18 +154,31 @@ $(function(){
             selectProduits += "<option value='" + types[cc].id + "'>" + types[cc].nom + "</option>";
           }
           selectProduits +=" </select>";
+          selectProduits += "<button title='recharger' class='btn btn-primary action-reload'><i class='fa fa-share'></i></button>";
         }
         $(".fontPr").append(selectProduits);
         //setDataTable dans /js   caisse.js
-        var globalTable = $("#tblP").setDataTable('produits',0);
+        //currentIdClient
+
+        globalTable = $("#tblP").setDataTable('produits',0);
         //Gestion du choix produit
         $("#slP").change(function(){
+          $("#megaSearch").val("");
           var idRayon = $(this).find('option:selected').val();
           //Choix d'un produit
           globalTable.ajax.url( '/produits/getAll/' + idRayon ).load();
-         
-
         });
+        $('body').on('click', 'button.action-reload', function (event) {
+          var idRayon = $("#slP").find('option:selected').val();
+          if(idRayon>1) { 
+            console.log("ok modif critere " + idRayon);
+            globalTable.ajax.url( '/produits/getAll/' + idRayon ).load();
+
+          }
+          else
+            console.log("pas de critere valable");
+        });
+       
     });
         
     //Ajout des infos clients en général et client selectionné
@@ -174,6 +192,10 @@ $(function(){
       	currentClient = $(this).val();
       	rechercheClient(currentClient);
 
+        clientsProducts = "/produits/distinct/" + currentClient;
+        console.log("requete de recherche par default : ", clientsProducts);
+        globalTable.ajax.url(clientsProducts).load();
+        
       });
     });
 
@@ -260,7 +282,7 @@ $(function(){
         $("#dvChoixPr").css('display','none');//fermeture de la modale
         var numC = parseInt($("#idCommande").html());
         if (isNaN(numC)) numC = 0; 
-        $.post('/commandes/addormodify',{'id_commande': numC, 'id_client': currentIdClient, 'dt_livraison' : null, 'lignes': lignes}, function(datas){
+        $.post('/commandes/addormodify',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'dt_livraison' : null, 'lignes': lignes}, function(datas){
               //alert(JSON.stringify(datas.fullCommande));
               if(datas.err != null) {
                  var infos = new PNotify({
@@ -284,7 +306,7 @@ $(function(){
       $(this).click(function(){
           var numC = parseInt($("#idCommande").html());
           if (isNaN(numC)) numC = 0; 
-          $.post('/commandes/valider',{'id_commande': numC, 'id_client': currentIdClient, 'paiement': $(this).data('paiement')}, function(datas) {
+          $.post('/commandes/valider',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'paiement': $(this).data('paiement')}, function(datas) {
              if(datas.err != null) {
                  var infos = new PNotify({
                     title: 'Erreur ',

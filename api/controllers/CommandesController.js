@@ -14,10 +14,18 @@ module.exports = {
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 		if(req.params.status !== null && req.params.status !== undefined) {
 			logger.warn('status concernés : ', req.params.status);
-			return res.render ('commandes/commandes_liste',{'action': 'COMMANDES A LIVRER', 'status': req.params.status, 'menu': menu});
+			return res.render ('commandes/commandes_liste',{'action': 'COMMANDES A LIVRER', 'status': req.params.status, 'id_client':"", 'menu': menu});
 		} else {
 			logger.warn('pas de status donc tous');
-			return res.render ('commandes/commandes_liste',{'action': 'COMMANDES', 'status': [1,2,3,4,5,6], 'menu': menu});	
+			var id_client = "";
+			if(req.params.id_client !== null & req.params.id_client !== undefined) {
+				id_client = req.params.id_client;
+				logger.warn("on a un clt ", req.params.id_client);
+			} else {
+				logger.warn('pas de clt');
+			}
+
+			return res.render ('commandes/commandes_liste',{'action': 'COMMANDES', 'status': [1,2,3,4,5,6],'id_client': id_client, 'menu': menu});	
 		}
 		
 	},
@@ -45,6 +53,17 @@ module.exports = {
 		
 	},
 	print: function(req, res) {
+		String.prototype.minified = function() {
+			var tb = this.split(" ");
+			var content = "";
+			for (var c = 0; c < tb.length; c++) {
+				if(tb[c].length > 4)
+					content += tb[c].substring(0,5) + '. ';
+				else
+					content += tb[c] + ' ';
+			}
+			return content;
+		};
 		var idCmd = req.body.id;
 		var id_client = req.body.id_client;
 		if(idCmd == null || idCmd == undefined) return res.send({'err': 'pas de numéro de commande'});
@@ -73,11 +92,13 @@ module.exports = {
 			var s2 = 'style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black"';
 			for (var c = 0; c < fCom.produits.length; c++) {
 				var prd = fCom.produits[c];
-				content += "<tr><td " + s + ">" + prd.nom + "</td><td " + s + ">" + prd.pu + "</td><td " + s + ">" + prd.qte + "</td><td " + s +">" + prd.ttc + "</td></tr>";
+				content += "<tr><td " + s + ">" + prd.nom.minified() + "</td><td " + s + ">" + prd.pu + "</td><td " + s + ">" + prd.qte + "</td><td " + s +">" + prd.ttc + "</td></tr>";
 			}
 			content += "<tr><td " + s2 + " colspan='2'></td><td " + s2 + ">" + fCom.ttlArticles + "</td><td " + s2 + ">" + fCom.total_commande + "</td></tr>";
 
 			template = template.replace(/@@CONTENT@@/g, content);
+			var sepa = "<br>------------------------------------------------------------------------------------------------------------------------<br>";
+			template += sepa + template;
 			var content_file = '<html><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></head><body>' + template + '</html>';
 			fs.writeFile(sails.config.chemin_impression_commande + fCom.id + ".html", content_file, function (err) {
 		    	if (err) {
@@ -198,6 +219,9 @@ module.exports = {
 		var dt_livraison = req.body.dt_livraison;
 		var paiement = req.body.paiement;
 		var cStatus = req.body.status;
+		var avoir = req.body.avoir;
+		var debit = req.body.debit;
+
 		logger.warn("status = ", cStatus);
 		if(dt_livraison == null || dt_livraison == '') {
 			dt_livraison =  moment().add(1,"days").format("YYYY-MM-DD");
@@ -227,7 +251,22 @@ module.exports = {
 								return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
 							}
 							logger.util(fCom);
-							return res.send({'err': null,'commande': fCom});
+							var origine = { 'id': id_client};
+							var cible = { 
+								'current_avoir': avoir,
+								'current_debit': debit
+							};
+							sails.models.clients.update(origine, cible).exec(function creaStat(err,updated) {
+								logger.warn('alors update avoir ', updated);
+								if (err !== null && err !== undefined) {
+									logger.error(err);
+									return res.send({'err': "Erreur de l'update client", 'commande': null});
+								}
+								fCom.client.current_avoir = avoir;
+								fCom.client.current_debit = debit;
+								
+								return res.send({'err': null,'commande': fCom});
+							});
 						});
 					});
 				}
@@ -273,7 +312,23 @@ module.exports = {
 										return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
 									}
 									logger.util(fCom);
-									return res.send({'err': null,'commande': fCom});
+									var origine = { 'id': id_client};
+									var cible = { 
+										'current_avoir': avoir,
+										'current_debit': debit
+									};
+
+									sails.models.clients.update(origine, cible).exec(function creaStat(err,updated) {
+										logger.warn('alors update avoir ', updated);
+										if (err !== null && err !== undefined) {
+											logger.error(err);
+											return res.send({'err': "Erreur de l'update client", 'commande': null});
+										}
+										fCom.client.current_avoir = avoir;
+										fCom.client.current_debit = debit;
+										
+										return res.send({'err': null,'commande': fCom});
+									});
 								});
 							});
 						}
@@ -309,6 +364,11 @@ module.exports = {
 		});
 	},
 	valider: function(req, res) {
+		if (req.body.id_client == null || req.body.id_client == undefined || parseInt(req.body.id_client) <= 0 ) return res.send({'err': 'Aucun client selectionné','commande': null});
+		//if (req.body.id_commande == null || req.body.id_commande == undefined || parseInt(req.body.id_commande) <= 0 ) return res.send({'err': 'Il faut un numéro de commande','commande': null});
+		
+		var avoir = req.body.avoir;
+		var debit = req.body.debit;
 		var origine = {
 			'id': req.body.id_commande,
 			'id_client': req.body.id_client
@@ -331,7 +391,26 @@ module.exports = {
 					return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
 				}
 				logger.util(fCom);
-				return res.send({'err': null,'commande': fCom});
+				logger.util(fCom);
+				var origine = { 'id': req.body.id_client};
+				var cible = { 
+					'current_avoir': avoir,
+					'current_debit': debit
+				};
+				
+				sails.models.clients.update(origine, cible).exec(function creaStat(err,updated) {
+					logger.warn('alors update avoir ', updated);
+					if (err !== null && err !== undefined) {
+						logger.error(err);
+						return res.send({'err': "Erreur de l'update client", 'commande': null});
+					}
+					if(fCom.client !== null && fCom.client !== undefined) {
+						fCom.client.current_avoir = avoir;
+						fCom.client.current_debit = debit;
+					}
+					
+					return res.send({'err': null,'commande': fCom});
+				});
 			});
 		});
 

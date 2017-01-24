@@ -30,7 +30,7 @@ $(function(){
         //socket.emit('i am client', {data: 'foo!'});
     });
     socket.on('completed', function(d_ko, d_ok) {
-    	console.log(d_ko, " , ", d_ok);
+    	//console.log(d_ko, " , ", d_ok);
     	$('.dial1')
         .val(d_ko)
         .trigger('change');
@@ -39,7 +39,7 @@ $(function(){
         .trigger('change');
     });
     socket.on('bad', function(d_ko, d_ok, l_lnk) {
-    	console.log("BADOUNET : ", d_ko, " , ", d_ok);
+    	//console.log("BADOUNET : ", d_ko, " , ", d_ok);
     	$('.dial1')
         .val(d_ko)
         .trigger('change');
@@ -55,7 +55,12 @@ $(function(){
     socket.on('all_completed', function(){
     	console.log("tout est ok");
     });
-
+    socket.on('importations', function(){
+        console.log("les imports debutent");
+    });
+    socket.on('fin_importations', function(){
+        console.log("les imports sont finis");
+    });
 
 
 });

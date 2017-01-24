@@ -211,7 +211,7 @@ ul, li {margin: 0; padding: 0;}
 .disponible {
 	padding-left:3px;
 	padding-right:3px;
-	width:100px;
+	width:60px;
 	color:#DDDDDD;
 	box-shadow: 0px 0px 10px 4px rgba(37, 180, 8, 0.75);
 	-moz-box-shadow: 0px 0px 10px 4px rgba(37, 180, 8, 0.75);
@@ -221,7 +221,7 @@ ul, li {margin: 0; padding: 0;}
 .indisponible {
 	padding-left:3px;
 	padding-right:3px;
-	width:100px;
+	width:60px;
 	color:#DDDDDD;
 	box-shadow: 0px 0px 10px 4px rgba(223, 92, 49, 0.75);
 	-moz-box-shadow: 0px 0px 10px 4px rgba(223, 92, 49, 0.75);
@@ -317,6 +317,9 @@ ul, li {margin: 0; padding: 0;}
 	list-style-type: none;
 	margin-top: 1px;
 }
+.classicGrey {
+	background-color: #DDDDDD;
+},
 #marchandise {
 	font-weight:bold;
 	margin-right:10px;

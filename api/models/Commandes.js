@@ -47,17 +47,26 @@ module.exports = {
     var dtFin = null;
     var id_client = null;
     var tbCritere = [];
-    if (req.body.status !== null && req.body.status !== undefined)
-      tbCritere.push("st.id in (" + req.body.status.join(',') + ")");
-    if (req.body.id_client !== null && req.body.id_client !== undefined && req.body.id_client > 0)
-      tbCritere.push("id_client = " + req.body.id_client);
-    if (req.body.dtDebut !== null && req.body.dtDebut != undefined) {
-      if(req.body.dtFin !== null && req.body.dtFin !== undefined)
-        tbCritere.push("dt_livraison between '" + req.body.dtDebut + " 00:00:00' and '" + req.body.dtFin + " 23:59:59'");
-      else
-        tbCritere.push("dt_livraison between '" + req.body.dtDebut + " 00:00:00' and '" + req.body.dtDebut + " 23:59:59'");
+    if(req.body !== null && req.body !== undefined) {
+      if (req.body.status !== null && req.body.status !== undefined)
+        tbCritere.push("st.id in (" + req.body.status.join(',') + ")");
+      if (req.body.id_client !== null && req.body.id_client !== undefined && req.body.id_client > 0)
+        tbCritere.push("id_client = " + req.body.id_client);
+      if (req.body.dtDebut !== null && req.body.dtDebut != undefined) {
+        if(req.body.dtFin !== null && req.body.dtFin !== undefined)
+          tbCritere.push("dt_livraison between '" + req.body.dtDebut + " 00:00:00' and '" + req.body.dtFin + " 23:59:59'");
+        else
+          tbCritere.push("dt_livraison between '" + req.body.dtDebut + " 00:00:00' and '" + req.body.dtDebut + " 23:59:59'");
+      }
     }
-    
+    //cas d'un passage en :id_client
+    /*
+    if(req.params !== null && req.params !== undefined) {
+      if(req.params.id_client !== null && req.params.id_client !== undefined)
+        tbCritere.push("id_client = " + req.params.id_client);
+    }
+    */
+    logger.warn("crits : ", tbCritere);
     var sql = "select c.id as idc, ";
       sql += "c.status as id_status, ";
       sql += "st.nom_status as nom_status, ";
@@ -109,7 +118,7 @@ module.exports = {
       produits: [],
       total_commande: 0
     };
-    var sql = "select * from historique h inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
+    var sql = "select * from historique h inner join produits prd on h.id_produit=prd.id inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
     logger.warn(sql);
     sails.models.clients.find({"id": id_client}, function (err, clt) {
       if (err !== null) return callback("pb de récupération client", null);
@@ -159,7 +168,7 @@ module.exports = {
           }
           fullCommande.ttlArticles = ttlArticles;
           logger.util(commandes[0]);
-          fullCommande.total_commande = commandes[0].total_commande;
+          fullCommande.total_commande = commandes[0].ttl_commande;
           logger.warn('ready to back histo');
         }
         callback(null,fullCommande);
@@ -231,7 +240,10 @@ module.exports = {
         produit.pht = commandes[c].ht;
         produit.ttl_ht = parseInt((produit.pht * produit.qte) * 100) / 100;
         produit.tx_com = commandes[c].tx_com;
-        produit.commission = parseInt((produit.pht * produit.tx_com)) / 100; //Comm unitaire
+        logger.warn ("le ht+com=", (produit.pht / (1-(produit.tx_com / 100))));
+        logger.warn("le ht = ", produit.pht);
+        logger.warn("rien que la com=",(produit.pht / (1-(produit.tx_com / 100))) - produit.pht);
+        produit.commission = (produit.pht / (1-(produit.tx_com / 100))) - produit.pht; //Comm unitaire
         produit.ttl_com = parseInt((produit.commission * produit.qte) * 100) / 100;//Comm totale
         //TODO : revoir les calculs 
         produit.tx_tva = commandes[c].tx_tva;
@@ -245,6 +257,7 @@ module.exports = {
 			}
       fullCommande.ttlArticles = ttlArticles;
       logger.warn('ready to back');
+      logger.error("fullCommande ", fullCommande.produits);
       fullCommande.total_commande = sails.models.commandes.arrondi(fullCommande.total_commande);
 			callback(null,fullCommande);
     	});

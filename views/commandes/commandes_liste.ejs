@@ -21,6 +21,14 @@
  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
 <script>
 $(function(){
+    var filtreClient = "";
+    <% if (this.id_client != "") {%>
+        filtreClient = "<%=id_client%>";
+        console.log("<%=id_client%>");
+    <%} else {%>
+        console.log("chelou pas de client");
+        <%}%>
+
     var monthNames = [
       "Janvier", "Février", "Mars",
       "Avril", "Mai", "Juin", "Juillet",
@@ -171,7 +179,8 @@ $(function(){
             return nRow;
         }
     });
-    $.post('/commandes/getCommandes', {'status': choixStatus}, function(datas){
+console.log("avant post : ", filtreClient);
+    $.post('/commandes/getCommandes', {'status': choixStatus,'id_client': filtreClient}, function(datas){
         console.log('postounet : ', datas);
         $('#tblCo').dataTable().fnClearTable();
         if(datas.data.length > 0){
@@ -239,7 +248,7 @@ $(function(){
                     //Récup des dates et affichage des commandes
                     $(this).dialog("close");
                     if(currentDate2 >= currentDate1) {
-                        $.post('/commandes/getCommandes', {'status': choixStatus, 'dtDebut': currentDate1, 'dtFin': currentDate2}, function(datas){
+                        $.post('/commandes/getCommandes', {'status': choixStatus, 'dtDebut': currentDate1, 'dtFin': currentDate2,'id_client': filtreClient}, function(datas){
                             console.log('postounet : ', datas);
                             $('#tblCo').dataTable().fnClearTable();
                             if(datas.data.length > 0){

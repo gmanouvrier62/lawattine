@@ -1,6 +1,7 @@
 $.prototype.setDataTable = function(l_table,id) {
 	$("div.toolbar").html('<b>Tout rayon:&nbsp;</b><input type="text" id="megaSearch" value="">');
 	var ajaxUrl ='';
+	
 	if(id>0) ajaxUrl = '/' + l_table + '/getAll/' + id;
 	var lTable = $(this).DataTable({
 		"columnDefs": [
@@ -41,8 +42,7 @@ $.prototype.setDataTable = function(l_table,id) {
 		"processing": false,
         "serverSide": false,
         "paging": true,
-        "ordering": true,
-        "defaultOrdering": [[2, 'desc']],
+        "ordering": false,
         "searching": true,
         "search": {
             "smart": false

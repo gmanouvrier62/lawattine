@@ -50,10 +50,23 @@ module.exports = {
       }
     });
   },
-  getDistinctProductByClient: function(id_client, callback) {
-    var sql += "select distinct * from caisse.produits where id in (select id_produit from caisse.cmd_pr where ";
+  getDistinctProductsByClient: function(id_client, callback) {
+    if(id_client == null && id_client == undefined) return callback("pas de id_client",null);
+    var sql = "SELECT distinct p.* FROM produits p inner join cmd_pr cp on p.id=cp.id_produit ";
+        sql += " inner join commandes cmd on cmd.id = cp.id_commande ";
+        sql += " inner join clients clt on clt.id=cmd.id_client ";
+        sql += " where cmd.id_client=" + id_client;
 
-  }
+    this.query(sql, function getPrds(err, result) {
+      if(err != null) {
+        logger.error("ATTENTION ! ", err);
+        callback(err,null);
+      } else {
+        callback(null,result);
+      }
+    });
+
+  },
   getRayonFromCom: function(txCom,tb,  callback) {
     var sql = " select t.nom as rayon from produits p inner join typesproduits t on p.id_type=t.id where tx_com=" + txCom;
     this.query(sql, function(err, resultat) {
@@ -71,12 +84,14 @@ module.exports = {
   },
   getAllCrit: function(crit, callback) {
     var tbCrit = [];
+    var extra = "";
     if (crit.nom !== null && crit.nom !== undefined) {
-      tbCrit.push("nom like '%" + crit.nom + "%' "); 
+      tbCrit.push("nom like '" + crit.nom + "%' "); 
+      extra = " UNION select * from  caisse.produits where nom like '%" + crit.nom + "%' ";
     } 
 
     if(tbCrit.length > 0) {
-      sql = "select * from  caisse.produits where " + tbCrit.join(" and ") + " order by nom asc";
+      sql = "select * from  caisse.produits where " + tbCrit.join(" and ") + extra;
       console.log("DANS MODEL : ", sql);
       
       this.query(sql, function creaStat(err,result){
@@ -92,7 +107,7 @@ module.exports = {
     }
   },
   majPrix: function(callback) {
-      sql = "update produits set ttc_vente = ROUND(pht * ( 1 + tx_com /100 ) * ( 1 + tva /100 ),2)";
+      sql = "update produits set ttc_vente = ROUND((pht / ( 1 - (tx_com/100) )) * ( 1 + tva /100 ),2)";
       logger.warn(sql);
       
       this.query(sql, function(err, pertinents) {
@@ -116,10 +131,10 @@ module.exports = {
         criteres.rayons = [];
       }
       if(criteres.rayons.length > 0) {
-        sql = "update produits set tx_com = " + tx + ", ttc_vente = ROUND(pht * ( 1 +" + tx + " /100 ) * ( 1 + tva /100 ),2)";
+        sql = "update produits set tx_com = " + tx + ", ttc_vente = ROUND((pht / ( 1 -(" + tx + "/100))) * ( 1 + tva /100 ),2)";
         sql +=" where id_type in(" + criteres.rayons.join(",") + ") and pht >=" + min + " and pht<=" + max;
       } else {
-        sql = "update produits set tx_com = " + tx + ", ttc_vente = ROUND(pht * ( 1 +" + tx + " /100 ) * ( 1 + tva /100 ),2)";
+        sql = "update produits set tx_com = " + tx + ", ttc_vente = ROUND((pht / ( 1 -(" + tx + "/100))) * ( 1 + tva /100 ),2)";
         sql+= " where pht >=" + min + " and pht<=" + max;
       }
       logger.warn(sql);

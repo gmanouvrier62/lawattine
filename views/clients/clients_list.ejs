@@ -23,11 +23,16 @@ $(function(){
  	
     $("#formModal").hide();
  	$('#nav').spasticNav();
-    
+    $('body').on('click', 'button.action-cmds', function (event) {
+        //TODO charger la liste commandes 
+        
+        document.location.href = "/commandes/client/" + $(this).data("id");
+
+    });
     $('body').on('click', 'button.action-view', function (event) {
         $("#formModale").ModalFormBind( {
                                             'title': "Fiche Client",
-                                            'height': '380',
+                                            'height': '410',
                                             'resource':'clients', 
                                             'id': $(this).data("id"),
                                             'fields' : {
@@ -39,7 +44,9 @@ $(function(){
                                                             'ville': 'Ville',
                                                             'tel': 'Tel',
                                                             'mobile': 'Mobile',
-                                                            'email': 'Mail'
+                                                            'email': 'Mail',
+                                                            'current_avoir': 'Avoir',
+                                                            'current_debit': 'Débit'
                                                         }
                                         } );
         
@@ -48,7 +55,7 @@ $(function(){
      $('body').on('click', 'button.action-new', function (event) {
         $("#formModale").ModalFormBind( {
                                             'title': "Fiche Client",
-                                            'height': '380',
+                                            'height': '410',
                                             'resource':'clients', 
                                             'id': 'N',
                                             'fields' : {
@@ -60,7 +67,9 @@ $(function(){
                                                             'ville': 'Ville',
                                                             'tel': 'Tel',
                                                             'mobile': 'Mobile',
-                                                            'email': 'Mail'
+                                                            'email': 'Mail',
+                                                            'current_avoir': 'Avoir',
+                                                            'current_debit': 'Débit'
                                                         }
                                         });
     });
@@ -73,15 +82,41 @@ $(function(){
                 // this case `data: 0`.
                 "render": function ( data, type, row ) {
                     var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir le client" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
-                    html += '<button class="btn btn-primary btn-xs btn-action action-touche" style="font-size: 13px;margin-left:5px" title="Supprimer" data-id="' + row[0] + '"><i class="fa fa-trash"></i></button>';
+                    html += '<button class="btn btn-primary btn-xs btn-action action-cmds" style="font-size: 13px;margin-left:5px" title="Voir les commandes" data-id="' + row[0] + '"><i class="fa fa-shopping-basket"></i></button>';
                     
                     return html;
                 },
                 "targets": 9
             },
-            { "visible": false,  "targets": [0] }
+            { "visible": false,  "targets": [0] },
+            { "className": "col_std", "targets": [ 1 ] },
+            { "className": "col_std", "targets": [ 2 ] },
+            { "className": "col_xxl", "targets": [ 3 ] },
+            { "className": "col_std", "targets": [ 4 ] },
+            { "className": "col_std", "targets": [ 5 ] },
+            { "className": "col_std", "targets": [ 6 ] },
+            { "className": "col_std", "targets": [ 7 ] },
+            { "className": "col_std", "targets": [ 8 ] },
+            { "className": "col_xxl", "targets": [ 9 ] },
             
         ],
+         "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+           
+            var cl = "classicGrey";
+           
+            $('td:eq(0)', nRow).addClass( cl );
+            
+            $('td:eq(1)', nRow).addClass( cl );
+            $('td:eq(2)', nRow).addClass( cl );
+            $('td:eq(3)', nRow).addClass( cl );
+            $('td:eq(4)', nRow).addClass( cl );
+            $('td:eq(5)', nRow).addClass( cl );
+            $('td:eq(6)', nRow).addClass( cl );
+            $('td:eq(7)', nRow).addClass( cl );
+            $('td:eq(8)', nRow).addClass( cl );
+            return nRow;
+           
+        },
         "processing": false,
         "serverSide": false,
         "paging": true,
@@ -108,7 +143,7 @@ $(function(){
 
 <div id="dvMiddle" class="row">
 
-	<div id="rowClients" class="col-md-8" style="margin-left:100px;margin-top:20px;">
+	<div id="rowClients" class="col-md-10" style="margin-left:100px;margin-top:20px;">
 		<table id="tblClients" class="order-column" cellspacing="0" width="100%">
             <thead>
                 <tr>
@@ -142,5 +177,6 @@ $(function(){
 	</div>
 </div>
 <div id="formModale" ></div>
+
 </body>
 </html>

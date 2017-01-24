@@ -15,7 +15,8 @@
         txCom = parseFloat(txCom);
         tva = parseFloat(tva);
 
-        var tt1 = ht +( (txCom*ht)/100 );
+        //var tt1 = ht +( (txCom*ht)/100 );
+        var tt1 = ht / (1 - (txCom/100));
         var resultat = tt1 + ((tt1*tva)/100);
        
         return Math.round(resultat *100)/100;

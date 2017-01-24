@@ -8,6 +8,7 @@ var path = require('path');
 var formidable = require('formidable');
 
 var importeur = require("../services/importeur.js"); 
+var import_images = require("../services/import_images.js"); 
 //Penser à supprimer createJson
 module.exports = {
 
@@ -70,8 +71,6 @@ module.exports = {
 			
 	},
 	prepare_import_json: function(req, res) {
-		
-
 		var imp = new importeur();
 		imp.getNext();
 		imp.on("pasbon", function(){
@@ -86,17 +85,30 @@ module.exports = {
 		imp.on("all_completed", function(){
 			//voir pour un socketio 
 			logger.warn("oki all finished");
-			//sails.models.produits.majPrix(function(result){
-			//	logger.warn("OK mise à jour prix !!!!")
-			//});
 		});
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
-		return res.render ('produits/import',{'action': 'import', 'menu': menu});
-
-	},
-	import_rayon_json: function(req, res) {
-
 		
+		return res.render ('produits/import',{'action': 'import', 'menu': menu});
+	},
+	import_images: function(req, res) {
+		var imp = new import_images();
+		imp.getNext();
+		imp.on("pasbon", function(){
+			logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
+			imp.getNext();
+		});
+		
+		imp.on("completed", function(){
+			logger.warn("fini pour ", imp.currentLink, " pointeur ", this.pointeur);
+			imp.getNext();
+		});
+		imp.on("all_completed", function(){
+			//voir pour un socketio 
+			logger.warn("oki all finished");
+		});
+		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+		
+		return res.render ('produits/import_images',{'action': 'import_images', 'menu': menu});
 
 	},
 	repartition_com: function(req, res) {
@@ -160,13 +172,44 @@ module.exports = {
 					objResult.data.push(tb);
 
 				});
-				logger.util(objResult);
+				logger.util(objResult[0]);
 				return res.send(objResult);
 			} else {
 				return res.send("");
 			}
 			
 		});
+	},
+	getDistinctProductsByClient: function (req, res) {
+		sails.models.produits.getDistinctProductsByClient(req.params.id_client, function(err,results) {
+			if (results !== null) {
+			var objResult = {"data": []};
+				results.map(function(obj,idx) {
+					var tb = [];
+					tb.push(obj.id);
+					tb.push(obj.nom.toString());
+					tb.push(obj.id_type);
+					tb.push(obj.ref_interne.toString());
+					tb.push(obj.ref_externe.toString());
+					tb.push(obj.ttc_externe);
+					tb.push(obj.pht);
+					tb.push(obj.tva);
+					tb.push(obj.tx_com);
+					tb.push(obj.ttc_vente);
+					tb.push(obj.icone.toString());
+					if(obj.conditionnement !== null)
+						tb.push(obj.conditionnement.toString());
+					else
+						tb.push(obj.conditionnement);
+					tb.push(obj.disponibilite);
+					objResult.data.push(tb);
+
+				});
+			}
+			logger.util(objResult);
+			return res.send(objResult);
+		});
+
 	},
 	getAll: function (req, res) {
 		sails.models.produits.getAll(req.params.id, function(err,results) {
@@ -240,7 +283,7 @@ module.exports = {
 	},
 	getTypes: function (req, res) {
 		logger.util("ok dans getTypes ");
-		var sql = " select * from caisse.typesproduits order by nom asc";
+		var sql = " select * from caisse.typesproduits where id in (select id_type from caisse.produits) order by nom asc";
 		sails.models.typesproduits.query(sql,function(err,results) {
 			logger.warn(err);
 			if (err) return res.send({'err': err});
