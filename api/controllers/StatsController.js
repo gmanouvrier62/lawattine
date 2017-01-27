@@ -28,7 +28,7 @@ module.exports = {
 		logger.warn("OK dans le controller stocks");
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 
-		return res.render ('stats/ventes',{'action': 'stats', 'periode': periode, 'd1': debut, 'd2': fin, 'menu': menu});
+		return res.render ('chiffres/ventes',{'action': 'stats', 'periode': periode, 'd1': debut, 'd2': fin, 'menu': menu});
 	},
 
 	ventes_jour: function (req, res) {

@@ -168,7 +168,7 @@ $(function(){
 	PNotify.prototype.options.styling = "jqueryui";
 	function afficheStats(dDebut, dFin) {
 
-        $.post("/stats/ventes_jour",{'dtDebut': dDebut, 'dtFin': dFin, 'status': [4]}, function(datas) {
+        $.post("/chiffres/ventes_jour",{'dtDebut': dDebut, 'dtFin': dFin, 'status': [4]}, function(datas) {
     		if(datas.err != "" && datas.err !== null) {
 			 var infos = new PNotify({
                 title: 'Erreur ',
@@ -210,7 +210,7 @@ $(function(){
             
             <% if(periode == 1) {%>
                 $("#simpleText").hide();
-                var l_url = "/stats/ventes/1/" + d1 + "/" + d2; 
+                var l_url = "/chiffres/ventes/1/" + d1 + "/" + d2; 
                 console.log(l_url);
                 document.location.href = l_url;
             <%}%>
@@ -232,7 +232,7 @@ $(function(){
                 console.log("youhou ", selectedDate);
                 d2 = selectedDate;
                
-                var l_url = "/stats/ventes/2/" + d1 + "/" + d2;
+                var l_url = "/chiffres/ventes/2/" + d1 + "/" + d2;
                 console.log(l_url);
                 document.location.href = l_url;
               }
