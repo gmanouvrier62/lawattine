@@ -1,6 +1,6 @@
 var fs = require('fs');
 var logger = require('../services/logger.init.js').logger("tom.txt");
-
+var definer = require("../services/definer.js");
 module.exports = {
 
 home: function(req, res) {
@@ -29,6 +29,7 @@ print: function(req, res) {
 	var catalogue = req.body.edition;
 	logger.util("le catalogue print : ", catalogue);
 	var template = fs.readFileSync(sails.config.template_catalogue).toString();
+	var fileTemplate = template;
 	template = template.replace("@@TITRE@@", catalogue.nom);
 	var content = "";
 	for(var c = 0; c < catalogue.sections.length; c++) {
@@ -41,7 +42,7 @@ print: function(req, res) {
 			 col = colRef;
 			}
 			col --;
-			content += "<td><img style='width:100px;height:100px' src='http://localhost:800" + catalogue.sections[c].produits[cc].icone + "'></td>";
+			content += "<td><img style='width:100px;height:100px' src='" + sails.config.catalogueHost + catalogue.sections[c].produits[cc].icone + "'></td>";
 		}
 		content += "</tr></table>";
 	}

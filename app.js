@@ -27,6 +27,7 @@ process.chdir(__dirname);
   var sails;
   try {
     sails = require('sails');
+   
   } catch (e) {
     console.error('To run an app using `node app.js`, you usually need to have a version of `sails` installed in the same directory as your app.');
     console.error('To do that, run `npm install sails`');
@@ -56,4 +57,5 @@ process.chdir(__dirname);
 
   // Start server
   sails.lift(rc('sails'));
+
 })();
