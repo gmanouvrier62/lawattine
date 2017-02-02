@@ -90,8 +90,8 @@ module.exports = {
 		
 		return res.render ('produits/import',{'action': 'import', 'menu': menu});
 	},
-	import_images: function(req, res) {
-		var imp = new import_images();
+	prepare_import_json_promos: function(req, res) {
+		var imp = new importeur("promos");
 		imp.getNext();
 		imp.on("pasbon", function(){
 			logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
@@ -108,8 +108,15 @@ module.exports = {
 		});
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 		
-		return res.render ('produits/import_images',{'action': 'import_images', 'menu': menu});
-
+		return res.render ('produits/import',{'action': 'import', 'menu': menu});
+	},
+	import_images: function(req, res) {
+		var imp = new import_images( function(err, st) {
+				
+			var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+			
+			return res.render ('produits/import_images',{'action': 'import_images', 'menu': menu});
+		});
 	},
 	repartition_com: function(req, res) {
 		logger.warn('DANS REPARTITION');
@@ -169,6 +176,7 @@ module.exports = {
 					else
 						tb.push(obj.conditionnement);
 					tb.push(obj.disponibilite);
+					tb.push(obj.promo);
 					objResult.data.push(tb);
 
 				});
@@ -202,6 +210,7 @@ module.exports = {
 					else
 						tb.push(obj.conditionnement);
 					tb.push(obj.disponibilite);
+					tb.push(obj.promo);
 					objResult.data.push(tb);
 
 				});
@@ -233,6 +242,7 @@ module.exports = {
 					else
 						tb.push(obj.conditionnement);
 					tb.push(obj.disponibilite);
+					tb.push(obj.promo);
 					objResult.data.push(tb);
 
 				});

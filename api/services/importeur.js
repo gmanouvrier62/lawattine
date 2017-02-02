@@ -7,6 +7,7 @@ var Immutable = require('immutable');
 var mkdirp = require('mkdirp');
 var Curl = require( 'node-libcurl' ).Curl;
 var importProduits = require("./import_produits.js");
+//var flagPromos = require("./flag_promos.js");
 //var http = require('http').Server(app);
 var app = require('express')();
 var http = require('http').Server(app);
@@ -16,6 +17,115 @@ J'ai un tb de liens(pointeur)
 Je lance getNext
 Lors de la fin de traitement il retourne un event error 1 2 ou completed
 */
+var lCurl_promos = function (ccurl, l_url, self) {
+	ccurl.setOpt( 'URL', l_url );
+    ccurl.setOpt( 'FOLLOWLOCATION', true );
+    ccurl.on( 'end', function( statusCode, body, headers ) {
+        logger.info('pour' + l_url);     
+        logger.info( statusCode );
+        logger.info( '---' );
+        logger.info( body.length );
+        logger.info( '---' );
+        logger.info( this.getInfo( 'TOTAL_TIME' ) );
+        //transformer le l_url de promo en rayon pour tromper la mécanique
+        
+        // ctl00_main_ctl01_pnlElementProduitsPromos
+       
+        var tb = body.split("('ctl00_main_ctl01_pnlElementProduitsPromos',");
+         logger.warn("url courrante : ", l_url, " length ", tb.length);
+        if (tb.length <= 1) {
+        	logger.warn("branche promos BDR");
+        	//('ctl00_main_ctl02_pnlElementProduitsBRD_NonPorteur
+        	tb = body.split("('ctl00_main_ctl02_pnlElementProduitsBRD_NonPorteur',");
+        } else {
+        	logger.warn("branche promos offre spe");
+        }
+        
+        if(tb.length > 0) {
+         // //]]
+         logger.warn("tblength>0 pour url ", l_url);
+         //§!!!!!!!!! PB de synchro surement
+         //pas moyen d'avoir la deuxieme promo
+         	var part2 = tb[1];
+            if(part2 !== null && part2 !== undefined) {
+            	var tb2 = part2.split('Utilitaires.widget.initOptions');
+	            var leJSON = tb2[0];
+	            leJSON = leJSON.substring(0,leJSON.length-2);
+	            var fn = 'Promos_' + self.pointeur + '.json';
+	            logger.warn("fichier ", fn);
+	            fs.writeFile(sails.config.importProductsFolder + fn, leJSON, function (err) {
+	                if (err) {
+	                  logger.error("pas bon pour " + l_url);
+	                  self.nbErr ++;
+	                  self.pct_ko = parseInt( (self.nbErr*100)/(self.tbPromos.length-1) );
+	                  if (self.sockets !== null && self.sockets !== undefined) {
+	                  		self.sockets.emit("error", self.pct_ko, self.pct_ok, l_url);
+	                  }	
+	                  self.emit('pasbon');
+	                } else {
+	                    logger.info("ok ducky");
+	                    self.nbOk ++;
+	                    self.pct_ok = parseInt( (self.nbOk*100)/(self.tbPromos.length-1) );
+	                    
+                       	logger.warn('va emttre un completed ', "");
+                    	if (self.sockets !== null && self.sockets !== undefined) {
+                    		self.sockets.emit("completed",self.pct_ko, self.pct_ok);	
+                    	}
+                    	self.emit('completed');
+	                    
+	                }
+	                //logger.warn("point sur lespointeurs self.p", self.pointeur, " self promo ", self.tbPromos.length-1);
+	                if(self.pointeur == self.tbPromos.length) {
+                    	if (self.sockets !== null && self.sockets !== undefined) {
+                    		self.sockets.emit("json_completed");
+                    	}
+                    	logger.error("!!!!!!!!!OK FINI!!!!!!!!!avant import db");
+                    	/*
+                    	importProduits(self,function(result) {
+                    		self.emit('all_completed');
+                    		if (self.sockets !== null && self.sockets !== undefined) {
+                    			self.sockets.emit("all_completed");
+                    		}
+                    	});
+						*/
+	                } 
+	            });
+            }  else {
+	        	if (self.sockets !== null && self.sockets !== undefined) {
+	        		self.nbErr ++;
+	        		self.pct_ko = parseInt( (self.nbErr*100)/(self.tbPromos.length-1) );
+    				self.sockets.emit("bad", self.pct_ko, self.pct_ok, l_url);
+	    		}
+	    		logger.error("pas bon 1");
+	    		self.emit('pasbon');		
+	        }
+
+        } else {
+        	//visiblement la page ne matche pas avec les élémets html à trouver
+        	if (self.sockets !== null && self.sockets !== undefined) {
+        		self.nbErr ++;
+        		self.pct_ko = parseInt( (self.nbErr*100)/(self.tbPromos.length-1) );
+    			self.sockets.emit("bad", self.pct_ko, self.pct_ok, l_url);
+    		}
+    		logger.error("pas bon 2");
+    		self.emit('pasbon');	
+        }
+        this.close();
+    });
+    ccurl.on( 'error', function(err) {
+    	logger.error("erreur curl");
+    	self.nbErr ++;
+    	self.pct_ko = parseInt( (self.nbErr*100)/(self.tbPromos.length-1) );
+    	ccurl.close.bind( ccurl  );
+    	if (self.sockets !== null && self.sockets !== undefined) {
+    		self.sockets.emit("bad", self.pct_ko, self.pct_ok);
+    	}
+    	
+    	
+	});
+    ccurl.perform();
+    return 0;
+};
 
 var lCurl = function(ccurl, l_url, self) {
 	ccurl.setOpt( 'URL', l_url );
@@ -27,12 +137,8 @@ var lCurl = function(ccurl, l_url, self) {
         logger.info( body.length );
         logger.info( '---' );
         logger.info( this.getInfo( 'TOTAL_TIME' ) );
-        //transformer le l_url de promo en rayon pour tromper la mécanique
-        if(l_url.indexOf("-offres")>-1) {
-        	//hack
-        	l_url.replace("-offres","-rayon");
-        }
-        //
+       
+        // ctl00_main_ctl01_pnlElementProduitsPromos
         var tb = body.split("('ctl00_main_ctl05_pnlElementProduit',");
         if(tb.length > 0) {
             var part2 = tb[1];
@@ -64,6 +170,7 @@ var lCurl = function(ccurl, l_url, self) {
                     	self.emit('completed');
 	                    
 	                }
+
 	                if(self.pointeur == self.tbLiens.length-1) {
                     	if (self.sockets !== null && self.sockets !== undefined) {
                     		self.sockets.emit("json_completed");
@@ -134,12 +241,15 @@ function importeur(dest) {
 	});
 
 	if (dest !== null && dest !== undefined) {
-		this.destinationFolder = dest;
+		this.import_type = "promos";
 	} else {
-		this.destinationFolder = "";	
+		this.import_type = "";	
 	}
+	this.destinationFolder = "";
 	this.currentLink = null;
 	this.pointeur = -1;	
+	this.tbPromos = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/offres-288597-Promotions.aspx','http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/bons-de-reduction.aspx'];
+	//autres promos http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/bons-de-reduction.aspx
 	this.tbLiens = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284325-Boucherie.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284326-Volailles-et-Gibiers.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284327-Poissonnerie.aspx',
@@ -236,17 +346,27 @@ function importeur(dest) {
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284690-Piles-Ampoules-et-Electricite.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284692-Chauffage-et-allumage.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284689-Fleurs-Jardin-et-Piscine.aspx'];
-		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/offres-288597-Promotions.aspx'
+		
 };
 
 importeur.prototype.getNext = function() {
 	this.pointeur += 1;
-	this.currentLink = this.tbLiens[this.pointeur];
-	var curl = new Curl();
-    var full_url = this.tbLiens[this.pointeur];
+	if (this.import_type == "") {
+		this.currentLink = this.tbLiens[this.pointeur];
+		var curl = new Curl();
+	    var full_url = this.tbLiens[this.pointeur];
+    } else {
+    	this.currentLink = this.tbPromos[this.pointeur];
+		var curl = new Curl();
+	    var full_url = this.tbPromos[this.pointeur];
+    }
+
     if(full_url !== null && full_url !== undefined) {
     	logger.warn("pour ", full_url);
-    	lCurl(curl, full_url, this);
+    	if (this.import_type == "")
+    		lCurl(curl, full_url, this);
+    	else 
+    		lCurl_promos(curl, full_url, this);
 	}
 };
 

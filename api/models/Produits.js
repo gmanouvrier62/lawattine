@@ -31,7 +31,9 @@ module.exports = {
 
     qte_dispo: { type: 'int'},
 
-    disponibilite: { type: 'int' }    
+    disponibilite: { type: 'int' },
+
+    promo: { type: 'int'},        
   },
 
   getAll: function(idType, callback) {

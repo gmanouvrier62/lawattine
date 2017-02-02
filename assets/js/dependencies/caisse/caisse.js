@@ -48,6 +48,18 @@ $.prototype.setDataTable = function(l_table,id) {
             "smart": false
         },
         "ajax": ajaxUrl,
+         "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            var cl = 'promo_' + aData[13];
+            //console.log(cl);
+            $('td:eq(0)', nRow).addClass( cl );
+            $('td:eq(1)', nRow).addClass( cl );
+            $('td:eq(2)', nRow).addClass( cl );
+            $('td:eq(3)', nRow).addClass( cl );
+            $('td:eq(4)', nRow).addClass( cl );
+            $('td:eq(5)', nRow).addClass( cl );
+            
+            return nRow;
+        },
         "dom": '<"toolbar">frtip'
 
 	});

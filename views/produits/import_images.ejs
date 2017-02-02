@@ -1,0 +1,97 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">  
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+ 
+ <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.knob.min.js"></script>
+<script src="http://localhost:1111/socket.io/socket.io.js"></script>
+<script>
+$(function(){
+	PNotify.prototype.options.styling = "jqueryui";
+	 $(".dial1").knob(); 
+	 $(".dial2").knob();
+
+	
+
+	var socket = window.io.connect("//localhost:1111").on('welcome', function(data) {
+        //alert(data);
+        console.log("connected");
+        //socket.emit('i am client', {data: 'foo!'});
+    });
+    socket.on('completed', function(d_ko, d_ok) {
+    	//console.log(d_ko, " , ", d_ok);
+    	$('.dial1')
+        .val(d_ko)
+        .trigger('change');
+        $('.dial2')
+        .val(d_ok)
+        .trigger('change');
+    });
+    socket.on('bad', function(d_ko, d_ok, l_lnk) {
+    	//console.log("BADOUNET : ", d_ko, " , ", d_ok);
+    	$('.dial1')
+        .val(d_ko)
+        .trigger('change');
+        $('.dial2')
+        .val(d_ok)
+        .trigger('change');
+        $("#badLinks").append("<li>" + l_lnk + "</li>");
+
+    });
+    socket.on('json_completed', function(){
+    	console.log("jason completed");
+    });
+    socket.on('all_completed', function(){
+    	console.log("tout est ok");
+    });
+    socket.on('importations', function(){
+        console.log("les imports debutent");
+    });
+    socket.on('fin_importations', function(){
+        console.log("les imports sont finis");
+    });
+
+
+});
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+<div style="text-align:center"><H1><font >IMPORTATION IMAGES</font></H1></div>
+<table>
+	<tr>
+		<td style="width:200px;margin-bottom:20px">IMPORTS EN ERREUR</td><td style="width:700px;margin-bottom:20px">LIENS KO</td><td style="width:300px;margin-bottom:20px">IMPORTS OK</td>
+	</tr>
+	<tr>
+		<td>
+		<input type="text" class="dial1" value="0" data-displayprevious="true" data-min="0" data-width="100" style="width: 104px; height: 66px; position: absolute; vertical-align: middle; margin-top: 66px; margin-left: -152px; border: 0px none; background: none repeat scroll ;margin-bottom:10px0% 0% transparent; font: bold 40px Arial; text-align: center; color: rgb(135, 206, 235); padding: 0px;">
+		</td>
+		<td>
+          <div id="container_links">
+    		  <ul id="badLinks">
+
+
+              </ul>	
+          </div>
+		</td>
+		<td>
+		<input type="text" class="dial2" value="0" data-displayprevious="true" data-min="0" data-width="100" style="width: 104px; height: 66px; position: absolute; vertical-align: middle; margin-top: 66px; margin-left: -152px; border: 0px none; background: none repeat scroll 0% 0% transparent; font: bold 40px Arial; text-align: center; color: rgb(135, 206, 235); padding: 0px;">
+		</td>
+	</tr>
+</table>
+
+
+</body>

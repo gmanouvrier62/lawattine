@@ -53,6 +53,10 @@ module.exports = {
 		
 	},
 	print: function(req, res) {
+		//pad(5,val,'0')
+		function pad(width, string, padding) { 
+		  return (width <= string.length) ? string : pad(width, padding + string, padding)
+		}
 		String.prototype.minified = function() {
 			var tb = this.split(" ");
 			var content = "";
@@ -84,22 +88,55 @@ module.exports = {
 			template = template.replace(/@@TEL@@/g, fCom.client.tel);
 			template = template.replace(/@@MOBILE@@/g, fCom.client.mobile);
 			
-			template = template.replace(/@@ID_COMMANDE@@/g, fCom.id);
+			template = template.replace(/@@ID_COMMANDE@@/g, moment(fCom.dt_creation).format("YYYYMMDD") + pad(5,fCom.id,'0');
 			template = template.replace(/@@MODE_PAIEMENT@@/g, fCom.paiement);
 			template = template.replace(/@@DT_LIVRAISON@@/g, moment(fCom.dt_livraison).format("DD-MM-YYYY"));
-			var content = "";
-			var s = 'style="border-left:1px solid black;border-right:1px solid black"';
-			var s2 = 'style="border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black"';
+			var ttl_tva = 0;
+			var s = 'style="font-size: 9px;border-left:1px solid black;border-right:1px solid black"';
+			var s2 = 'style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black"';
 			for (var c = 0; c < fCom.produits.length; c++) {
 				var prd = fCom.produits[c];
-				content += "<tr><td " + s + ">" + prd.nom.minified() + "</td><td " + s + ">" + prd.pu + "</td><td " + s + ">" + prd.qte + "</td><td " + s +">" + prd.ttc + "</td></tr>";
+				content += "<tr><td " + s +">" + prd.ref_interne  + "</td><td " + s + ">" + prd.nom.minified() + "</td><td " + s + ">" + prd.qte + "</td><td " + s + ">" + prd.pu + "</td><td " + s +">" + prd.ttc + "</td></tr>";
+				ttl_tva += prd.qte * prd.tva;
 			}
-			content += "<tr><td " + s2 + " colspan='2'></td><td " + s2 + ">" + fCom.ttlArticles + "</td><td " + s2 + ">" + fCom.total_commande + "</td></tr>";
+			//ttl_tva = parseInt(ttl_tva * 100) / 100;
+			//content += "<tr><td " + s2 + " colspan='2'>TOTAL</td><td " + s2 + ">" + fCom.ttlArticles + "</td><td " + s2 + ">" + ttl_tva + "</td><td " + s2 + ">" + fCom.total_commande + "</td></tr>";
 
 			template = template.replace(/@@CONTENT@@/g, content);
+			template = template.replace(/@@TTL_ARTICLES@@/g, fCom.ttlArticles);
+			template = template.replace(/@@TTL_TTC@@/g, fCom.total_comande);
+			switch (fCom.paiement) {
+
+				case 'cb':
+					template = template.replace(/@@TTL_TTC_ES@@/g, "");
+					template = template.replace(/@@TTL_TTC_CH@@/g, "");
+					template = template.replace(/@@TTL_TTC_CB@@/g, fCom.total_comande);
+					template = template.replace(/@@TTL_TTC_PR@@/g, "");
+					template = template.replace(/@@TTL_TTC_AU@@/g, "");
+					break;
+				case 'chèque': 
+					template = template.replace(/@@TTL_TTC_ES@@/g, "");
+					var txtCheque = fCom.total_comande;
+					if (fCom.dt_paiement != "") txtCheque += " (" + fCom.dt_paiement + ")";
+					template = template.replace(/@@TTL_TTC_CH@@/g, txtCheque);
+					template = template.replace(/@@TTL_TTC_CB@@/g, "");
+					template = template.replace(/@@TTL_TTC_PR@@/g, "");
+					template = template.replace(/@@TTL_TTC_AU@@/g, "");
+					break;
+				case 'espèce':
+					template = template.replace(/@@TTL_TTC_CH@@/g, "");
+					template = template.replace(/@@TTL_TTC_CB@@/g, "");
+					template = template.replace(/@@TTL_TTC_PR@@/g, "");
+					template = template.replace(/@@TTL_TTC_AU@@/g, "");
+					template = template.replace(/@@TTL_TTC_ES@@/g, fCom.total_comande);
+					break;
+				default:
+
+			}
 			var sepa = "<br>------------------------------------------------------------------------------------------------------------------------<br>";
 			template += sepa + template;
-			var content_file = '<html><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></head><body>' + template + '</html>';
+			if (fCom.produits.length < 13)
+				var content_file = '<html><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></head><body>' + template + '</html>';
 			fs.writeFile(sails.config.chemin_impression_commande + fCom.id + ".html", content_file, function (err) {
 		    	if (err) {
 		    		logger.error({'err': err});
@@ -229,47 +266,51 @@ module.exports = {
 		
 		if(idCmd == null || idCmd == undefined || idCmd <= 0) {
 			logger.warn("cmd? ajout : ", idCmd);
-			sails.models.commandes.query("insert into caisse.commandes (id_client,status,dt_livraison) values(" + id_client + ",1,'" + dt_livraison + "')", function(err, commande) {
-				if (err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion de la commande", 'commande': null});
-				var idCmd = commande.insertId;
-				logger.warn("id com : ", idCmd);
-				for(var cpt = 0; cpt < lignes.length; cpt++) {
-					var ligne = {
-						id_commande: idCmd,
-						id_produit: lignes[cpt].id_produit,
-						qte: lignes[cpt].qte
-					};
-					logger.util("ligne : ", ligne);
-					
-					sails.models.cmd_pr.findOrCreate(ligne,ligne).exec(function creaStat(err,created){
-						if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande " + err, 'commande': null});
-					
-						//sur retour ok, on recupere la comm créé et on affiche le prix
-						sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
-							if (err !== null && err !== undefined) {
-								logger.error(err);
-								return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
-							}
-							logger.util(fCom);
-							var origine = { 'id': id_client};
-							var cible = { 
-								'current_avoir': avoir,
-								'current_debit': debit
-							};
-							sails.models.clients.update(origine, cible).exec(function creaStat(err,updated) {
-								logger.warn('alors update avoir ', updated);
+			sqlLast = "select position+1 new_pos from commandes order by id desc limit 1"; 
+			sails.models.commandes.query(sqlLast, function (err, resultLast) {
+				var position = resultLast[0].new_pos;
+				sails.models.commandes.query("insert into caisse.commandes (id_client,status,dt_livraison, position) values(" + id_client + ",1,'" + dt_livraison + "'," + position + ")", function(err, commande) {
+					if (err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion de la commande", 'commande': null});
+					var idCmd = commande.insertId;
+					logger.warn("id com : ", idCmd);
+					for(var cpt = 0; cpt < lignes.length; cpt++) {
+						var ligne = {
+							id_commande: idCmd,
+							id_produit: lignes[cpt].id_produit,
+							qte: lignes[cpt].qte
+						};
+						logger.util("ligne : ", ligne);
+						
+						sails.models.cmd_pr.findOrCreate(ligne,ligne).exec(function creaStat(err,created){
+							if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande " + err, 'commande': null});
+						
+							//sur retour ok, on recupere la comm créé et on affiche le prix
+							sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
 								if (err !== null && err !== undefined) {
 									logger.error(err);
-									return res.send({'err': "Erreur de l'update client", 'commande': null});
+									return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
 								}
-								fCom.client.current_avoir = avoir;
-								fCom.client.current_debit = debit;
-								
-								return res.send({'err': null,'commande': fCom});
+								logger.util(fCom);
+								var origine = { 'id': id_client};
+								var cible = { 
+									'current_avoir': avoir,
+									'current_debit': debit
+								};
+								sails.models.clients.update(origine, cible).exec(function creaStat(err,updated) {
+									logger.warn('alors update avoir ', updated);
+									if (err !== null && err !== undefined) {
+										logger.error(err);
+										return res.send({'err': "Erreur de l'update client", 'commande': null});
+									}
+									fCom.client.current_avoir = avoir;
+									fCom.client.current_debit = debit;
+									
+									return res.send({'err': null,'commande': fCom});
+								});
 							});
 						});
-					});
-				}
+					}
+				});
 			});
 		} else {
 			//C'est une modif de commande existante
@@ -377,7 +418,8 @@ module.exports = {
 			'id': req.body.id_commande,
 			'id_client': req.body.id_client,
 			'status': 2,
-			'paiement': req.body.paiement
+			'paiement': req.body.paiement,
+			'dt_paiement': req.body.dt_paiement
 		};
 		logger.warn('avant update');
 		sails.models.commandes.update(origine, target).exec(function (err, updated) {

@@ -48,14 +48,14 @@ print: function(req, res) {
 	}
 	template = template.replace("@@CONTENT@@", content);
 	logger.warn("tpl : ", template);
-
-	fs.writeFile("/var/impression/last_catalogue.html", template, function (err) {
+	var savedTemplate = "<html><head><meta charset='utf-8'></head><body>" + template + "</body></html>";
+	fs.writeFile("/var/impression/last_catalogue.html", savedTemplate, function (err) {
     	if (err) {
     		logger.error(err);
     		return res.send(null);
     	}
 
-    	return res.send(template);
+    	return res.send(savedTemplate);
     });
 },
 getFormatedCatalogue: function (req, res) {

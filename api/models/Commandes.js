@@ -6,13 +6,21 @@ module.exports = {
 
     id: { type: 'int' },
 
+    position: { type: 'int'},
+
     id_client: { type: 'int'},
 
     status: { type: 'int' },
 
     paiement: { type: 'string'},
 
-    dt_livraison: { type: 'datetime'}
+    dt_paiement: { type: 'string'},
+
+    dt_livraison: { type: 'datetime'}, 
+
+    createdAt: { type: 'datetime'},
+
+    updatedAt: { type: 'datetime'}
 
   },
   arrondi: function(p) {
@@ -118,7 +126,7 @@ module.exports = {
       produits: [],
       total_commande: 0
     };
-    var sql = "select * from historique h inner join produits prd on h.id_produit=prd.id inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
+    var sql = "select  c.createdAt dt_creation, h . * , c . * , prd . * , sc . *  from historique h inner join produits prd on h.id_produit=prd.id inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
     logger.warn(sql);
     sails.models.clients.find({"id": id_client}, function (err, clt) {
       if (err !== null) return callback("pb de récupération client", null);
@@ -135,6 +143,9 @@ module.exports = {
             fullCommande.status = commandes[0].nom_status;
             fullCommande.dt_livraison = commandes[0].dt_livraison;
             fullCommande.paiement = commandes[0].paiement;
+            fullCommande.dt_paiement = commandes[0].dt_paiement;
+            fullCommande.position = commandes[0].position;
+            fullCommande.dt_creation = commandes[0].dt_creation;
             var produit = {};
             produit.index_ligne = commandes[c].id_cmd_pr;
             produit.id = commandes[c].id_produit;
@@ -189,7 +200,7 @@ module.exports = {
 
   	};
 	  //rajouter nom, ref_interne et externe
-  	var sql = "select c.id cid, st.nom_status cstatus, c.dt_livraison dt_livraison, c.paiement paiement, cp.qte qte, ";
+  	var sql = "select c.id cid, st.nom_status cstatus, c.dt_livraison dt_livraison, c.createdAt dt_creation,  c.paiement paiement, cp.qte qte, c.dt_paiement, c.position, ";
   		sql += "cp.id_produit cpid, cp.qte_ok qte_ok, cp.id cp_index_ligne, ";
   		sql += "p.ttc_vente puttc, ";
       sql += "p.ttc_externe achat_ttc, ";
@@ -222,6 +233,9 @@ module.exports = {
 				fullCommande.status = commandes[0].cstatus;
 				fullCommande.dt_livraison = commandes[0].dt_livraison;
         fullCommande.paiement = commandes[0].paiement;
+        fullCommande.dt_paiement = commandes[0].dt_paiement;
+        fullCommande.position = commandes[0].position;
+        fullCommande.dt_creation = commandes[0].dt_creation;
 				var produit = {};
 				produit.index_ligne = commandes[c].cp_index_ligne;
 				produit.id = commandes[c].cpid;
@@ -258,7 +272,7 @@ module.exports = {
       fullCommande.ttlArticles = ttlArticles;
       logger.warn('ready to back');
       logger.error("fullCommande ", fullCommande.produits);
-      fullCommande.total_commande = sails.models.commandes.arrondi(fullCommande.total_commande);
+      //fullCommande.total_commande = sails.models.commandes.arrondi(fullCommande.total_commande);
 			callback(null,fullCommande);
     	});
     });

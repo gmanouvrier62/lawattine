@@ -34,12 +34,14 @@ module.exports = {
             replaceConsole: true,
             path: '/var/log/lawattine.log'
         },
+  tbPromos: ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/offres-288597-Promotions.aspx','http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/bons-de-reduction.aspx'],
   chemin_impression_catalogue: "/var/impression/last_catalogue.html",
   chemin_impression_commande: "/var/impression/commande/",
   productImages: "/home/gilles/node/git/caisse/assets/images/uploads/leclerc/",
   relativProductImages: "/images/uploads/leclerc/",
   importProductsFolder: "/var/leclerc/",
   images_rayons_download: "/home/gilles/node/git/caisse/assets/images/images_rayons_down/",
+  images_tmp: "/var/images_tmp/",
   template_catalogue: "/home/gilles/node/git/caisse/assets/images/template_catalogue.txt",
   hostsList: ["http://localhost:800","http://192.168.0.13","http://88.178.175.187"],
   catalogueHost: "http://88.178.175.187",
@@ -49,8 +51,6 @@ module.exports = {
   ip_dev: "176.151.197.161",
   ip_mavad01: "88.178.175.187",
   ip_master: ""
-
-
 
 };
 //SELECT (<value> DIV 0.05) * 0.05 + IF(<value> MOD 0.05 = 0, 0, 0.05)

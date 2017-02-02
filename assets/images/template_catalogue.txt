@@ -1,9 +1,5 @@
-<div>BANDEAU AVEC LE LOGO</div>
 <H1 style="margin-top:50px;margin-bottom:50px;text-align:center">@@TITRE@@</H1><br>
 <table style="">
 @@CONTENT@@
-<tr>
-<td>CADDY GOURMAND  (footer)</td>
-</tr>
 </table>
   

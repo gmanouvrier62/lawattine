@@ -1,0 +1,41 @@
+<div>BANDEAU AVEC LE LOGO</div>
+<div id="mondiv" style="float:left;margin-top: 10px;margin-bottom:3px;margin-right:10px;border: 1px solid black;width:70%;padding: 10px 10px 20px;line-height: 1; color:#000000;-moz-border-radius: 30px;-webkit-border-radius: 30px;border-radius: 30px;">
+	<div style="font-size: 12px;float:left">
+		<ul style="list-style-type: none">
+			<li>@@PRENOM@@ @@NOM@@</li>
+			<li style="margin-top:10px">@@ADRESSE@@</li>
+			<li>@@CP@@ @@VILLE@@</li>
+			<li style="margin-top:12px;font-weight:bold">Tel : @@TEL@@</li>
+			<li style="font-weight:bold">Mobile : @@MOBILE@@</li>
+		</ul>
+	</div>
+	<div id="infoCmd" style="margin-left:20px;float:right">
+		<table style="border: 1px 1px 1px 1px solid black">
+			<tbody>
+				<tr>
+					<td>Commande : </td>
+					<td >@@ID_COMMANDE@@</td>
+				</tr>
+				<tr>
+					<td>Paiement : </td>
+					<td>
+						<b>@@MODE_PAIEMENT@@</b>
+					</td>
+				</tr>
+				<tr>
+				<td coslpan="2"></td>
+
+				</tr>
+			</tbody>
+		</table>
+	</div>
+<div style="margin-top:110px;" ><font style="font-size:14px;font-weight:bold">Le &nbsp;@@DT_LIVRAISON@@</font></div>
+<br>
+<div>
+<table style="font-size: 9px;border-collapse: none;border-spacing: 0px;">
+<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">Libellé</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">P.U</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">Quantité</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">TVA</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">TTC</td></tr>
+@@CONTENT@@
+</table>
+</div>
+</div>
+</body>

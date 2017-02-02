@@ -452,11 +452,19 @@ ul, li {margin: 0; padding: 0;}
 .insuffisant {
 	background-color: #F7ADAD;
 }
-.impression{
+.impression {
 
 border: 1px solid black; 
 margin-left:3px;
 margin-right:3px;
 
-
+}
+.promo_0 {
+	background-color: #EDEAEA;
+}
+.promo_1 {
+	background-color: #8785FC;
+}
+.promo_2 {
+	background-color: #2724F2;
 }

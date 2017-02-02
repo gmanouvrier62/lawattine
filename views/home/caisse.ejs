@@ -30,7 +30,16 @@
  //require(['jquery','jquery-ui','pnotify','composant/caisse_init','composant/caisse','bootstrap-3.3.7-dist/js/bootstrap.min'], function () {
  	//alert($("#mondiv").attr('tom'));
 $(function(){
+  $("#dvCheque").hide();
   var globalTable;
+  var monthNames = [
+    "Janvier", "Février", "Mars",
+    "Avril", "Mai", "Juin", "Juillet",
+    "Août", "Septembre", "Octobre",
+    "Novembre", "Decembre"
+  ];
+  var currentDate = new Date();
+  var date_de_paiement = "";
   function impression(content){
       var fen = window.open("", "", "height=500px, width=1000px,toolbar=0, menubar=0, scrollbars=1, resizable=1,status=0, location=0, left=10, top=10");
       // style du popup
@@ -46,10 +55,11 @@ $(function(){
       fen.window.print();
        
       //Fermeture du popup
-      fen.window.close();
+      //fen.window.close();
       return true;
   }
   function GestionAffichage(fCommande) {
+
     $(".rawContent").each(function(){
       $(this).remove();
     });
@@ -301,12 +311,10 @@ $(function(){
           });
         
     });
-    $(".validation").each(function(){
-      console.log("ok val");
-      $(this).click(function(){
-          var numC = parseInt($("#idCommande").html());
-          if (isNaN(numC)) numC = 0; 
-          $.post('/commandes/valider',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'paiement': $(this).data('paiement')}, function(datas) {
+    function validateCommande(obj) {
+      var numC = parseInt($("#idCommande").html());
+      if (isNaN(numC)) numC = 0; 
+      $.post('/commandes/valider',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'paiement': obj.data('paiement'), 'dt_paiement': date_de_paiement}, function(datas) {
              if(datas.err != null) {
                  var infos = new PNotify({
                     title: 'Erreur ',
@@ -327,12 +335,73 @@ $(function(){
                   }); 
                  fullCommande = datas.commande;
                  GestionAffichage(fullCommande);
+                 date_de_paiement = "";
+                 $("#dtCheque").val("");
             }
             //setTimeout(function(){document.location.href = '/commandes';},2000);
 
 
           });
+    }
+    $('body').on('click', 'button.action-cal', function(){
+      console.log("oulala");
+      $( "#calPickerCheque" ).datepicker({
+        defaultDate: currentDate,
+        changeMonth: true,
+        changeYear: true,
+        dateFormat: "yy-mm-dd",
+          maxDate: new Date(),
+        onClose: function(selectedDate) {
+          currentDate = new Date(selectedDate);
+          var day = currentDate.getDate();
+          var monthIndex = currentDate.getMonth();
+          var year = currentDate.getFullYear();
+          date_de_paiement = day + ' ' + monthNames[monthIndex] + ' ' + year;
+          $("#dtCheque").val(date_de_paiement);
+          $(this).hide();
+        },
+          onSelect: function(selectedDate) {
+            console.log("youhou ", selectedDate);
+            currentDate = new Date(selectedDate);
+            var day = currentDate.getDate();
+            var monthIndex = currentDate.getMonth();
+            var year = currentDate.getFullYear();
+            date_de_paiement = day + ' ' + monthNames[monthIndex] + ' ' + year;
+            $("#dtCheque").val(date_de_paiement);
+            $(this).hide();
+          }
       });
+
+    });
+    
+    $(".validation").each(function(){
+      console.log("ok val");
+      $(this).click(function(){
+         validateCommande($(this));
+      });
+    });
+    $(".validationCheque").click(function(){
+      //affichage modale date paiement
+      var valCheque = this;
+      $("#dvCheque").dialog({
+              title: "Prise en compte chèque",
+              resizable: true,
+              height: 400,
+              width: 500,
+              modal: true,
+              buttons: {
+                "Save": function() {
+                  validateCommande($(this));
+                  $(this).dialog("close");
+                },
+                "Cancel": function() {
+                 date_de_paiement = "";
+                 $("#dtCheque").val("");
+                 $(this).dialog("close");
+                }
+              }
+      });
+      //
     });
   <% if (id !== null && id !== undefined) {%>
       var currentID = '<%=id%>';
@@ -414,7 +483,7 @@ $(function(){
    
     
     <% if (status_com != "Livrée" && status_com != "4") { %> 
-    <button title="Chèque" data-paiement="chèque" class="btn btn-warning validation"><i class="fa fa-dedent"></i></button>
+    <button title="Chèque" data-paiement="chèque" class="btn btn-warning validationCheque"><i class="fa fa-dedent"></i></button>
     <button title="Espèces" data-paiement="espèce" class="btn btn-warning validation"><i class="fa fa-eur"></i></button>
     <button title="Carte" data-paiement="cb" class="btn btn-warning validation"><i class="fa fa-cc-visa"></i></button>
 
@@ -428,6 +497,15 @@ $(function(){
   </div>
 </div>  
  <%- partial ('/home/gilles/node/git/caisse/views/produits/choix.ejs',{'nom': 'Gilles Manouvrier'}) %>
+
+
+<div id="dvCheque" >
+        A encaisser dès le<input type='text' id='dtCheque' value=''><button id="calDate" class="btn btn-success btn-xs btn-action action-cal" style="font-size: 13px;margin-bottom:5px" title="Choisir le jour" ><i class="fa fa-calendar"></i></button>
+        <div id='calPickerCheque'></div>
+    
+</div>
+
+
 
 </body>
 

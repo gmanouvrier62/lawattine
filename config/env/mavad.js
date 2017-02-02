@@ -40,6 +40,7 @@ module.exports = {
   relativProductImages: "/images/uploads/leclerc/",
   importProductsFolder: "/var/leclerc/",
   images_rayons_download: "/var/node/lawattine/assets/images/images_rayons_down/",
+  images_tmp: "/var/images_tmp/",
   template_catalogue: "/var/node/lawattine/assets/images/template_catalogue.txt",
   hostsList: ["http://localhost:800","http://192.168.0.13","http://88.178.175.187"],
   catalogueHost: "http://88.178.175.187",
