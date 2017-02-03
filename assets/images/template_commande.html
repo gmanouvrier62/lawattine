@@ -1,17 +1,19 @@
 <div>BANDEAU AVEC LE LOGO</div>
 
-<div style="font-size: 12px;float:left">
+<div style="font-size: 12px">
 	<ul style="list-style-type: none">
 		<li>@@PRENOM@@ @@NOM@@</li>
 		<li style="margin-top:10px">@@ADRESSE@@</li>
 		<li>@@CP@@ @@VILLE@@</li>
-		<li style="margin-top:12px;font-weight:bold">Tel : @@TEL@@</li>
-		<li style="font-weight:bold">Mobile : @@MOBILE@@</li>
+		<li style="margin-top:12px">Tel : @@TEL@@</li>
+		<li >Mobile : @@MOBILE@@</li>
+		<li style="font-weight:bold">Commande @@ID_COMMANDE@@</li>
+		
 	</ul>
 </div>
 
 
-<div>
+<div >
 	<table style="font-size: 9px;border-collapse: none;border-spacing: 0px;">
 	<tr>
 	<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">Ref</td>
@@ -20,29 +22,39 @@
 	<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">P.U</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;">TTC</td></tr>
 	@@CONTENT@@
 	<tr>
-		<td colspan="2"></td><td>@@TTL_ARTICLES@@</td><td></td><td>@@TTL_TTC@@</td>
+		<td colspan="2" style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;"></td>
+		<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">@@TTL_ARTICLES@@</td>
+		<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;"></td>
+		<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">@@TTL_TTC@@</td>
 	</tr>
 	</table>
 </div>
 <div>
-<ul>
-	<li><font>Montant HT</font><font></font></li>
-	<li><font>Montant TVA 5.5%</font></li>
-	<li><font>Montant TVA 10%</font></li>
-	<li><font>Montant TVA 20%</font></li>
-	<li><font>TTC</font></li>
+
+<table style="border: none">
+<tr><td style="font-size:9px;margin-right:10px">Montant HT</td><td style="font-size:9px">@@TTL_HT@@</td></tr>
+<tr><td style="font-size:9px;margin-right:10px">Montant TVA 5.5%</td><td style="font-size:9px">@@TTL_TVA_5.5@@</td></tr>
+<tr><td style="font-size:9px;margin-right:10px">Montant TVA 10%</td><td style="font-size:9px">@@TTL_TVA_10@@</td></tr>
+<tr><td style="font-size:9px;margin-right:10px">Montant TVA 20%</td><td style="font-size:9px">@@TTL_TVA_20@@</td></tr>
+<tr><td style="font-size:9px;margin-right:10px">TTC</td><td style="font-size:9px">@@TTL_TTC@@</td></tr>
 
 
-</ul>
+</table>
+
 </div>
 <div>
-	<table>
+	<table style="border-collapse: none;border-spacing: 0px;">
 	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Votre règlement</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Commentaires</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Signature Client</td></tr>
-	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Espèce</td><td>@@TTL_TTC_ES@@</td><td></td></tr>
-	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Chèque</td><td>@@TTL_TTC_CH@@ @@DT_PAIEMENT@@</td><td></td></tr>
-	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Carte</td><td>@@TTL_TTC_CB@@</td><td></td></tr>
-	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;"Prélèvment</td><td>@@TTL_TTC_PR@@</td><td></td></tr>
-	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Autre</td><td>@@TTL_TTC_AU@@</td><td></td></tr>
+	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Espèce</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">@@TTL_TTC_ES@@</td>
+	<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;"></td></tr>
+	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Chèque</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">@@TTL_TTC_CH@@ </td>
+	<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;"></td></tr>
+	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Carte</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">@@TTL_TTC_CB@@</td>
+	<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;"></td></tr>
+	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Prélèvment</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">@@TTL_TTC_PR@@</td>
+	<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;"></td></tr>
+	<tr><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">Autre</td><td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black;">@@TTL_TTC_AU@@</td>
+	<td style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-bottom:1px solid black;"></td></tr>
 
 
 	</table>

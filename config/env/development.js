@@ -37,6 +37,7 @@ module.exports = {
   tbPromos: ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/offres-288597-Promotions.aspx','http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/bons-de-reduction.aspx'],
   chemin_impression_catalogue: "/var/impression/last_catalogue.html",
   chemin_impression_commande: "/var/impression/commande/",
+  archive_facture: "/var/archives/",
   productImages: "/home/gilles/node/git/caisse/assets/images/uploads/leclerc/",
   relativProductImages: "/images/uploads/leclerc/",
   importProductsFolder: "/var/leclerc/",

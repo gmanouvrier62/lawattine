@@ -257,26 +257,28 @@ $(function(){
     });
     ////
     $('body').on('click', 'button.action-print', function (event) {
-      $.post("/commandes/print", {'id': $("#idCommande").html(), 'id_client': currentIdClient}, function(toPrint){
-        var title = "Impression";
-        var text, l_type;
-        if(toPrint.err !== "" && toPrint.err !== null) {
-          text = toPrint.err;
-          l_type = "error";
-        } else {
-          text = "OK";
-          l_type = "success";
-          impression(toPrint.content);
-        } 
-        var infos = new PNotify({
-                  title: title,
-                  text: text,
-                  type: l_type,
-                  desktop: {
-                    desktop: true
-                  }
-        }); 
-      });
+      if ($("#idCommande").html() !== "") {
+        $.post("/commandes/print", {'id': $("#idCommande").html(), 'id_client': currentIdClient}, function(toPrint){
+          var title = "Impression";
+          var text, l_type;
+          if(toPrint.err !== "" && toPrint.err !== null) {
+            text = toPrint.err;
+            l_type = "error";
+          } else {
+            text = "OK";
+            l_type = "success";
+            impression(toPrint.content);
+          } 
+          var infos = new PNotify({
+                    title: title,
+                    text: text,
+                    type: l_type,
+                    desktop: {
+                      desktop: true
+                    }
+          }); 
+        });
+      }
     });
     $('body').on('click', 'button.action-okpr', function (event) {
         //On a choisi un produit 
@@ -350,7 +352,7 @@ $(function(){
         changeMonth: true,
         changeYear: true,
         dateFormat: "yy-mm-dd",
-          maxDate: new Date(),
+         
         onClose: function(selectedDate) {
           currentDate = new Date(selectedDate);
           var day = currentDate.getDate();
@@ -488,10 +490,8 @@ $(function(){
     <button title="Carte" data-paiement="cb" class="btn btn-warning validation"><i class="fa fa-cc-visa"></i></button>
 
     <% } %>
-     <% if(status_com == 3 || status_com == 4 || status_com == 'Validée' || status_com == 'Livrée') { %>
-         <button title="print" class="btn btn-success action-print"><i class="fa fa-print"></i></button>
-
-      <% } %>
+    
+      <button title="print" class="btn btn-success action-print"><i class="fa fa-print"></i></button>
     <br>
     <div class="arrondi-plein-net"><b>Net à payer</b><font id="cmdNet" class="txt50"></font></div>
   </div>

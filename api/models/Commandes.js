@@ -118,15 +118,22 @@ module.exports = {
   },
   getOneFullCommandeHistorique: function (id_commande, id_client, callback) {
     //Préparation de l'objet de retour
+    var objTVA = {
+    '5.5': 0,
+    '10': 0,
+    '20': 0
+    };
     var fullCommande = {
       client: null, 
       id: null, 
       status: null, 
       dt_livraison: null, 
       produits: [],
+      total_ht: 0,
+      total_tva: objTVA,
       total_commande: 0
     };
-    var sql = "select  c.createdAt dt_creation, h . * , c . * , prd . * , sc . *  from historique h inner join produits prd on h.id_produit=prd.id inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
+    var sql = "select  c.createdAt dt_creation, h . * , c . * , prd.id_type, prd.id_fournisseur,  , sc . *  from historique h inner join produits prd on h.id_produit=prd.id inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
     logger.warn(sql);
     sails.models.clients.find({"id": id_client}, function (err, clt) {
       if (err !== null) return callback("pb de récupération client", null);
@@ -162,8 +169,11 @@ module.exports = {
             produit.rayon = commandes[c].rayon;
             produit.idr = commandes[c].idr;
             produit.pht = commandes[c].pht;
+            var coeffComm = (100 - commandes[c].tx_com) / 100;
+            produit.client_ht = parseInt((produit.pht / coeffCom) * 100)/100;
+            produit.ttl_ht = parseInt((produit.client_ht * produit.qte) * 100) / 100;
             //produit.ttl_ht = parseInt((produit.pht * produit.qte) * 100) / 100;
-            produit.ttl_ht = commandes[c].ttl_ht;
+           
             produit.tx_com = commandes[c].tx_com;
             //produit.commission = parseInt((produit.pht * produit.tx_com)) / 100; //Comm unitaire
             produit.commission = commandes[c].commission;
@@ -174,7 +184,9 @@ module.exports = {
             produit.tva = commandes[c].tva;
             //produit.ttl_tva = parseInt(produit.tva * produit.qte * 100)/100;
             produit.ttl_tva = commandes[c].ttl_tva;
-
+            
+            fullCommande.total_ht += produit.pht;
+            fullCommande.total_tva[produit.tx_tva.toString()] += produit.tva;
             fullCommande.produits.push(produit);
           }
           fullCommande.ttlArticles = ttlArticles;
@@ -189,16 +201,30 @@ module.exports = {
 
   },
   getOneFullCommande: function(id_commande, id_client, callback) {
-  	//Préparation de l'objet de retour
-  	var fullCommande = {
+  	var roundDecimal = function(nombre, precision){
+      var precision = precision || 2;
+      var tmp = Math.pow(10, precision);
+      return Math.round( nombre*tmp )/tmp;
+    }
+    //Préparation de l'objet de retour
+  	var objTVA = {
+    '5.5': 0,
+    '10': 0,
+    '20': 0
+    };
+    var fullCommande = {
   		client: null, 
   		id: null, 
   		status: null, 
   		dt_livraison: null, 
   		produits: [],
-  		total_commande: 0
+      total_ht: 0.00,
+      total_tva: objTVA,
+  		total_commande: 0.00
 
   	};
+    logger.warn("!debut fct : ", fullCommande.total_tva['5.5']);
+        
 	  //rajouter nom, ref_interne et externe
   	var sql = "select c.id cid, st.nom_status cstatus, c.dt_livraison dt_livraison, c.createdAt dt_creation,  c.paiement paiement, cp.qte qte, c.dt_paiement, c.position, ";
   		sql += "cp.id_produit cpid, cp.qte_ok qte_ok, cp.id cp_index_ligne, ";
@@ -220,61 +246,82 @@ module.exports = {
   		sql += " and c.id_client=" + id_client + " order by c.id";
     logger.warn(sql);
     sails.models.clients.find({"id": id_client}, function (err, clt) {
-    	if (err !== null) return callback("pb de récupération client", null);
+    	logger.warn("!debut client : ", id_client, "  = ", fullCommande.total_tva['5.5']);
+       
+      if (err !== null) return callback("pb de récupération client", null);
     	if (clt == null || clt == undefined) return callback("Le client n'existe pas", null);
     	fullCommande.client = clt[0];
     	sails.models.commandes.query(sql, function(err, commandes) {
-			if (err !== null && err !== undefined)  return callback("pb de récupération des produits d'une commande", null);
-			if (commandes == null || commandes == undefined) return callback("La commande est vide", null);			
-			logger.warn("remplissage des produits : ", commandes.length);
-			var ttlArticles = 0;
-      for(var c = 0; c < commandes.length; c++) { 
-				fullCommande.id = commandes[0].cid;
-				fullCommande.status = commandes[0].cstatus;
-				fullCommande.dt_livraison = commandes[0].dt_livraison;
-        fullCommande.paiement = commandes[0].paiement;
-        fullCommande.dt_paiement = commandes[0].dt_paiement;
-        fullCommande.position = commandes[0].position;
-        fullCommande.dt_creation = commandes[0].dt_creation;
-				var produit = {};
-				produit.index_ligne = commandes[c].cp_index_ligne;
-				produit.id = commandes[c].cpid;
-        produit.nom = commandes[c].nom;
-				produit.qte = commandes[c].qte;
-        produit.qte_ok = commandes[c].qte_ok;
-        ttlArticles += produit.qte;
-       	produit.pu = commandes[c].puttc;
-        produit.achat_ttc = commandes[c].achat_ttc;
-        produit.ttc = parseInt((commandes[c].puttc * produit.qte) * 100)/100;
-				produit.ref_interne = commandes[c].ref_interne;
-				produit.ref_externe = commandes[c].ref_externe;
-        produit.icone = commandes[c].icone;
-				produit.rayon = commandes[c].rayon;
-        produit.idr = commandes[c].idr;
-        produit.pht = commandes[c].ht;
-        produit.ttl_ht = parseInt((produit.pht * produit.qte) * 100) / 100;
-        produit.tx_com = commandes[c].tx_com;
-        logger.warn ("le ht+com=", (produit.pht / (1-(produit.tx_com / 100))));
-        logger.warn("le ht = ", produit.pht);
-        logger.warn("rien que la com=",(produit.pht / (1-(produit.tx_com / 100))) - produit.pht);
-        produit.commission = (produit.pht / (1-(produit.tx_com / 100))) - produit.pht; //Comm unitaire
-        produit.ttl_com = parseInt((produit.commission * produit.qte) * 100) / 100;//Comm totale
-        //TODO : revoir les calculs 
-        produit.tx_tva = commandes[c].tx_tva;
-        produit.tva = parseInt(produit.pht * (produit.tx_tva / 100) * 100 )/100;
-        produit.ttl_tva = parseInt(produit.tva * produit.qte * 100)/100;
-        
-				fullCommande.total_commande += produit.ttc;
-        fullCommande.total_commande = parseInt(fullCommande.total_commande * 100)/100;
-				fullCommande.produits.push(produit);
+  			if (err !== null && err !== undefined)  return callback("pb de récupération des produits d'une commande", null);
+  			if (commandes == null || commandes == undefined) return callback("La commande est vide", null);			
+  			logger.warn("remplissage des produits : ", commandes.length);
+  			var ttlArticles = 0;
+        for(var c = 0; c < commandes.length; c++) { 
+  				fullCommande.id = commandes[0].cid;
+  				fullCommande.status = commandes[0].cstatus;
+  				fullCommande.dt_livraison = commandes[0].dt_livraison;
+          fullCommande.paiement = commandes[0].paiement;
+          fullCommande.dt_paiement = commandes[0].dt_paiement;
+          fullCommande.position = commandes[0].position;
+          fullCommande.dt_creation = commandes[0].dt_creation;
+  				var produit = {};
+  				produit.index_ligne = commandes[c].cp_index_ligne;
+  				produit.id = commandes[c].cpid;
+          produit.nom = commandes[c].nom;
+  				produit.qte = commandes[c].qte;
+          produit.qte_ok = commandes[c].qte_ok;
+           produit.tx_tva = commandes[c].tx_tva;
+          ttlArticles += produit.qte;
+         	produit.pu = roundDecimal(commandes[c].puttc,2);
+          produit.achat_ttc = commandes[c].achat_ttc;
+
+          produit.ttc = roundDecimal(commandes[c].puttc * produit.qte,2);
+  				
+          produit.ttl_ht = roundDecimal(produit.ttc / (1 + produit.tx_tva/100),4);
+          
+          produit.ref_interne = commandes[c].ref_interne;
+  				produit.ref_externe = commandes[c].ref_externe;
+          produit.icone = commandes[c].icone;
+  				produit.rayon = commandes[c].rayon;
+          produit.idr = commandes[c].idr;
+          produit.pht = commandes[c].ht;//achat
+          var coeffCom = (100 - commandes[c].tx_com) / 100;
+          logger.warn("coeffcom : ", coeffCom);
+
+          produit.client_ht = parseInt((produit.pht / coeffCom) * 100)/100;
+            
          
-			}
-      fullCommande.ttlArticles = ttlArticles;
-      logger.warn('ready to back');
-      logger.error("fullCommande ", fullCommande.produits);
-      //fullCommande.total_commande = sails.models.commandes.arrondi(fullCommande.total_commande);
-			callback(null,fullCommande);
-    	});
+         
+          
+          produit.tx_com = commandes[c].tx_com;
+          
+          produit.commission = produit.client_ht - produit.pht;
+          produit.ttl_com = parseInt((produit.commission * produit.qte) * 100) / 100;//Comm totale
+          
+         
+          produit.tva = produit.client_ht * (produit.tx_tva / 100);
+           
+          produit.ttl_tva = produit.tva * produit.qte;
+          logger.error("produit ", produit.nom, " : ", produit.tva, " ttl : ", produit.ttl_tva);    
+  				fullCommande.total_commande += produit.ttc;
+          fullCommande.total_commande = roundDecimal(fullCommande.total_commande, 2);
+         
+          fullCommande.total_ht += produit.ttl_ht;
+          fullCommande.total_ht = roundDecimal(fullCommande.total_ht, 2);
+          
+          fullCommande.total_tva[produit.tx_tva.toString()] += produit.ttl_tva;
+          fullCommande.total_tva[produit.tx_tva.toString()] = roundDecimal(fullCommande.total_tva[produit.tx_tva.toString()], 2);
+
+          fullCommande.produits.push(produit);
+           
+  			}
+        fullCommande.ttlArticles = ttlArticles;
+        fullCommande.total_ht = roundDecimal(fullCommande.total_ht, 2);
+        logger.warn('ready to back');
+        logger.error("fullCommande final", fullCommande.produits);
+        //fullCommande.total_commande = sails.models.commandes.arrondi(fullCommande.total_commande);
+  			callback(null,fullCommande);
+      });
     });
  }
   

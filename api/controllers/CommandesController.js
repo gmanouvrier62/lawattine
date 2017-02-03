@@ -74,11 +74,12 @@ module.exports = {
 		if(id_client == null || id_client == undefined) return res.send({'err': 'pas de numéro de client'});
 		
 		sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
+			logger.util("method print : ", fCom);
 			if (err !== null && err !== undefined) {
 				logger.error(err);
 				return res.send({'err': "Erreur de récupération de la commande"});
 			}
-			logger.util(fCom);
+			
 			var template = fs.readFileSync(sails.config.template_commande).toString();
 			template = template.replace(/@@PRENOM@@/g, fCom.client.prenom);
 			template = template.replace(/@@NOM@@/g, fCom.client.nom);
@@ -87,37 +88,46 @@ module.exports = {
 			template = template.replace(/@@VILLE@@/g, fCom.client.ville);
 			template = template.replace(/@@TEL@@/g, fCom.client.tel);
 			template = template.replace(/@@MOBILE@@/g, fCom.client.mobile);
-			
-			template = template.replace(/@@ID_COMMANDE@@/g, moment(fCom.dt_creation).format("YYYYMMDD") + pad(5,fCom.id,'0');
+			logger.error("putain de date : ", fCom.dt_creation);
+			template = template.replace(/@@ID_COMMANDE@@/g, moment(fCom.dt_creation).format("YYYYMMDD") + pad(5,fCom.position,'0'));
 			template = template.replace(/@@MODE_PAIEMENT@@/g, fCom.paiement);
 			template = template.replace(/@@DT_LIVRAISON@@/g, moment(fCom.dt_livraison).format("DD-MM-YYYY"));
-			var ttl_tva = 0;
+			var content = "";
+			
 			var s = 'style="font-size: 9px;border-left:1px solid black;border-right:1px solid black"';
 			var s2 = 'style="font-size: 9px;border-left:1px solid black;border-right:1px solid black;border-top:1px solid black;border-bottom:1px solid black"';
 			for (var c = 0; c < fCom.produits.length; c++) {
 				var prd = fCom.produits[c];
 				content += "<tr><td " + s +">" + prd.ref_interne  + "</td><td " + s + ">" + prd.nom.minified() + "</td><td " + s + ">" + prd.qte + "</td><td " + s + ">" + prd.pu + "</td><td " + s +">" + prd.ttc + "</td></tr>";
-				ttl_tva += prd.qte * prd.tva;
+				
 			}
-			//ttl_tva = parseInt(ttl_tva * 100) / 100;
-			//content += "<tr><td " + s2 + " colspan='2'>TOTAL</td><td " + s2 + ">" + fCom.ttlArticles + "</td><td " + s2 + ">" + ttl_tva + "</td><td " + s2 + ">" + fCom.total_commande + "</td></tr>";
-
+		
 			template = template.replace(/@@CONTENT@@/g, content);
 			template = template.replace(/@@TTL_ARTICLES@@/g, fCom.ttlArticles);
-			template = template.replace(/@@TTL_TTC@@/g, fCom.total_comande);
+			template = template.replace(/@@TTL_TTC@@/g, fCom.total_commande);
+			template = template.replace(/@@TTL_HT@@/g, parseInt(fCom.total_ht * 100) / 100);
+			//TVAs
+			template = template.replace(/@@TTL_TVA_5.5@@/g, fCom.total_tva['5.5']);
+			template = template.replace(/@@TTL_TVA_10@@/g, fCom.total_tva['10']);
+			template = template.replace(/@@TTL_TVA_20@@/g, fCom.total_tva['20']);
+			
+			//
+			logger.error('paiement ', fCom.paiement);
+			logger.error('ttl co ', fCom.total_commande);
+			
 			switch (fCom.paiement) {
 
 				case 'cb':
 					template = template.replace(/@@TTL_TTC_ES@@/g, "");
 					template = template.replace(/@@TTL_TTC_CH@@/g, "");
-					template = template.replace(/@@TTL_TTC_CB@@/g, fCom.total_comande);
+					template = template.replace(/@@TTL_TTC_CB@@/g, fCom.total_commande);
 					template = template.replace(/@@TTL_TTC_PR@@/g, "");
 					template = template.replace(/@@TTL_TTC_AU@@/g, "");
 					break;
 				case 'chèque': 
 					template = template.replace(/@@TTL_TTC_ES@@/g, "");
-					var txtCheque = fCom.total_comande;
-					if (fCom.dt_paiement != "") txtCheque += " (" + fCom.dt_paiement + ")";
+					var txtCheque = fCom.total_commande;
+					if (fCom.dt_paiement != "") txtCheque += " (différé au " + fCom.dt_paiement + ")";
 					template = template.replace(/@@TTL_TTC_CH@@/g, txtCheque);
 					template = template.replace(/@@TTL_TTC_CB@@/g, "");
 					template = template.replace(/@@TTL_TTC_PR@@/g, "");
@@ -128,16 +138,20 @@ module.exports = {
 					template = template.replace(/@@TTL_TTC_CB@@/g, "");
 					template = template.replace(/@@TTL_TTC_PR@@/g, "");
 					template = template.replace(/@@TTL_TTC_AU@@/g, "");
-					template = template.replace(/@@TTL_TTC_ES@@/g, fCom.total_comande);
+					template = template.replace(/@@TTL_TTC_ES@@/g, fCom.total_commande);
 					break;
 				default:
-
+					template = template.replace(/@@TTL_TTC_CH@@/g, "");
+					template = template.replace(/@@TTL_TTC_CB@@/g, "");
+					template = template.replace(/@@TTL_TTC_PR@@/g, "");
+					template = template.replace(/@@TTL_TTC_AU@@/g, "");
+					template = template.replace(/@@TTL_TTC_ES@@/g, "");
 			}
 			var sepa = "<br>------------------------------------------------------------------------------------------------------------------------<br>";
 			template += sepa + template;
 			if (fCom.produits.length < 13)
 				var content_file = '<html><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></head><body>' + template + '</html>';
-			fs.writeFile(sails.config.chemin_impression_commande + fCom.id + ".html", content_file, function (err) {
+			fs.writeFile(sails.config.archive_facture + "id_" + fCom.id + "_" + moment(fCom.dt_creation).format("YYYYMMDD") + pad(5,fCom.position,'0') + ".html", content_file, function (err) {
 		    	if (err) {
 		    		logger.error({'err': err});
 		    		return res.send({'err': err});
@@ -268,8 +282,15 @@ module.exports = {
 			logger.warn("cmd? ajout : ", idCmd);
 			sqlLast = "select position+1 new_pos from commandes order by id desc limit 1"; 
 			sails.models.commandes.query(sqlLast, function (err, resultLast) {
-				var position = resultLast[0].new_pos;
-				sails.models.commandes.query("insert into caisse.commandes (id_client,status,dt_livraison, position) values(" + id_client + ",1,'" + dt_livraison + "'," + position + ")", function(err, commande) {
+				var position = 0;
+				if(resultLast.length <=0) {
+					position = 1;
+				} else {
+					position = resultLast[0].new_pos;
+				}
+
+				var createdAt = moment().format("YYYY-MM-DD");				
+				sails.models.commandes.query("insert into caisse.commandes (id_client,status,dt_livraison, position, createdAt) values(" + id_client + ",1,'" + dt_livraison + "'," + position + ",'" +  createdAt  + "')", function(err, commande) {
 					if (err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion de la commande", 'commande': null});
 					var idCmd = commande.insertId;
 					logger.warn("id com : ", idCmd);
