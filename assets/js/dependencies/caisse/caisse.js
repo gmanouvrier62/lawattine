@@ -65,7 +65,7 @@ $.prototype.setDataTable = function(l_table,id) {
 	});
 	$("#megaSearch").keydown(function(){
 		var critere = $(this).val();
-		if(critere.length > 3) {
+		if(critere.length > 2) {
 			lTable.ajax.url('/' + l_table + '/getAllCrit/' + critere).load();
 		}
 	});

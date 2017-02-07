@@ -27,7 +27,6 @@ module.exports = {
 
 			return res.render ('commandes/commandes_liste',{'action': 'COMMANDES', 'status': [1,2,3,4,5,6],'id_client': id_client, 'menu': menu});	
 		}
-		
 	},
 	load: function (req, res) {
 		logger.warn(sails.config.appPath);
@@ -50,9 +49,23 @@ module.exports = {
 			//Je renvoie directement l'objet commande complet
 			return res.render ('home/caisse.ejs',{'id': idCmd,'status_com': fCom.status, 'f_com': JSON.stringify(fCom), 'menu': menu});
 		});
-		
 	},
 	print: function(req, res) {
+		function checkFolder(chemin) {
+			var tb = chemin.split('/');
+			var toCheck = "";
+			for(var c = 0; c < tb.length; c++) {
+				toCheck += tb[c] + '/';
+				fs.mkdir(toCheck,function(e){
+				    if(!e || (e && e.code === 'EEXIST')){
+				        //do something with contents
+				    } else {
+					    fs.mkdirSync(toCheck,0777);
+				    }
+				});
+			}
+			return toCheck;
+		};
 		//pad(5,val,'0')
 		function pad(width, string, padding) { 
 		  return (width <= string.length) ? string : pad(width, padding + string, padding)
@@ -116,7 +129,6 @@ module.exports = {
 			logger.error('ttl co ', fCom.total_commande);
 			
 			switch (fCom.paiement) {
-
 				case 'cb':
 					template = template.replace(/@@TTL_TTC_ES@@/g, "");
 					template = template.replace(/@@TTL_TTC_CH@@/g, "");
@@ -151,7 +163,9 @@ module.exports = {
 			template += sepa + template;
 			if (fCom.produits.length < 13)
 				var content_file = '<html><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"></head><body>' + template + '</html>';
-			fs.writeFile(sails.config.archive_facture + "id_" + fCom.id + "_" + moment(fCom.dt_creation).format("YYYYMMDD") + pad(5,fCom.position,'0') + ".html", content_file, function (err) {
+			var folderDay = moment().format("YYYY/MM/DD");
+			var fullFolderDay = checkFolder(sails.config.archive_facture + folderDay);
+			fs.writeFile(fullFolderDay + "id_" + fCom.id + "_" + moment(fCom.dt_creation).format("YYYYMMDD") + pad(5,fCom.position,'0') + ".html", content_file, function (err) {
 		    	if (err) {
 		    		logger.error({'err': err});
 		    		return res.send({'err': err});
@@ -205,7 +219,6 @@ module.exports = {
 			
 			return res.render ('home/caisse.ejs',{'id': idCmd,'status_com': fCom.status, 'f_com': JSON.stringify(fCom), 'menu': menu});
 		});
-		
 	},
 	getAll: function (req, res) {
 		sails.models.commandes.getAll(function(err,results) {
@@ -224,7 +237,6 @@ module.exports = {
 					tb.push(obj.dt_livraison);
 					
 					objResult.data.push(tb);
-
 				});
 			}
 			logger.util(objResult);
@@ -260,6 +272,54 @@ module.exports = {
 			//return res.send({'err': null,'commandes': retour});
 			logger.util("avant retour ", objResult);
 			return res.send(objResult);
+		});
+	},
+	dupliquer: function(req, res) {
+		if(req.body.id_commande === null || req.body.id_commande === undefined)  return res.send({'err': "Erreur récupération commande"});
+		sails.models.commandes.getOneFullCommandeHistorique(req.body.id_commande, req.body.id_client, function(err, fCom) {
+			if (err !== null && err !== undefined) {
+				logger.error(err);
+				return res.send({'err': "Erreur de récupération de la commande"});
+			}
+			var sqlLast = "select position+1 new_pos from commandes order by id desc limit 1"; 
+			sails.models.commandes.query(sqlLast, function (err, resultLast) {
+				var position = 0;
+				if(resultLast.length <=0) {
+					position = 1;
+				} else {
+					position = resultLast[0].new_pos;
+				}
+				var createdAt = moment().format("YYYY-MM-DD");	
+				var dt_livraison =  moment().add(1,"days").format("YYYY-MM-DD");			
+				sails.models.commandes.query("insert into caisse.commandes (id_client,status,dt_livraison, position, createdAt) values(" + req.body.id_client + ",1,'" + dt_livraison + "'," + position + ",'" +  createdAt  + "')", function(err, commande) {
+					if (err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion de la commande", 'commande': null});
+					var idCmd = commande.insertId;
+					logger.warn("id com dupliquée : ", idCmd);
+					var lignes = fCom.produits;
+					for(var cpt = 0; cpt < lignes.length; cpt++) {
+						var ligne = {
+							id_commande: idCmd,
+							id_produit: lignes[cpt].id,
+							qte: lignes[cpt].qte
+						};
+						
+						sails.models.cmd_pr.findOrCreate(ligne,ligne).exec(function creaStat(err,created){
+							if(this.compteur == lignes.length-1) {
+								//préparation du retour final
+								sails.models.commandes.getOneFullCommande(idCmd, req.body.id_client, function(err, fCom) {
+									if (err !== null && err !== undefined) {
+										logger.error(err);
+										return res.send({'err': "Erreur de récupération de la commande dupliquée", 'commande': null});
+									}
+									//voir redirect
+									return res.send({'err': null,'commande': fCom});
+
+								});
+							}
+						}.bind({'compteur':cpt}));
+					}
+				});
+			});
 		});
 	},
 	addormodify: function (req, res) {
@@ -311,7 +371,7 @@ module.exports = {
 									logger.error(err);
 									return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
 								}
-								logger.util(fCom);
+								//logger.util(fCom);
 								var origine = { 'id': id_client};
 								var cible = { 
 									'current_avoir': avoir,
@@ -352,7 +412,6 @@ module.exports = {
 					newC.status = req.body.status;
 
 				}
-
 				sails.models.commandes.update(oldC, newC).exec(function creaStat(err,updated){
 					if(err !== null && err !== undefined) return res.send({'err':"Erreur de modification d'une commande : " + err, 'commande': null});
 					if(lignes !== null && lignes !== undefined) {
@@ -396,15 +455,11 @@ module.exports = {
 						}
 					}
 				});
-				
-				
 			} else {
 				return res.send({'err':"Erreur de modification d'une commande : " + newC, 'commande': null});
-					
 			}
 		}
 	},
-	
 	retirer_produit: function(req, res) {
 		var index_ligne = req.body.index_ligne;
 		var id_commande = req.body.id_commande;
@@ -476,7 +531,6 @@ module.exports = {
 				});
 			});
 		});
-
 	},
 	livrer: function(req, res) {
 		if(req.body.id_commande == null || req.body.id_commande == undefined || parseInt(req.body.id_commande)<=0) return res.send({"err": "Pas de numéro de commande", "msg": 'KO'});
@@ -540,7 +594,6 @@ module.exports = {
 									}
 									ccc++;
 								});
-								//
 							}
 						});
 					}
@@ -551,16 +604,7 @@ module.exports = {
 		});
 	},
 	update: function (req, res) {
-		/*
-		var datasInitial = {'id': req.body.datas.id};
-		logger.util(req.body);
-		sails.models.commandes.update(datasInitial,req.body.datas).exec(function creaStat(err,updated){
-			logger.warn(err);
-			var retour = {err: err};
 
-			return res.send(retour);
-		});
-*/
 	}
 	
 };

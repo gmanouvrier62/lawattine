@@ -9,7 +9,7 @@
 <link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="/js/dependencies/tooltipster/dist/css/tooltipster.bundle.min.css" />
 <link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">
-   
+ <link href="/js/dependencies/jQuery-QueryBuilder-2.4.1/dist/css/query-builder.default.css" rel="stylesheet">  
  <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
  <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
  <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
@@ -19,6 +19,8 @@
  <script type="text/javascript" src="/js/dependencies/composant/ModalFormBind.js"></script>
  <script type="text/javascript" src="/js/dependencies/tooltipster/dist/js/tooltipster.bundle.min.js"></script> 
  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+
+ <script type="text/javascript" src="/js/dependencies/jQuery-QueryBuilder-2.4.1/dist/js/query-builder.js"></script>
 <script>
 $(function(){
     var filtreClient = "";
@@ -234,6 +236,9 @@ console.log("avant post : ", filtreClient);
        });     
             
     });
+    $('body').on('click', 'button.action-filtre', function(){
+        $("#dvFiltre").queryBuilder();
+    });
     $('body').on('click', 'button.action-cal', function(){
         
         //prévoir une modal tradi ici
@@ -305,7 +310,10 @@ console.log("avant post : ", filtreClient);
 <%- menu %>
 </div>
 <div style="text-align:center"><H1><font ><%=action%></font></H1>
-<button id="print" class="btn btn-success btn-xs btn-action action-cal" style="font-size: 13px;margin-bottom:5px" title="Choisir le jour" ><i class="fa fa-calendar"></i></button></div>
+<button id="print" class="btn btn-success btn-xs btn-action action-cal" style="font-size: 13px;margin-bottom:5px" title="Choisir le jour" ><i class="fa fa-calendar"></i></button>
+<button id="print" class="btn btn-success btn-xs btn-action action-filtre" style="font-size: 13px;margin-bottom:5px" title="Filtres avancés" ><i class="fa fa-filter"></i></button></div>
+<div id='dvFiltre'></div>
+
 <div id='bandeauDate' class='row bandeauDate modal container'><font class='fontTitre' style="float:left">DU</font><div  style="float:left" id="dt1"></div><font class='fontTitre' style="float:left">AU</font><div id="dt2" style="float:left"></div>
 
 

@@ -32,7 +32,11 @@ module.exports = {
 	},
 
 	ventes_jour: function (req, res) {
-				
+		var roundDecimal = function(nombre, precision){
+	      var precision = precision || 2;
+	      var tmp = Math.pow(10, precision);
+	      return Math.round( nombre*tmp )/tmp;
+	    }		
 		sails.models.commandes.getCommandes(req, function(err, results){
 			if (err !== null && err !== undefined) {
 				return res.send({"err": err, "msg": null});
@@ -64,6 +68,7 @@ module.exports = {
 							prd.push(fCom.produits[cptP].qte);
 							prd.push(fCom.produits[cptP].ttl_ht);
 							somme_ht += fCom.produits[cptP].ttl_ht;
+
 							prd.push(fCom.produits[cptP].ttl_tva);
 							somme_tva += fCom.produits[cptP].ttl_tva;
 							prd.push(fCom.produits[cptP].ttc);
@@ -79,10 +84,10 @@ module.exports = {
 							var objResult = {"data": null};
 							objResult.data = tb;
 							objResult.recap = {
-								'somme_ht': parseInt(somme_ht * 100) / 100,
-								'somme_tva': parseInt(somme_tva * 100) / 100,
-								'somme_ttc': parseInt(somme_ttc * 100) / 100,
-								'somme_com': parseInt(somme_com * 100) / 100
+								'somme_ht': roundDecimal(somme_ht, 2),
+								'somme_tva': roundDecimal(somme_tva, 2),
+								'somme_ttc': roundDecimal(somme_ttc, 2),
+								'somme_com': roundDecimal(somme_com, 2)
 							};
 							objResult.err = null;
 							res.send(objResult);

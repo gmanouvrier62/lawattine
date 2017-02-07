@@ -67,14 +67,7 @@ module.exports = {
           tbCritere.push("dt_livraison between '" + req.body.dtDebut + " 00:00:00' and '" + req.body.dtDebut + " 23:59:59'");
       }
     }
-    //cas d'un passage en :id_client
-    /*
-    if(req.params !== null && req.params !== undefined) {
-      if(req.params.id_client !== null && req.params.id_client !== undefined)
-        tbCritere.push("id_client = " + req.params.id_client);
-    }
-    */
-    logger.warn("crits : ", tbCritere);
+    
     var sql = "select c.id as idc, ";
       sql += "c.status as id_status, ";
       sql += "st.nom_status as nom_status, ";
@@ -117,7 +110,11 @@ module.exports = {
     });
   },
   getOneFullCommandeHistorique: function (id_commande, id_client, callback) {
-    //Préparation de l'objet de retour
+    var roundDecimal = function(nombre, precision){
+      var precision = precision || 2;
+      var tmp = Math.pow(10, precision);
+      return Math.round( nombre*tmp )/tmp;
+    }
     var objTVA = {
     '5.5': 0,
     '10': 0,
@@ -133,7 +130,7 @@ module.exports = {
       total_tva: objTVA,
       total_commande: 0
     };
-    var sql = "select  c.createdAt dt_creation, h . * , c . * , prd.id_type, prd.id_fournisseur,  , sc . *  from historique h inner join produits prd on h.id_produit=prd.id inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
+    var sql = "select  c.createdAt dt_creation, h.* ,c.* , prd.icone, prd.id_type, prd.id_fournisseur,sc.*  from historique h inner join produits prd on h.id_produit=prd.id inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
     logger.warn(sql);
     sails.models.clients.find({"id": id_client}, function (err, clt) {
       if (err !== null) return callback("pb de récupération client", null);
@@ -159,40 +156,45 @@ module.exports = {
             produit.nom = commandes[c].nom;
             produit.qte = commandes[c].qte;
             produit.qte_ok = 0;
+            produit.tx_tva = commandes[c].tx_tva;
             ttlArticles += produit.qte;
-            produit.pu = commandes[c].pu;
+            //old produit.pu = commandes[c].pu;
+            produit.pu = roundDecimal(commandes[c].pu,2);
             produit.achat_ttc = commandes[c].achat_ttc;
-            produit.ttc = parseInt((commandes[c].pu * produit.qte) * 100)/100;
+            produit.ttc = roundDecimal(commandes[c].pu * produit.qte,2);
+            // old produit.ttc = parseInt((commandes[c].pu * produit.qte) * 100)/100;
+            produit.ttl_ht = roundDecimal(produit.ttc / (1 + produit.tx_tva/100),4);
+            // old produit.ttl_ht = parseInt((produit.client_ht * produit.qte) * 100) / 100;
             produit.ref_interne = commandes[c].ref_interne;
             produit.ref_externe = commandes[c].ref_externe;
             produit.icone = commandes[c].icone;
             produit.rayon = commandes[c].rayon;
             produit.idr = commandes[c].idr;
             produit.pht = commandes[c].pht;
-            var coeffComm = (100 - commandes[c].tx_com) / 100;
+            var coeffCom = (100 - commandes[c].tx_com) / 100;
+            //produit.client_ht = parseInt((produit.pht produit.commission = produit.client_ht - produit.pht;/ coeffCom) * 100)/100;
             produit.client_ht = parseInt((produit.pht / coeffCom) * 100)/100;
-            produit.ttl_ht = parseInt((produit.client_ht * produit.qte) * 100) / 100;
-            //produit.ttl_ht = parseInt((produit.pht * produit.qte) * 100) / 100;
-           
+             //produit.ttl_ht = parseInt((produit.pht * produit.qte) * 100) / 100;
             produit.tx_com = commandes[c].tx_com;
-            //produit.commission = parseInt((produit.pht * produit.tx_com)) / 100; //Comm unitaire
-            produit.commission = commandes[c].commission;
-            //produit.ttl_com = parseInt((produit.commission * produit.qte) * 100) / 100;//Comm totale
+            produit.commission = commandes[c].commission; //faire check que le champ est dans histo
             produit.ttl_com = commandes[c].ttl_com;
-            produit.tx_tva = commandes[c].tx_tva;
+           
             //produit.tva = parseInt(produit.pht * (produit.tx_tva / 100) * 100 )/100;
-            produit.tva = commandes[c].tva;
-            //produit.ttl_tva = parseInt(produit.tva * produit.qte * 100)/100;
-            produit.ttl_tva = commandes[c].ttl_tva;
+            // old produit.tva = commandes[c].tva;
+            produit.tva = produit.client_ht * (produit.tx_tva / 100);
+            produit.ttl_tva = produit.tva * produit.qte;
             
-            fullCommande.total_ht += produit.pht;
-            fullCommande.total_tva[produit.tx_tva.toString()] += produit.tva;
+            fullCommande.total_ht += produit.ttl_ht;
+            fullCommande.total_ht = roundDecimal(fullCommande.total_ht, 2);
+           
+            fullCommande.total_tva[produit.tx_tva.toString()] += produit.ttl_tva;
+            fullCommande.total_tva[produit.tx_tva.toString()] = roundDecimal(fullCommande.total_tva[produit.tx_tva.toString()], 2);
             fullCommande.produits.push(produit);
           }
           fullCommande.ttlArticles = ttlArticles;
-          logger.util(commandes[0]);
           fullCommande.total_commande = commandes[0].ttl_commande;
           logger.warn('ready to back histo');
+          //logger.util("donc : ", fullCommande);
         }
         callback(null,fullCommande);
       });
@@ -270,15 +272,13 @@ module.exports = {
           produit.nom = commandes[c].nom;
   				produit.qte = commandes[c].qte;
           produit.qte_ok = commandes[c].qte_ok;
-           produit.tx_tva = commandes[c].tx_tva;
+          produit.tx_tva = commandes[c].tx_tva;
           ttlArticles += produit.qte;
          	produit.pu = roundDecimal(commandes[c].puttc,2);
           produit.achat_ttc = commandes[c].achat_ttc;
-
           produit.ttc = roundDecimal(commandes[c].puttc * produit.qte,2);
   				
           produit.ttl_ht = roundDecimal(produit.ttc / (1 + produit.tx_tva/100),4);
-          
           produit.ref_interne = commandes[c].ref_interne;
   				produit.ref_externe = commandes[c].ref_externe;
           produit.icone = commandes[c].icone;
@@ -287,17 +287,12 @@ module.exports = {
           produit.pht = commandes[c].ht;//achat
           var coeffCom = (100 - commandes[c].tx_com) / 100;
           logger.warn("coeffcom : ", coeffCom);
-
           produit.client_ht = parseInt((produit.pht / coeffCom) * 100)/100;
-            
-         
-         
-          
           produit.tx_com = commandes[c].tx_com;
-          
-          produit.commission = produit.client_ht - produit.pht;
-          produit.ttl_com = parseInt((produit.commission * produit.qte) * 100) / 100;//Comm totale
-          
+          //TODO A checker par precaution avec Christophe
+          produit.commission = produit.client_ht - produit.ht;
+          produit.ttl_com = produit.commission * produit.qte;//Comm totale
+          produit.ttl_com = roundDecimal(produit.ttl_com,2);
          
           produit.tva = produit.client_ht * (produit.tx_tva / 100);
            

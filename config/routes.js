@@ -69,6 +69,7 @@ module.exports.routes = {
   '/commandes/client/:id_client':   'CommandesController.home',
   '/commandes/status/:status':          'CommandesController.home',
   '/commandes/addormodify':             'CommandesController.addormodify',
+  '/commandes/dupliquer':               'CommandesController.dupliquer',
   '/commandes/get_commandes/:id_client': 'CommandesController.getCommandes',
   '/commandes/livrer':             'CommandesController.livrer',
   '/commandes/print/:id':          'CommandesController.print',

@@ -310,7 +310,7 @@
                         desktop: true
                       }
                     }); 
-                    window.location.href = '/' + opts.resource;
+                    //window.location.href = '/' + opts.resource;
                   });
 
                  
@@ -361,6 +361,8 @@
              for (var fld in opts.fields) {
                 obj[fld] = $('#' + fld).val();
              }
+             
+             console.log("dans save ", obj)
              $.post('/' + opts.resource + '/add',{'datas':obj}, function(result){
                 var msg="";
                 var msg_type ="";
@@ -383,7 +385,7 @@
                     }
 
                 }); 
-                window.location.href = '/' + opts.resource;
+                //window.location.href = '/' + opts.resource;
                 self.dialog("close");
              });
 

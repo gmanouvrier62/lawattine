@@ -15,15 +15,15 @@ module.exports = {
 
     ref_externe: { type: 'string' },
 
-    pht: { type: 'double' },
+    pht: { type: 'decimal' },
 
-    tva: { type: 'double' },
+    tva: { type: 'decimal' },
 
-    ttc_externe: { type: 'double' },
+    ttc_externe: { type: 'decimal' },
 
-    tx_com: { type: 'double' },
+    tx_com: { type: 'decimal' },
 
-    ttc_vente: { type: 'double' },
+    ttc_vente: { type: 'decimal' },
 
     icone: { type: 'string' },
 
