@@ -1,0 +1,235 @@
+<html>
+<head>
+<link rel="stylesheet" href="/styles/font-awesome-4.7.0/css/font-awesome.min.css">
+<link href="/js/dependencies/pnotify.custom.min.css" rel="stylesheet">
+<link href="/js/dependencies/caisse.css" rel="stylesheet">
+<link rel="stylesheet" href="/styles/style.css" type="text/css" media="screen" />
+<link href="/js/dependencies/jquery-ui/jquery-ui.css" rel="stylesheet">
+<link href="/js/dependencies/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/js/dependencies/DataTables-1.10.12/media/css/jquery.dataTables.min.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="/js/dependencies/tooltipster/dist/css/tooltipster.bundle.min.css" />
+<link href="/js/dependencies/sc026/css/style.css" rel="stylesheet">
+ <link href="/js/dependencies/jQuery-QueryBuilder-2.4.1/dist/css/query-builder.default.css" rel="stylesheet">  
+ <script type="text/javascript" src="/js/dependencies/jquery.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery-ui.js"></script>
+ <script type="text/javascript" src="/js/dependencies/pnotify.js"></script>
+ <script type="text/javascript" src="/js/dependencies/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+ <script type="text/javascript" src="/js/dependencies/jquery.spasticNav.js"></script>
+ <script type="text/javascript" src="/js/dependencies/DataTables-1.10.12/media/js/jquery.dataTables.js"></script>		
+ <script type="text/javascript" src="/js/dependencies/composant/ModalFormBind.js"></script>
+ <script type="text/javascript" src="/js/dependencies/tooltipster/dist/js/tooltipster.bundle.min.js"></script> 
+ <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
+
+ <script type="text/javascript" src="/js/dependencies/jQuery-QueryBuilder-2.4.1/dist/js/query-builder.js"></script>
+<script>
+$(function(){
+    var filtreClient = "";
+    <% if (this.id_client != "") {%>
+        filtreClient = "<%=id_client%>";
+        console.log("<%=id_client%>");
+    <%} else {%>
+        console.log("chelou pas de client");
+        <%}%>
+
+    var monthNames = [
+      "Janvier", "Février", "Mars",
+      "Avril", "Mai", "Juin", "Juillet",
+      "Août", "Septembre", "Octobre",
+      "Novembre", "Decembre"
+    ];
+    var currentDate1 = new Date();
+    var currentDate2 = new Date();
+
+    var day1 = currentDate1.getDate();
+    var monthIndex1 = currentDate1.getMonth();
+    var year1 = currentDate1.getFullYear();
+    var ladate1 = day1 + ' ' + monthNames[monthIndex1] + ' ' + year1;
+    var myMonth1 = monthIndex1 + 1;
+    myMonth1 = myMonth1  >9?myMonth1: '0' + myMonth1;
+    var myDay1 = day1 > 9?day1: '0' + day1;
+        
+    var day2 = currentDate2.getDate();
+    var monthIndex2 = currentDate2.getMonth();
+    var year2 = currentDate2.getFullYear();
+    var ladate2 = day2 + ' ' + monthNames[monthIndex2] + ' ' + year2;
+    var myMonth2 = monthIndex2 + 1;
+    myMonth2 = myMonth2  >9?myMonth2: '0' + myMonth2;
+    var myDay2 = day2 > 9?day2: '0' + day2;
+        
+    var d1= year1 + '-' + myMonth1 + '-' + myDay1;
+    var d2= year2 + '-' + myMonth2 + '-' + myDay2;
+    
+    $("#bandeauDate").hide();
+    
+    $('#nav').spasticNav();
+    var tableCo = $('#tblCo').DataTable( {
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                   
+                    return row[1];//numero facture
+                },
+                "targets": 0
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    return "";
+                },
+                "targets": 1
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    return "";
+                },
+                "targets": 2
+            },
+            {
+                "render": function ( data, type, row ) {
+                    
+                    var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir la commande" data-status="' + row[2] + '" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
+                    
+                    return html;
+                },
+                "targets": 3
+            },
+            { "className": "col_date", "targets": [ 0 ] },
+            { "className": "col_ref", "targets": [ 1 ] },
+            { "className": "col_xl", "targets": [ 2 ] },
+            { "className": "col_std", "targets": [ 3 ] }
+        ],
+        "oLanguage": {"sZeroRecords": "", "sEmptyTable": "<b>Pas de commandes</b>"},
+        "processing": false,
+        "serverSide": false,
+        "paging": true,
+        "ordering": true,
+        "defaultOrdering": [[2, 'desc']],
+        "searching": true,
+        "search": {
+            "smart": false
+        },
+        "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            var cl = "";
+            
+            //console.log("le content : ", aData[1]);
+            $('td:eq(0)', nRow).addClass( cl );
+            
+            $('td:eq(1)', nRow).addClass( cl );
+            $('td:eq(2)', nRow).addClass( cl );
+            $('td:eq(3)', nRow).addClass( cl );
+            
+            return nRow;
+        }
+    });
+
+    $('body').on('click', 'button.action-view', function(){
+        var idx = $(this).data('id');
+        var id_client = $(this).data('id_client');
+        var status = $(this).data('status');
+        if(status == 'Livrée')
+            document.location.href = '/commandes/histo/' + idx + '/client/' + id_client;
+        else    
+            document.location.href = '/commandes/load/' + idx + '/client/' + id_client;
+    });
+    
+    $('body').on('click', 'button.action-cal', function(){
+        
+        //prévoir une modal tradi ici
+        $("#bandeauDate").dialog({
+              title: "Période de recherche",
+              resizable: false,
+              height: 390,
+              width: 650,
+              modal: true,
+              buttons: {
+                "Save": function() {
+                    //Récup des dates et affichage des commandes
+                    $(this).dialog("close");
+                    if(currentDate2 >= currentDate1) {
+                        $.post('/commandes/getCommandes', {'status': choixStatus, 'dtDebut': currentDate1, 'dtFin': currentDate2,'id_client': filtreClient}, function(datas){
+                            console.log('postounet : ', datas);
+                            $('#tblCo').dataTable().fnClearTable();
+                            if(datas.data.length > 0){
+                                $('#tblCo').dataTable().fnAddData(datas.data);    
+                            }
+                        });
+                    } else {
+                        var infos = new PNotify({
+                            title: 'Erreur ',
+                            text: "La date de fin est antérieure à la date de début...",
+                            type: 'error',
+                            desktop: {
+                              desktop: true
+                            }
+                        }); 
+                    }
+                },
+                "Annuler": function() {
+                    $(this).dialog("close");
+                }
+              }
+        });
+
+        //
+        $( "#dt1" ).datepicker({
+          defaultDate: currentDate1,
+          changeMonth: true,
+          changeYear: true,
+          dateFormat: "yy-mm-dd",
+          onSelect: function( selectedDate ) {
+            currentDate1 = selectedDate;
+
+          }
+        });
+        $("#dt1").show();
+
+        $( "#dt2" ).datepicker({
+          defaultDate: currentDate2,
+          changeMonth: true,
+          changeYear: true,
+          dateFormat: "yy-mm-dd",
+          onSelect: function( selectedDate ) {
+            currentDate2 = selectedDate;
+
+          }
+        });
+        $("#dt2").show();
+    });
+});
+</script>
+</head>
+<body>
+<div id="dvHeader" class="row">
+<%- menu %>
+</div>
+<div style="text-align:center"><H1><font ><%=action%></font></H1>
+<button id="print" class="btn btn-success btn-xs btn-action action-cal" style="font-size: 13px;margin-bottom:5px" title="Choisir le jour" ><i class="fa fa-calendar"></i></button>
+<button id="print" class="btn btn-success btn-xs btn-action action-filtre" style="font-size: 13px;margin-bottom:5px" title="Filtres avancés" ><i class="fa fa-filter"></i></button></div>
+<div id='dvFiltre'></div>
+
+<div id='bandeauDate' class='row bandeauDate modal container'><font class='fontTitre' style="float:left">DU</font><div  style="float:left" id="dt1"></div><font class='fontTitre' style="float:left">AU</font><div id="dt2" style="float:left"></div>
+
+
+</div>
+<div id="dvMiddle" class="row">
+
+	<div id="rowFactures" class="col-md-10" style="margin-left:100px;margin-top:20px;">
+		<table id="tblFac" class="order-column" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Numéro</th>    
+                	<th>Client</th>
+                    
+                    <th>
+                    Action
+                    </th>
+                </tr>
+            </thead>
+            
+	</div>
+</div>
+
+</body>
+</html>

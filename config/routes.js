@@ -83,7 +83,8 @@ module.exports.routes = {
   '/stocks':                        'StocksController.home',
   '/chiffres/ventes/:periode':             'StatsController.home',
   '/chiffres/ventes/:periode/:debut/:fin':  'StatsController.home',
-  '/chiffres/ventes_jour':        'StatsController.ventes_jour' 
+  '/chiffres/ventes_jour':        'StatsController.ventes_jour' ,
+  '/factures/liste':              'FacturesController.home'
   
   /***************************************************************************
   *                                                                          *
@@ -94,5 +95,15 @@ module.exports.routes = {
   * for configuration options and examples.                                  *
   *                                                                          *
   ***************************************************************************/
+  /*
+  regroupement et ocncat des différentes évolutions de prix
 
+  SELECT `id_produit` , nom, GROUP_CONCAT( `ttc_externe` ) AS concat_titre
+FROM `evolutions`
+GROUP BY id_produit
+LIMIT 0 , 30
+
+
+
+  */
 };

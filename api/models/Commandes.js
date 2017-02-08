@@ -290,7 +290,10 @@ module.exports = {
           produit.client_ht = parseInt((produit.pht / coeffCom) * 100)/100;
           produit.tx_com = commandes[c].tx_com;
           //TODO A checker par precaution avec Christophe
-          produit.commission = produit.client_ht - produit.ht;
+          logger.error("client_ht : ", produit.client_ht);
+          logger.error("ht : ", produit.pht);
+          logger.error("soutract client_ht-pht= ", produit.client_ht - produit.pht);
+          produit.commission = produit.client_ht - produit.pht;
           produit.ttl_com = produit.commission * produit.qte;//Comm totale
           produit.ttl_com = roundDecimal(produit.ttl_com,2);
          
