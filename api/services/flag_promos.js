@@ -19,25 +19,28 @@ module.exports = function(sck,callback){
     var cptFile = 0;
 	sck.sockets.emit("importations");
 	for (cc = 0; cc < sails.config.tbPromos.length; cc++) {
-		var filename = sails.config.importProductsFolder + 'Promos_' + cc;
-		contenu = JSON.parse(fs.readFileSync(filename, "UTF-8"));
-		var produits = contenu.objContenu.lstElements;
-    	for(var cpt = 0 ; cpt < produits.length;cpt++) {
-    		tom ++;
-    		var ref_prod = produits[cpt].objElement.iIdProduit.toString();	
-    		var origine = {'ref_externe': ref_prod};
-    		var cible = {'promo': cc +1};//1=promo_0, 2=promo_1
-    		sails.models.produits.update(origine, cible).exec(function(err, updated) {
-    			if (err !== null && err !== undefined) {
-    				logger.error("pb update promo : ", err);
-    				lesurl += err + '\r\n';
-    			}
-    			if( (this.cptFile == ttlFiles-1) && (this.cpt == (produits.length -1))) {
-					sck.sockets.emit("fin_importations");
-					callback(lesurl);
-				} 
-    		}.bind({'cpt': cpt,'cptFile': cptFile}));
-    	}
+		var filename = sails.config.importProductsFolder + 'Promos_' + cc + '.json';
+		if (fs.existsSync(filename)) {
+            contenu = JSON.parse(fs.readFileSync(filename, "UTF-8"));
+    		var produits = contenu.objContenu.lstElements;
+        	for(var cpt = 0 ; cpt < produits.length;cpt++) {
+        		//tom ++;
+        		var ref_prod = produits[cpt].objElement.iIdProduit.toString();	
+        		var origine = {'ref_externe': ref_prod};
+        		var cible = {'promo': cc +1};//1=promo_0, 2=promo_1
+        		logger.warn("pour ref_extern ", origine, " on update comme ", cible);
+                sails.models.produits.update(origine, cible).exec(function(err, updated) {
+        			if (err !== null && err !== undefined) {
+        				logger.error("pb update promo : ", err);
+        				lesurl += err + '\r\n';
+        			}
+        			if( (this.cptFile == ttlFiles-1) && (this.cpt == (produits.length -1))) {
+    					sck.sockets.emit("fin_importations");
+    					callback(lesurl);
+    				} 
+        		}.bind({'cpt': cpt,'cptFile': cptFile}));
+        	}
+        }
     	cptFile++;
 	}
 };

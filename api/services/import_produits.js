@@ -204,7 +204,7 @@ module.exports = function(sck,callback){
 						sck.sockets.emit("fin_importations");
 						callback(lesurl);
 					} 
-					logger.warn("produit : ", this.cpt, "/", produits.length," du doc ", this.cptFile,"/", ttlFiles);
+					//logger.warn("produit : ", this.cpt, "/", produits.length," du doc ", this.cptFile,"/", ttlFiles);
 						
         		}.bind({'cpt': cpt,'cptFile': cptFile}));
 

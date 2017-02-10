@@ -85,30 +85,38 @@ module.exports = {
 		imp.on("all_completed", function(){
 			//voir pour un socketio 
 			logger.warn("oki all finished");
+			imp = null;
 		});
 		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
 		
 		return res.render ('produits/import',{'action': 'import', 'menu': menu});
 	},
 	prepare_import_json_promos: function(req, res) {
-		var imp = new importeur("promos");
-		imp.getNext();
-		imp.on("pasbon", function(){
-			logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
+		var sql = "update produits set promo=0";
+		sails.models.produits.query(sql, function(err, results){
+			if (err !== null & err !== undefined) {
+				logger.error(err);
+				return res.status(500).send("Erreur de remise à 0 des promos");
+			}
+			var imp = new importeur("promos");
 			imp.getNext();
+			imp.on("pasbon", function(){
+				logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
+				imp.getNext();
+			});
+			
+			imp.on("completed", function(){
+				logger.warn("fini pour ", imp.currentLink, " pointeur ", this.pointeur);
+				imp.getNext();
+			});
+			imp.on("all_completed", function(){
+				//voir pour un socketio 
+				logger.warn("oki all finished");
+			});
+			var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+			
+			return res.render ('produits/import',{'action': 'import', 'menu': menu});
 		});
-		
-		imp.on("completed", function(){
-			logger.warn("fini pour ", imp.currentLink, " pointeur ", this.pointeur);
-			imp.getNext();
-		});
-		imp.on("all_completed", function(){
-			//voir pour un socketio 
-			logger.warn("oki all finished");
-		});
-		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
-		
-		return res.render ('produits/import',{'action': 'import', 'menu': menu});
 	},
 	import_images: function(req, res) {
 		var imp = new import_images( function(err, st) {

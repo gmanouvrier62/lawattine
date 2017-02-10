@@ -7,7 +7,7 @@ var Immutable = require('immutable');
 var mkdirp = require('mkdirp');
 var Curl = require( 'node-libcurl' ).Curl;
 var importProduits = require("./import_produits.js");
-//var flagPromos = require("./flag_promos.js");
+var flagPromos = require("./flag_promos.js");
 //var http = require('http').Server(app);
 var app = require('express')();
 var http = require('http').Server(app);
@@ -80,14 +80,15 @@ var lCurl_promos = function (ccurl, l_url, self) {
                     		self.sockets.emit("json_completed");
                     	}
                     	logger.error("!!!!!!!!!OK FINI!!!!!!!!!avant import db");
-                    	/*
-                    	importProduits(self,function(result) {
+                    	
+                    	flagPromos(self,function(result) {
+                    		logger.warn("dans callback flagPromos");
                     		self.emit('all_completed');
                     		if (self.sockets !== null && self.sockets !== undefined) {
                     			self.sockets.emit("all_completed");
                     		}
                     	});
-						*/
+						
 	                } 
 	            });
             }  else {
