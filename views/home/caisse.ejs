@@ -91,6 +91,8 @@ $(function(){
      var produit_ligne = "<tr class='rawContent' data-id='" +  obj.index_ligne + "'>";
           produit_ligne += "<td class='rayon_pr'>" +  obj.rayon  + "</td>";
           produit_ligne += "<td class='ref_pr'>" +  obj.ref_interne  + "</td>";
+          var imgPertinente = obj.idr;
+          if(obj.promo > 0) imgPertinente = '288567';
           produit_ligne += "<td><img class='pictoImg' src='/images/images_rayons/" + obj.idr + "/" + obj.icone + "'></td>";
           produit_ligne += "<td>" +   obj.nom  + "</td>";
           produit_ligne += "<td class='prqte'>" +   obj.qte   + "</td>";
@@ -345,10 +347,11 @@ $(function(){
           }); 
       }
     }
-    function validateCommande(obj) {
+    
+    function deliverCommande(obj) {
       var numC = parseInt($("#idCommande").html());
       if (isNaN(numC)) numC = 0; 
-      $.post('/commandes/valider',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'paiement': obj.data('paiement'), 'dt_paiement': date_de_paiement}, function(datas) {
+      $.post('/commandes/livrer',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'paiement': obj.data('paiement'), 'dt_paiement': date_de_paiement}, function(datas) {
              if(datas.err != null) {
                  var infos = new PNotify({
                     title: 'Erreur ',
@@ -361,7 +364,7 @@ $(function(){
             } else {
                  var infos = new PNotify({
                     title: 'OK ',
-                    text: "Commande validée!",
+                    text: "Commande Livrée!",
                     type: 'success',
                     desktop: {
                       desktop: true
@@ -377,6 +380,7 @@ $(function(){
 
           });
     }
+    
     $('body').on('click', 'button.action-dupliquer', function (event) {
       duplication();
     });
@@ -411,13 +415,14 @@ $(function(){
 
     });
     
-    $(".validation").each(function(){
+    $(".livraison").each(function(){
       console.log("ok val");
       $(this).click(function(){
-         validateCommande($(this));
+         deliverCommande($(this));
+         
       });
     });
-    $(".validationCheque").click(function(){
+    $(".livraisonCheque").click(function(){
       //affichage modale date paiement
       var valCheque = this;
       $("#dvCheque").dialog({
@@ -428,7 +433,8 @@ $(function(){
               modal: true,
               buttons: {
                 "Save": function() {
-                  validateCommande($(this));
+                  deliverCommande($(this));
+                  //livraison avec mention cheque
                   $(this).dialog("close");
                 },
                 "Cancel": function() {
@@ -522,13 +528,13 @@ $(function(){
     <font id="marchandise">Marchandises</font><font id='ttlMarchandises' style="margin-right:20px"></font>
    
     
-    <% if (status_com != "Livrée" && status_com != "4") { %> 
-    <button title="Chèque" data-paiement="chèque" class="btn btn-warning validationCheque"><i class="fa fa-dedent"></i></button>
-    <button title="Espèces" data-paiement="espèce" class="btn btn-warning validation"><i class="fa fa-eur"></i></button>
-    <button title="Carte" data-paiement="cb" class="btn btn-warning validation"><i class="fa fa-cc-visa"></i></button>
-    <button title="print" class="btn btn-success action-print"><i class="fa fa-print"></i></button>
-    <% } %>
+    <% if (status_com == "Validée" || status_com == "2") { %> 
+    <button title="Chèque" data-paiement="chèque" class="btn btn-warning livraisonCheque"><i class="fa fa-dedent"></i></button>
+    <button title="Espèces" data-paiement="espèce" class="btn btn-warning livraison"><i class="fa fa-eur"></i></button>
+    <button title="Carte" data-paiement="cb" class="btn btn-warning livraison"><i class="fa fa-cc-visa"></i></button>
     
+    <% } %>
+    <button title="print" class="btn btn-success action-print"><i class="fa fa-print"></i></button>
       
     <br>
     <div class="arrondi-plein-net"><b>Net à payer</b><font id="cmdNet" class="txt50"></font></div>

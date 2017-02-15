@@ -111,8 +111,11 @@ $(function(){
                 "render": function ( data, type, row ) {
                     
                     var html = '<button class="btn btn-primary btn-xs btn-action action-view" style="font-size: 13px;" title="Voir la commande" data-status="' + row[2] + '" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-eye"></i></button>';
+                     if (row[1] == 4) {
+                        html += '<button class="btn btn-success btn-xs btn-action action-facture" style="font-size: 13px;margin-left:10px" title="Facture" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-file-text-o"></i></button>';
+                    }
                     if (row[1] == 2) {
-                        html += '<button class="btn btn-success btn-xs btn-action action-maj" style="font-size: 13px;" title="Livrer la commande" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-chevron-down"></i>Livraison faite</button>';
+                        html += '<button class="btn btn-success btn-xs btn-action action-maj" style="font-size: 13px;" title="Livrer la commande" data-id_client="' + row[11] + '" data-id="' + row[0] + '"><i class="fa fa-chevron-down"></i>Livré</button>';
                     }
                     return html;
                 },
@@ -203,6 +206,26 @@ console.log("avant post : ", filtreClient);
             document.location.href = '/commandes/histo/' + idx + '/client/' + id_client;
         else    
             document.location.href = '/commandes/load/' + idx + '/client/' + id_client;
+    });
+    $('body').on('click', 'button.action-facture', function(){
+        var id_commande = $(this).data('id');
+        var id_client = $(this).data('id_client');
+        console.log("id_commande", id_commande);
+        $.post("/factures/view",{'id_commande': id_commande}, function(result){
+            if(result.err != null && result.err != "") {
+                //KO
+                var infos = new PNotify({
+                    title: 'Erreur ',
+                    text: result.err,
+                    type: 'error',
+                    desktop: {
+                      desktop: true
+                    }
+                  }); 
+            } else {
+                 var fen = window.open(result.link);
+            }
+        });
     });
     $('body').on('click', 'button.action-maj', function(){
         var id_commande = $(this).data('id');

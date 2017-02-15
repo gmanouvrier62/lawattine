@@ -321,6 +321,28 @@ module.exports = {
   			callback(null,fullCommande);
       });
     });
+ },
+ valider: function(id_commande, id_client, callback) {
+    var origine = {
+      'id': id_commande,
+      'id_client': id_client
+    };
+    var target = {
+      'id': id_commande,
+      'id_client': id_client,
+      'status': 2
+      //'paiement': req.body.paiement,
+      //'dt_paiement': req.body.dt_paiement
+    };
+    logger.warn('avant update');
+    sails.models.commandes.update(origine, target).exec(function (err, updated) {
+      if (err !== null && err !== undefined){
+       logger.error(err);
+       return callback("Erreur de mise à jur de commande : " + err, null);
+      }
+      callback(null,"OK");
+    });
+
  }
   
 };

@@ -73,7 +73,6 @@ module.exports.routes = {
   '/commandes/get_commandes/:id_client': 'CommandesController.getCommandes',
   '/commandes/livrer':             'CommandesController.livrer',
   '/commandes/print/:id':          'CommandesController.print',
-  '/commandes/valider':              'CommandesController.valider',
   '/commandes/retirer_produit':      'CommandesController.retirer_produit',
   '/commandes/load/:id/client/:id_client':              'CommandesController.load',
   '/commandes/get/:id/client/:id_client' :              'CommandesController.getCommandeById',
@@ -84,7 +83,7 @@ module.exports.routes = {
   '/chiffres/ventes/:periode':             'StatsController.home',
   '/chiffres/ventes/:periode/:debut/:fin':  'StatsController.home',
   '/chiffres/ventes_jour':        'StatsController.ventes_jour' ,
-  '/factures/liste':              'FacturesController.home'
+  '/factures/view':              'FacturesController.home'
   
   /***************************************************************************
   *                                                                          *
