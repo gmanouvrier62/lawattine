@@ -55,3 +55,14 @@ module.exports = {
 
 };
 //SELECT (<value> DIV 0.05) * 0.05 + IF(<value> MOD 0.05 = 0, 0, 0.05)
+/*
+chemin_impression_commande
+ archive_facture
+ productImages
+ relativProductImages
+ importProductsFolder
+ images_rayons_download
+ images_tmp
+ archives
+ impressions
+*/

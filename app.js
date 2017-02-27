@@ -54,8 +54,8 @@ process.chdir(__dirname);
     }
   }
 
-
+  
   // Start server
   sails.lift(rc('sails'));
-
+  console.log("Check folders");
 })();

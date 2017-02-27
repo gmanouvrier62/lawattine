@@ -170,13 +170,16 @@ module.exports = {
 		    		logger.error({'err': err});
 		    		return res.send({'err': err});
 		    	}
-		    	sails.models.commandes.valider(fCom.id, req.body.id_client, function(err, result) {
-					if (err !== null && err !== undefined) {
-						return res.send({'err': 'pb de validation de commande','validation': null})
-					}
-					return res.send({'err':null, 'content': template});
-				});
-				
+		    	if (fCom.status !== 4 && fCom.status !== 'Livrée') {
+			    	sails.models.commandes.valider(fCom.id, req.body.id_client, function(err, result) {
+						if (err !== null && err !== undefined) {
+							return res.send({'err': 'pb de validation de commande','validation': null})
+						}
+						return res.send({'err':null, 'content': template});
+					});
+				} else {
+					return res.send({'err':null, 'content': template});//plus de validation car déjà validée
+				}
     		});
 			
 		});	
@@ -215,7 +218,7 @@ module.exports = {
 		if (req.params.id_client !== null && req.params.id_client !== undefined) {
 			id_client = req.params.id_client;
 		}
-		sails.models.commandes.getOneFullCommandeHistorique(idCmd, id_client, function(err, fCom) {
+		sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
 			if (err !== null && err !== undefined) {
 				logger.error(err);
 				return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
@@ -282,7 +285,7 @@ module.exports = {
 	},
 	dupliquer: function(req, res) {
 		if(req.body.id_commande === null || req.body.id_commande === undefined)  return res.send({'err': "Erreur récupération commande"});
-		sails.models.commandes.getOneFullCommandeHistorique(req.body.id_commande, req.body.id_client, function(err, fCom) {
+		sails.models.commandes.getOneFullCommande(req.body.id_commande, req.body.id_client, function(err, fCom) {
 			if (err !== null && err !== undefined) {
 				logger.error(err);
 				return res.send({'err': "Erreur de récupération de la commande"});
@@ -361,7 +364,9 @@ module.exports = {
 					var idCmd = commande.insertId;
 					logger.warn("id com : ", idCmd);
 					for(var cpt = 0; cpt < lignes.length; cpt++) {
-						sails.models.produits.find({id: lignes[this.cpt].qte}, function(err, resultPr) {
+						logger.util("l produit : ", lignes[cpt]);
+						sails.models.produits.find({id: lignes[cpt].id_produit}).exec(function(err, resultPr) {
+							logger.util("recup pr : ", resultPr);
 							var ligne = {
 								id_commande: idCmd,
 								id_produit: lignes[this.cpt].id_produit,
@@ -431,24 +436,23 @@ module.exports = {
 					if(err !== null && err !== undefined) return res.send({'err':"Erreur de modification d'une commande : " + err, 'commande': null});
 					if(lignes !== null && lignes !== undefined) {
 						for(var cpt = 0; cpt < lignes.length; cpt++) {
-							sails.models.produits.find({id: lignes[this.cpt].qte}, function(err, resultPr) {
+							sails.models.produits.find({id: lignes[cpt].id_produit}, function(err, resultPr) {
 						
 								var ligneTest = {
 									id_commande: idCmd,
-									id_produit: lignes[cpt].id_produit,
-									qte: lignes[cpt].qte
+									id_produit: lignes[this.cpt].id_produit,
+									qte: lignes[this.cpt].qte
 								};
 								var ligneCreate = {
 									id_commande: idCmd,
-									id_produit: lignes[cpt].id_produit,
-									qte: lignes[cpt].qte,
+									id_produit: lignes[this.cpt].id_produit,
+									qte: lignes[this.cpt].qte,
 									pht: resultPr[0].pht,
 									tva: resultPr[0].tva,
 									tx_com: resultPr[0].tx_com,
 									ttc_vente: resultPr[0].ttc_vente,
 									ttc_externe: resultPr[0].ttc_externe
 								};
-								logger.util("ligne : ", ligne);
 								
 								sails.models.cmd_pr.findOrCreate(ligneTest,ligneCreate).exec(function creaStat(err,created){
 									if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande", 'commande': null});
@@ -581,7 +585,7 @@ module.exports = {
 			var oldStatus = recup[0].status;
 			logger.util('updated : ', recup);
 			//quand status de livraison avec old=crea => on destcoke
-			if ((oldStatus == 1 || oldStatus == 2 || oldStatus == 3) ) {
+			if ((oldStatus == 1 || oldStatus == 2 || oldStatus == 4) ) {
 				var origine = {
 					'id': req.body.id_commande,
 					'id_client': req.body.id_client
@@ -640,13 +644,14 @@ module.exports = {
 										logger.warn('le ccc ', ccc, 'le max ', fCom.produits.length) ;
 										if (ccc == fCom.produits.length-1) {
 											//FIXER LES PRIX au moment de la livraison, les prix ne peuvent plus bouger aprés
-											fixePrice(fCom, function(err, retourFinal) {
-												logger.warn("retour de fixeprice!!!!");
-												if(allErr + err != "")
+											//fixePrice(fCom, function(err, retourFinal) {
+												if(allErr != "") {
+													logger.error("oulala : ", allErr + err);
 													res.send({"err": allErr, "msg": 'KO'});
+												}
 												else 
 													res.send({"err": null, "msg": 'OK'});		
-											});
+											//});
 										}
 										ccc++;
 									});

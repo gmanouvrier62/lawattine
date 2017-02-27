@@ -45,7 +45,6 @@ module.exports.routes = {
   '/produits/import_images':       'ProduitsController.import_images', 
   '/produits/prepare_import_json': 'ProduitsController.prepare_import_json',
   '/produits/prepare_import_json_promos': 'ProduitsController.prepare_import_json_promos',
-  '/produits/import_rayon_json/:id': 'ProduitsController.import_rayon_json',
   '/produits/marge':        'ProduitsController.marge',
   '/produits/repartition_com':  'ProduitsController.repartition_com',
   '/produits/apply_com':       'ProduitsController.apply_com',

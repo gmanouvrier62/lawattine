@@ -55,7 +55,7 @@ module.exports = {
 					logger.warn('attention idC: ', idC);
 					logger.warn('attention id_client: ', id_client);
 					
-					sails.models.commandes.getOneFullCommandeHistorique(idC, id_client, function(err, fCom) {
+					sails.models.commandes.getOneFullCommande(idC, id_client, function(err, fCom) {
 						//Tous les produits de 1 commande
 						for(var cptP = 0; cptP < fCom.produits.length; cptP++) {
 							var prd = [];

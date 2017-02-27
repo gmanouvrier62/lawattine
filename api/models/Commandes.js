@@ -109,99 +109,6 @@ module.exports = {
 
     });
   },
-  getOneFullCommandeHistorique: function (id_commande, id_client, callback) {
-    var roundDecimal = function(nombre, precision){
-      var precision = precision || 2;
-      var tmp = Math.pow(10, precision);
-      return Math.round( nombre*tmp )/tmp;
-    }
-    var objTVA = {
-    '5.5': 0,
-    '10': 0,
-    '20': 0
-    };
-    var fullCommande = {
-      client: null, 
-      id: null, 
-      status: null, 
-      dt_livraison: null, 
-      produits: [],
-      total_ht: 0,
-      total_tva: objTVA,
-      total_commande: 0
-    };
-    var sql = "select  c.createdAt dt_creation, h.* ,c.* , prd.icone, prd.id_type, prd.id_fournisseur,sc.*  from historique h inner join produits prd on h.id_produit=prd.id inner join commandes c on c.id=h.id_commande inner join status_commande sc on sc.id=c.status where id_commande=" + id_commande;
-    logger.warn(sql);
-    sails.models.clients.find({"id": id_client}, function (err, clt) {
-      if (err !== null) return callback("pb de récupération client", null);
-      if (clt == null || clt == undefined) return callback("Le client n'existe pas", null);
-      fullCommande.client = clt[0];
-      sails.models.commandes.query(sql, function(err, commandes) {
-        if (err !== null && err !== undefined)  return callback("pb de récupération des produits d'une commande", null);
-        if (commandes == null || commandes == undefined) return callback("La commande est vide", null);     
-        logger.warn("remplissage des produits : ", commandes.length);
-        if(commandes.length > 0) {
-          var ttlArticles = 0;
-          for(var c = 0; c < commandes.length; c++) { 
-            fullCommande.id = commandes[0].id_commande;
-            fullCommande.status = commandes[0].nom_status;
-            fullCommande.dt_livraison = commandes[0].dt_livraison;
-            fullCommande.paiement = commandes[0].paiement;
-            fullCommande.dt_paiement = commandes[0].dt_paiement;
-            fullCommande.position = commandes[0].position;
-            fullCommande.dt_creation = commandes[0].dt_creation;
-            var produit = {};
-            produit.index_ligne = commandes[c].id_cmd_pr;
-            produit.id = commandes[c].id_produit;
-            produit.nom = commandes[c].nom;
-            produit.qte = commandes[c].qte;
-            produit.qte_ok = 0;
-            produit.tx_tva = commandes[c].tx_tva;
-            ttlArticles += produit.qte;
-            //old produit.pu = commandes[c].pu;
-            produit.pu = roundDecimal(commandes[c].pu,2);
-            produit.achat_ttc = commandes[c].achat_ttc;
-            produit.ttc = roundDecimal(commandes[c].pu * produit.qte,2);
-            // old produit.ttc = parseInt((commandes[c].pu * produit.qte) * 100)/100;
-            produit.ttl_ht = roundDecimal(produit.ttc / (1 + produit.tx_tva/100),4);
-            // old produit.ttl_ht = parseInt((produit.client_ht * produit.qte) * 100) / 100;
-            produit.ref_interne = commandes[c].ref_interne;
-            produit.ref_externe = commandes[c].ref_externe;
-            produit.icone = commandes[c].icone;
-            produit.rayon = commandes[c].rayon;
-            produit.idr = commandes[c].idr;
-            produit.pht = commandes[c].pht;
-            var coeffCom = (100 - commandes[c].tx_com) / 100;
-            //produit.client_ht = parseInt((produit.pht produit.commission = produit.client_ht - produit.pht;/ coeffCom) * 100)/100;
-            produit.client_ht = parseInt((produit.pht / coeffCom) * 100)/100;
-             //produit.ttl_ht = parseInt((produit.pht * produit.qte) * 100) / 100;
-            produit.tx_com = commandes[c].tx_com;
-            produit.commission = commandes[c].commission; //faire check que le champ est dans histo
-            produit.ttl_com = commandes[c].ttl_com;
-           
-            //produit.tva = parseInt(produit.pht * (produit.tx_tva / 100) * 100 )/100;
-            // old produit.tva = commandes[c].tva;
-            produit.tva = produit.client_ht * (produit.tx_tva / 100);
-            produit.ttl_tva = produit.tva * produit.qte;
-            
-            fullCommande.total_ht += produit.ttl_ht;
-            fullCommande.total_ht = roundDecimal(fullCommande.total_ht, 2);
-           
-            fullCommande.total_tva[produit.tx_tva.toString()] += produit.ttl_tva;
-            fullCommande.total_tva[produit.tx_tva.toString()] = roundDecimal(fullCommande.total_tva[produit.tx_tva.toString()], 2);
-            fullCommande.produits.push(produit);
-          }
-          fullCommande.ttlArticles = ttlArticles;
-          fullCommande.total_commande = commandes[0].ttl_commande;
-          logger.warn('ready to back histo');
-          //logger.util("donc : ", fullCommande);
-        }
-        callback(null,fullCommande);
-      });
-
-    });
-
-  },
   getOneFullCommande: function(id_commande, id_client, callback) {
   	var roundDecimal = function(nombre, precision){
       var precision = precision || 2;
@@ -230,15 +137,15 @@ module.exports = {
 	  //rajouter nom, ref_interne et externe
   	var sql = "select c.id cid, st.nom_status cstatus, c.dt_livraison dt_livraison, c.createdAt dt_creation,  c.paiement paiement, cp.qte qte, c.dt_paiement, c.position, ";
   		sql += "cp.id_produit cpid, cp.qte_ok qte_ok, cp.id cp_index_ligne, ";
-  		sql += "p.ttc_vente puttc, ";
-      sql += "p.ttc_externe achat_ttc, ";
+  		sql += "cp.ttc_vente puttc, ";
+      sql += "cp.ttc_externe achat_ttc, ";
       sql += "p.ref_interne ref_interne, ";
       sql += "p.ref_externe ref_externe, ";
       sql += "p.nom nom, ";
       sql += "p.icone icone, ";
-      sql += "p.pht ht, ";
-      sql += "p.tx_com tx_com, ";
-      sql += "p.tva tx_tva, ";
+      sql += "cp.pht ht, ";
+      sql += "cp.tx_com tx_com, ";
+      sql += "cp.tva tx_tva, ";
   		sql += "r.nom rayon, r.id idr ";
   		sql += " from commandes c inner join cmd_pr cp on c.id=cp.id_commande ";
   		sql += " inner join produits p on p.id=cp.id_produit ";

@@ -90,9 +90,16 @@ var tIndex = 0;
                 },
                 "targets": 7
             },
-
+            { "className": "col_std", "targets": [ 0 ] },
             { "className": "col_xxl", "targets": [ 1 ] },
-            { "className": "col_xl", "targets": [ 8 ] }
+            { "className": "col_std", "targets": [ 2 ] },
+            { "className": "col_std", "targets": [ 3 ] },
+            { "className": "col_std", "targets": [ 4 ] },
+            { "className": "col_std", "targets": [ 5 ] },
+            { "className": "col_std", "targets": [ 6 ] },
+            { "className": "col_std", "targets": [ 7 ] },
+            { "className": "col_xl", "targets": [ 8 ] },
+            { "visible": false,  "targets": [5] },
         ],
         "oLanguage": {"sZeroRecords": "", "sEmptyTable": "<b>Pas de produits achetés</b>"},
         "processing": false,
@@ -209,12 +216,12 @@ var tIndex = 0;
 
 <div id="dvMiddle" class="row">
 
-	<div id="rowAchats" class="col-md-8" style="margin-left:100px;margin-top:20px;">
+	<div id="rowAchats" class="col-md-10" style="margin-left:100px;margin-top:20px;">
 		<table id="tblAchats" class="order-column" cellspacing="0" width="100%">
             <thead>
                 <tr>
                 	<th>REF</th>
-                    <th>nom</th>
+                    <th>NOM</th>
                     <th>PU</th>
                     <th>TVA</th>
                     <th>Qté </th>

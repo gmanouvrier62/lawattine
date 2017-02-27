@@ -337,6 +337,7 @@ QueryBuilder.prototype.init = function($el, options) {
     this.$el = $el;
 
     // PROPERTIES
+    this.settings={};
     this.settings = $.extendext(true, 'replace', {}, QueryBuilder.DEFAULTS, options);
     this.model = new Model();
     this.status = {

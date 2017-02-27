@@ -353,6 +353,7 @@ $(function(){
       if (isNaN(numC)) numC = 0; 
       $.post('/commandes/livrer',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'paiement': obj.data('paiement'), 'dt_paiement': date_de_paiement}, function(datas) {
              if(datas.err != null) {
+                console.log("erreur pas null? = ", datas.err);
                  var infos = new PNotify({
                     title: 'Erreur ',
                     text: datas.err,

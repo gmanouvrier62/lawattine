@@ -3,6 +3,11 @@ var logger = require('../services/logger.init.js').logger("tom.txt");
 
 
 module.exports = function(callback){
+		var roundDecimal = function(nombre, precision){
+	      var precision = precision || 2;
+	      var tmp = Math.pow(10, precision);
+	      return Math.round( nombre*tmp )/tmp;
+	    }
 		function calculHT(ttc_achat,tva) {
 	        var resultat = parseFloat(ttc_achat) /(1 + (parseFloat(tva)/100) );
 	        return Math.round(resultat *100)/100;
@@ -14,11 +19,11 @@ module.exports = function(callback){
 			sql += "pr.icone, ";
 			sql += "t.nom as rayon, ";
 			sql += "t.id as rayon_id, ";
-			sql += "ttc_externe, ";
-			sql += "tva, ";
+			sql += "cp.ttc_externe ttc_externe, ";
+			sql += "cp.tva tva, ";
 			sql += "qte_ok, ";
 			sql += "cp.id as index_ligne, ";
-			sql += "sum(cp.qte)*ttc_externe  as ttl_achat ";
+			sql += "sum(cp.qte)*cp.ttc_externe  as ttl_achat ";
 			sql += "from cmd_pr cp inner join commandes c on c.id=cp.id_commande ";
 			sql += "inner join produits pr on pr.id=cp.id_produit ";
 			sql += "inner join typesproduits t on t.id=pr.id_type ";
@@ -36,7 +41,7 @@ module.exports = function(callback){
 				stb.push(lignes[cpt].ttc_externe);
 				stb.push(lignes[cpt].tva);
 				stb.push(lignes[cpt].quantite);
-				stb.push(lignes[cpt].ttl_achat);
+				stb.push(roundDecimal(lignes[cpt].ttl_achat,2));
 				stb.push(calculHT(lignes[cpt].ttl_achat,lignes[cpt].tva));
 				stb.push(lignes[cpt].qte_ok);
 				stb.push(lignes[cpt].rayon);
