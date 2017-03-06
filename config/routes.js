@@ -76,6 +76,7 @@ module.exports.routes = {
   '/commandes/load/:id/client/:id_client':              'CommandesController.load',
   '/commandes/get/:id/client/:id_client' :              'CommandesController.getCommandeById',
   '/commandes/histo/:id/client/:id_client':     "CommandesController.load_history", 
+  '/commandes/undo':                  "CommandesController.undo",
   '/achats':                        'AchatsController.home',
   '/achats/achat_todo':             'AchatsController.achat_todo',
   '/stocks':                        'StocksController.home',

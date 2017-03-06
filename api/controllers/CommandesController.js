@@ -665,9 +665,20 @@ module.exports = {
 			}
 		});
 	},
+	undo: function (req, res) {
+		logger.warn("dans undo");
+		var id_commande = req.body.id_commande;
+		logger.warn("commande : ", id_commande);
+		sails.models.commandes.undo(id_commande, function(err, result) {
+			logger.warn("retour undo", result);
+			if (err !== null && err !== undefined) return res.send({"err": err, "msg": 'KO'});
+			res.send({"err": null, "msg": 'OK'});
+		});
+	},
 	update: function (req, res) {
 
 	}
+
 	
 };
 

@@ -259,6 +259,33 @@ $(function(){
         if(q>1) $(this).parent().find(".fontQte").html( q-1 );
     });
     ////
+    $('body').on('click', 'button.action-undo', function (event) {
+      if ($("#idCommande").html() !== "") {
+        var idC = $("#idCommande").html();
+        $.post("/commandes/undo", {'id_commande': idC}, function(ret) {
+          var title = "Marche Arrière";
+          var text, l_type;
+          if(ret.err !== "" && ret.err !== null) {
+            text = ret.err;
+            l_type = "error";
+          } else {
+            text = "OK";
+            l_type = "success";
+            impression(ret.content);
+          } 
+          var infos = new PNotify({
+                    title: title,
+                    text: text,
+                    type: l_type,
+                    desktop: {
+                      desktop: true
+                    }
+          }); 
+          setTimeout(function(){ document.location.href = '/commandes/load/' + idC + '/client/' + currentIdClient;},2000);
+        });
+      }
+
+    });
     $('body').on('click', 'button.action-print', function (event) {
       if ($("#idCommande").html() !== "") {
         $.post("/commandes/print", {'id': $("#idCommande").html(), 'id_client': currentIdClient}, function(toPrint){
@@ -535,6 +562,13 @@ $(function(){
     <button title="Carte" data-paiement="cb" class="btn btn-warning livraison"><i class="fa fa-cc-visa"></i></button>
     
     <% } %>
+    <% if (status_com == "Validée" || status_com == "2" || status_com == 'Livrée' || status_com == '4') { %> 
+    
+      <button title="Marche arrière" class="btn btn-success action-undo"><i class="fa fa-unlock"></i></button>
+    
+
+    <% } %>
+    
     <button title="print" class="btn btn-success action-print"><i class="fa fa-print"></i></button>
       
     <br>

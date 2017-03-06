@@ -250,6 +250,24 @@ module.exports = {
       callback(null,"OK");
     });
 
+ },
+ undo: function(id_commande, callback) {
+    if(id_commande === null || id_commande === undefined || parseInt(id_commande)<=0 ) return callback("erreur pas de commande", null);
+    var origine = {
+      'id': id_commande
+    };
+    var target = {
+      'id': id_commande,
+      'status': 1
+    };
+    sails.models.commandes.update(origine, target).exec(function (err, updated) {
+      if (err !== null && err !== undefined){
+       logger.error(err);
+       return callback("Erreur de mise à jour de commande : " + err, null);
+      }
+      callback(null,"OK");
+    });
+
  }
   
 };

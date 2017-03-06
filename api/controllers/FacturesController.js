@@ -7,7 +7,7 @@
 var fs = require('fs');
 var logger = require('../services/logger.init.js').logger("tom.txt");
 var moment = require("moment");
-var sleep = require("sleep");
+var sleep = require("system-sleep");
 module.exports = {
 	home: function (req, res) {
 		function checkFolder(chemin) {
