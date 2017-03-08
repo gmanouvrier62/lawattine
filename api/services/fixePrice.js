@@ -1,5 +1,5 @@
 var moment = require('moment');
-var sleep = require('sleep');
+var sleep = require('system-sleep');
 var logger = require('../services/logger.init.js').logger("tom.txt");
 
 module.exports = function(commande, callback){

@@ -1,7 +1,7 @@
 var fs = require('fs');
 var util = require("util");
 var moment = require('moment');
-var sleep = require('sleep');
+var sleep = require('system-sleep');
 var Immutable = require('immutable');
 var mkdirp = require('mkdirp');
 var Curl = require( 'node-libcurl' ).Curl;
