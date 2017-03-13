@@ -271,7 +271,7 @@ $(function(){
           } else {
             text = "OK";
             l_type = "success";
-            impression(ret.content);
+            //impression(ret.content);
           } 
           var infos = new PNotify({
                     title: title,
@@ -281,6 +281,7 @@ $(function(){
                       desktop: true
                     }
           }); 
+          console.log("timeout va : ", '/commandes/load/' + idC + '/client/' + currentIdClient);
           setTimeout(function(){ document.location.href = '/commandes/load/' + idC + '/client/' + currentIdClient;},2000);
         });
       }
@@ -288,6 +289,7 @@ $(function(){
     });
     $('body').on('click', 'button.action-print', function (event) {
       if ($("#idCommande").html() !== "") {
+        var idC = $("#idCommande").html();
         $.post("/commandes/print", {'id': $("#idCommande").html(), 'id_client': currentIdClient}, function(toPrint){
           var title = "Impression";
           var text, l_type;
@@ -307,6 +309,8 @@ $(function(){
                       desktop: true
                     }
           }); 
+
+          setTimeout(function(){ document.location.href = '/commandes/load/' + idC + '/client/' + currentIdClient;},2000);
         });
       }
     });
@@ -376,6 +380,7 @@ $(function(){
     }
     
     function deliverCommande(obj) {
+      console.log("ATTENTION DANS LIVRER");
       var numC = parseInt($("#idCommande").html());
       if (isNaN(numC)) numC = 0; 
       $.post('/commandes/livrer',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'paiement': obj.data('paiement'), 'dt_paiement': date_de_paiement}, function(datas) {
@@ -399,14 +404,16 @@ $(function(){
                     }
                   }); 
                  fullCommande = datas.commande;
-                 GestionAffichage(fullCommande);
+                 //GestionAffichage(fullCommande);
                  date_de_paiement = "";
                  $("#dtCheque").val("");
+                 console.log("avant setTimeout final : ", '/commandes/load/' + numC + '/client/' + currentIdClient);
+                 setTimeout(function(){ document.location.href = '/commandes/load/' + numC + '/client/' + currentIdClient;},1000);
+
             }
             //setTimeout(function(){document.location.href = '/commandes';},2000);
-
-
-          });
+            
+        });
     }
     
     $('body').on('click', 'button.action-dupliquer', function (event) {

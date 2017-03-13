@@ -566,6 +566,7 @@ module.exports = {
 		});
 	},
 	livrer: function(req, res) {
+		logger.error("!!!!!!!!!!!DANS LIVRER!!!!!!!!!!!!");
 		var paiement = "";
 		var dt_paiement = "";
 		var avoir = "";
@@ -598,7 +599,9 @@ module.exports = {
 					'paiement': paiement,
 					'dt_paiement': dt_paiement
 				};
-				logger.error(target);	
+				logger.error("source : ", origine);	
+				
+				logger.error("cible : ", target);	
 				sails.models.commandes.update(origine, target).exec(function (err, updated) {
 					if (err !== null && err !== undefined){
 					 	logger.error(err);
