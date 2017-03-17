@@ -13,7 +13,6 @@
     else {
         factory(root.jQuery, root.doT);
     }
-
 }(this, function($, doT) {
 "use strict";
 
@@ -81,7 +80,6 @@ QueryBuilder.plugins = {};
  * @return {undefined|object} nothing or configuration object (copy)
  */
 QueryBuilder.defaults = function(options) {
-    
     if (typeof options == 'object') {
         $.extendext(true, 'replace', QueryBuilder.DEFAULTS, options);
     }
@@ -337,7 +335,6 @@ QueryBuilder.prototype.init = function($el, options) {
     this.$el = $el;
 
     // PROPERTIES
-    this.settings={};
     this.settings = $.extendext(true, 'replace', {}, QueryBuilder.DEFAULTS, options);
     this.model = new Model();
     this.status = {
@@ -2732,6 +2729,8 @@ Utils.error = function() {
     var args = Array.isArray(arguments[i]) ? arguments[i] : Array.prototype.slice.call(arguments, i);
 
     if (doThrow) {
+        console.log("message : ", message);
+        console.log("args : ", args);
         var err = new Error(Utils.fmt(message, args));
         err.name = type + 'Error';
         err.args = args;

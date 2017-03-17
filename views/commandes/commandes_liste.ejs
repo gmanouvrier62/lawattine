@@ -20,7 +20,17 @@
  <script type="text/javascript" src="/js/dependencies/tooltipster/dist/js/tooltipster.bundle.min.js"></script> 
  <script type="text/javascript" src="/js/dependencies/sc026/scr/modernizr.js"></script>
 
- <script type="text/javascript" src="/js/dependencies/jQuery-QueryBuilder-2.4.1/dist/js/query-builder.js"></script>
+
+  <script src="/js/dependencies/jQuery-QueryBuilder-2.4.1/bower_components/bootbox/bootbox.js"></script>
+  <script src="/js/dependencies/jQuery-QueryBuilder-2.4.1/bower_components/moment/min/moment.min.js"></script>
+  <script src="/js/dependencies/jQuery-QueryBuilder-2.4.1/bower_components/sql-parser/browser/sql-parser.js"></script>
+  <script src="/js/dependencies/jQuery-QueryBuilder-2.4.1/bower_components/jquery-extendext/jQuery.extendext.min.js"></script>
+  <script src="/js/dependencies/jQuery-QueryBuilder-2.4.1/bower_components/doT/doT.js"></script>
+
+  <script src="/js/dependencies/jQuery-QueryBuilder-2.4.1/dist/js/query-builder.js"></script>
+
+
+
 <script>
 $(function(){
     var filtreClient = "";
@@ -260,7 +270,40 @@ console.log("avant post : ", filtreClient);
             
     });
     $('body').on('click', 'button.action-filtre', function(){
-        $("#dvFiltre").queryBuilder();
+        //
+        $('#dvFiltre').on('afterInit.queryBuilder', function() {
+           $.get("/clients/getAllJson",{}, function(datas) {
+            var obj = $("#dvFiltre")[0].queryBuilder.filters[1];
+            console.log(datas);
+            var oo = Object.keys(datas);
+            var tt = new Array();
+            oo.map(function(obj, id) {
+                tt.push(obj[id]);
+            });
+            console.log(tt);
+            obj.values = tt;
+           }); 
+
+        });
+        $('#dvFiltre').queryBuilder({
+            sortable: true,
+            filters: [{
+              id: 'status',
+              type: 'string',
+              input: 'select',
+              values: {1:"Création", 2:"Validées", 4:"Livrées"},
+              operators: ['equal', 'not_equal', 'in', 'not_in']
+             }, {
+              id: 'id_client',
+              label: 'client',
+              input: 'select',
+              type: 'string',
+              values: '',
+              operators: ['equal', 'not_equal', 'in', 'not_in']
+            }]
+        });
+
+        //
     });
     $('body').on('click', 'button.action-cal', function(){
         
