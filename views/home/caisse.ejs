@@ -328,7 +328,7 @@ $(function(){
         $("#dvChoixPr").css('display','none');//fermeture de la modale
         var numC = parseInt($("#idCommande").html());
         if (isNaN(numC)) numC = 0; 
-        $.post('/commandes/addormodify',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'dt_livraison' : null, 'lignes': lignes}, function(datas){
+        $.post('/commandes/addormodify',{'id_commande': numC, 'avoir': $("#txtAvoir").val(), 'debit': $("#txtDebit").val(), 'id_client': currentIdClient, 'dt_livraison' : null, 'lignes': lignes,'tape':$("#megaSearch").val()}, function(datas){
               //alert(JSON.stringify(datas.fullCommande));
               if(datas.err != null) {
                  var infos = new PNotify({

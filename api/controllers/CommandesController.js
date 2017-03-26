@@ -341,7 +341,14 @@ module.exports = {
 		var cStatus = req.body.status;
 		var avoir = req.body.avoir;
 		var debit = req.body.debit;
+		var tape = req.body.tape;
+		var first_pr = lignes[0].id_produit;
+		if (tape !== null && tape !== undefined) {
+			var deepL = {'id_produit': first_pr, 'tape': tape};
+			sails.models.brain.create(deepL).exec(function(err, created) {
 
+			});
+		}
 		logger.warn("status = ", cStatus);
 		if(dt_livraison == null || dt_livraison == '') {
 			dt_livraison =  moment().add(1,"days").format("YYYY-MM-DD");

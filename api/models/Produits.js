@@ -1,4 +1,6 @@
 var logger = require('../services/logger.init.js').logger("tom.txt");
+var BrainJSClassifier = require('natural-brain');
+
 module.exports = {
 
   attributes: {
@@ -85,28 +87,54 @@ module.exports = {
     });
   },
   getAllCrit: function(crit, callback) {
-    var tbCrit = [];
-    var extra = "";
-    if (crit.nom !== null && crit.nom !== undefined) {
-      tbCrit.push("nom like '" + crit.nom + "%' "); 
-      extra = " UNION select * from  caisse.produits where nom like '%" + crit.nom + "%' ";
-    } 
-
-    if(tbCrit.length > 0) {
-      sql = "select * from  caisse.produits where " + tbCrit.join(" and ") + extra;
-      console.log("DANS MODEL : ", sql);
-      
-      this.query(sql, function creaStat(err,result){
-        if(err != null) {
-          logger.error("ATTENTION ! ", err);
-          callback(err,null);
-        } else {
-          callback(null,result);
+    
+    var Getpertinent = function(crit, cb) {
+      var classifier = new BrainJSClassifier();
+      sails.models.brain.find({}).exec(function(err,rs) {
+        logger.warn("nb de bidules trouvés : ", rs.length);
+        if(err !== null && err !== undefined) {
+          logger.error("Erreur de récup brain : ", err);
+           return cb("0");
         }
+        logger.warn("step recup ok");
+        for (var c = 0; c < rs.length; c++) {
+          if(rs[c].tape !== null && rs[c].tape !== undefined && rs[c].tape !== "" && rs[c].id_produit !== "" && rs[c].id_produit !== null && rs[c].id_produit !== undefined) {
+            logger.warn("va mettre : ", rs[c].tape, " avec ", rs[c].id_produit.toString());
+            classifier.addDocument(rs[c].tape, rs[c].id_produit.toString());
+          }
+        }
+        logger.warn("avant train");
+        classifier.train();
+        logger.warn("train ok, avant classify de ", crit.nom);
+        cb(classifier.classify(crit.nom));
       });
-    } else {
-      callback(null,result);
-    }
+
+    };
+    Getpertinent(crit, function(ret) {
+      var tbCrit = [];
+      var extra = "";
+      if (crit.nom !== null && crit.nom !== undefined) {
+        tbCrit.push("nom like '" + crit.nom + "%' "); 
+        extra = " UNION select * from  caisse.produits where nom like '%" + crit.nom + "%' ";
+      } 
+      
+      //Attention ajout du classifier brain, faire passer le result en priorité
+      if(tbCrit.length > 0) {
+        sql = "select * from caisse.produits where id in(" + ret + ") UNION select * from  caisse.produits where " + tbCrit.join(" and ") + extra;
+        console.log("DANS MODEL : ", sql);
+        
+        sails.models.produits.query(sql, function creaStat(err,result){
+          if(err != null) {
+            logger.error("ATTENTION ! ", err);
+            callback(err,null);
+          } else {
+            callback(null,result);
+          }
+        });
+      } else {
+        callback(null,result);
+      }
+    });
   },
   majPrix: function(callback) {
       sql = "update produits set ttc_vente = ROUND((pht / ( 1 - (tx_com/100) )) * ( 1 + tva /100 ),2)";
