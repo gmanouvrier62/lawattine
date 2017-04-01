@@ -71,6 +71,12 @@ module.exports = {
     });
 
   },
+  rayonExiste: function(id, callback) {
+    sails.models.produits.findOrCreate({'id': id},{'id':id,'N/D_' + id.toString()}).exec(function(err, dts) {
+      callback(err);
+
+    });
+  },
   getRayonFromCom: function(txCom,tb,  callback) {
     var sql = " select t.nom as rayon from produits p inner join typesproduits t on p.id_type=t.id where tx_com=" + txCom;
     this.query(sql, function(err, resultat) {

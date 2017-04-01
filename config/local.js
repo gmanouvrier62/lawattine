@@ -44,6 +44,9 @@ module.exports = {
   //   cert: require('fs').readFileSync(__dirname + './ssl/my_apps_ssl.crt')
   // },
 
+    "hooks": {
+        "grunt": false
+    }
   /***************************************************************************
    * The `port` setting determines which TCP port your app will be           *
    * deployed on.                                                            *

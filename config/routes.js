@@ -43,6 +43,7 @@ module.exports.routes = {
   '/produits/types/list':     'ProduitsController.getTypes',
   '/produits/import':       'ProduitsController.import', 
   '/produits/import_images':       'ProduitsController.import_images', 
+  '/produits/prepare_import_generic/id_rayon/:id_rayon/nom/:rayon/section/:section': 'ProduitsController.prepare_import_json_generic',
   '/produits/prepare_import_json': 'ProduitsController.prepare_import_json',
   '/produits/prepare_import_json_promos': 'ProduitsController.prepare_import_json_promos',
   '/produits/marge':        'ProduitsController.marge',

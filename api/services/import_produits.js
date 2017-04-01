@@ -121,48 +121,50 @@ module.exports = function(sck,callback){
 			prd.qte_dispo = currentP.iQteDisponible;
 			prd.disponibilite = prd.qte_dispo>0?1:0;
 			prd.id_fournisseur = 1;
-			sails.models.produits.findOne({'ref_externe': prd.ref_externe}).exec(function(err,results) {
-			  if (!err) {
-			  	logger.util("le result : ", results);
-			  	if(results == null || results == undefined) {
-			  		//C'est une création
-					//logger.util("prd : ", prd);
-					
-					sails.models.produits.findOrCreate(prd,prd).exec(function creaStat(err,created){
-						if (err !== null && err !== undefined) {
-						 	logger.warn("il y aurait une err : ", err);
-						 	return callback(err);
-						} 
-						//logger.util("created : ", created);
-						saveAnImage(fullImgUrl, created.id, idImage,created.id_type, function(err, saved) {
-							if(err !== null && err !== undefined) return callback ({'err':err, current_url: null});
-							logger.info("create semble ok");
-							return callback({current_url: this.full_url});
-						}.bind({'full_url': full_url}));
+			sails.models.produits.rayonExiste(prd.id_type, function(err) {
+				sails.models.produits.findOne({'ref_externe': prd.ref_externe}).exec(function(err,results) {
+				  if (!err) {
+				  	logger.util("le result : ", results);
+				  	if(results == null || results == undefined) {
+				  		//C'est une création
+						//logger.util("prd : ", prd);
 						
-					});
-			  	} else {
-			  		//C'est un update
-			  		delete prd.icone;//Je ne prends pas en compte les images 
-			  		var datasInitial = {ref_externe: prd.ref_externe};
-			  		sails.models.produits.update(datasInitial,prd).exec(function creaStat(err,updated){
-						
-						if (err !== null && err !== undefined) {
-							logger.warn(err);
-							return callback(err);
-						} 
-						logger.util("updated prd: ", updated);
+						sails.models.produits.findOrCreate(prd,prd).exec(function creaStat(err,created){
+							if (err !== null && err !== undefined) {
+							 	logger.warn("il y aurait une err : ", err);
+							 	return callback(err);
+							} 
+							//logger.util("created : ", created);
+							saveAnImage(fullImgUrl, created.id, idImage,created.id_type, function(err, saved) {
+								if(err !== null && err !== undefined) return callback ({'err':err, current_url: null});
+								logger.info("create semble ok");
+								return callback({current_url: this.full_url});
+							}.bind({'full_url': full_url}));
+							
+						});
+				  	} else {
+				  		//C'est un update
+				  		//delete prd.icone;//Je ne prends pas en compte les images 
+				  		var datasInitial = {ref_externe: prd.ref_externe};
+				  		sails.models.produits.update(datasInitial,prd).exec(function creaStat(err,updated){
+							
+							if (err !== null && err !== undefined) {
+								logger.warn(err);
+								return callback(err);
+							} 
+							logger.util("updated prd: ", updated);
 
-						saveAnImage(fullImgUrl, updated[0].id, idImage, updated[0].id_type, function(err, saved) {
-							if(err !== null && err !== undefined) return callback({'err':err, current_url: null});
-							return callback({current_url: this.full_url});
-						}.bind({'full_url': full_url}));
-					});
-			  	}
-			  } else
-			    logger.error('erreur de recherche produit ', prd.ref_externe + ", " + prd.nom);
-			    logger.error("err : ", err);
-			    return callback("err");
+							saveAnImage(fullImgUrl, updated[0].id, idImage, updated[0].id_type, function(err, saved) {
+								if(err !== null && err !== undefined) return callback({'err':err, current_url: null});
+								return callback({current_url: this.full_url});
+							}.bind({'full_url': full_url}));
+						});
+				  	}
+				  } else
+				    logger.error('erreur de recherche produit ', prd.ref_externe + ", " + prd.nom);
+				    logger.error("err : ", err);
+				    return callback("err");
+				});
 			});
 		
 

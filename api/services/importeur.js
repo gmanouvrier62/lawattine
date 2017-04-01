@@ -17,6 +17,119 @@ J'ai un tb de liens(pointeur)
 Je lance getNext
 Lors de la fin de traitement il retourne un event error 1 2 ou completed
 */
+var lCurl_generic = function(ccurl, l_url, section1, self) {
+	ccurl.setOpt( 'URL', l_url );
+    ccurl.setOpt( 'FOLLOWLOCATION', true );
+    ccurl.on( 'end', function( statusCode, body, headers ) {
+        logger.info('pour' + l_url);     
+        logger.info( statusCode );
+        logger.info( '---' );
+        logger.info( body.length );
+        logger.info( '---' );
+        logger.info( this.getInfo( 'TOTAL_TIME' ) );
+        //transformer le l_url de promo en rayon pour tromper la mécanique
+        
+        // ctl00_main_ctl01_pnlElementProduitsPromos
+       
+        var tb = body.split("('" + section1 + "',");
+        logger.warn("url courrante : ", l_url, " length ", tb.length);
+        if (tb.length <= 1) {
+        	logger.warn("branche promos BDR");
+        	//('ctl00_main_ctl02_pnlElementProduitsBRD_NonPorteur
+        	//ctl00_ctl12_pnlGestionStock
+        	tb = body.split("('ctl00_main_ctl02_pnlElementProduitsBRD_NonPorteur',");
+        } else {
+        	logger.warn("branche promos offre spe");
+        }
+        
+        if(tb.length > 0) {
+         // //]]
+         logger.warn("tblength>0 pour url ", l_url);
+         //§!!!!!!!!! PB de synchro surement
+         //pas moyen d'avoir la deuxieme promo
+         	var part2 = tb[1];
+            if(part2 !== null && part2 !== undefined) {
+            	var tb2 = part2.split('Utilitaires.widget.initOptions');
+	            var leJSON = tb2[0];
+	            leJSON = leJSON.substring(0,leJSON.length-2);
+	            var fn = 'Promos_' + self.pointeur + '.json';
+	            logger.warn("fichier ", fn);
+	            fs.writeFile(sails.config.importProductsFolder + fn, leJSON, function (err) {
+	                if (err) {
+	                  logger.error("pas bon pour " + l_url);
+	                  self.nbErr ++;
+	                  self.pct_ko = parseInt( (self.nbErr*100)/(self.tbPromos.length-1) );
+	                  if (self.sockets !== null && self.sockets !== undefined) {
+	                  		self.sockets.emit("error", self.pct_ko, self.pct_ok, l_url);
+	                  }	
+	                  self.emit('pasbon');
+	                } else {
+	                    logger.info("ok ducky");
+	                    self.nbOk ++;
+	                    self.pct_ok = parseInt( (self.nbOk*100)/(self.tbPromos.length-1) );
+	                    
+                       	logger.warn('va emttre un completed ', "");
+                    	if (self.sockets !== null && self.sockets !== undefined) {
+                    		self.sockets.emit("completed",self.pct_ko, self.pct_ok);	
+                    	}
+                    	self.emit('completed');
+	                    
+	                }
+	                //logger.warn("point sur lespointeurs self.p", self.pointeur, " self promo ", self.tbPromos.length-1);
+	                if(self.pointeur == self.tbPromos.length) {
+                    	if (self.sockets !== null && self.sockets !== undefined) {
+                    		self.sockets.emit("json_completed");
+                    	}
+                    	logger.error("!!!!!!!!!OK FINI!!!!!!!!!avant import db");
+                    	
+                    	flagPromos(self,function(result) {
+                    		logger.warn("dans callback flagPromos");
+                    		self.emit('all_completed');
+                    		if (self.sockets !== null && self.sockets !== undefined) {
+                    			self.sockets.emit("all_completed");
+                    		}
+                    	});
+						
+	                } 
+	            });
+            }  else {
+	        	if (self.sockets !== null && self.sockets !== undefined) {
+	        		self.nbErr ++;
+	        		self.pct_ko = parseInt( (self.nbErr*100)/(self.tbPromos.length-1) );
+    				self.sockets.emit("bad", self.pct_ko, self.pct_ok, l_url);
+	    		}
+	    		logger.error("pas bon 1");
+	    		self.emit('pasbon');		
+	        }
+
+        } else {
+        	//visiblement la page ne matche pas avec les élémets html à trouver
+        	if (self.sockets !== null && self.sockets !== undefined) {
+        		self.nbErr ++;
+        		self.pct_ko = parseInt( (self.nbErr*100)/(self.tbPromos.length-1) );
+    			self.sockets.emit("bad", self.pct_ko, self.pct_ok, l_url);
+    		}
+    		logger.error("pas bon 2");
+    		self.emit('pasbon');	
+        }
+        this.close();
+    });
+    ccurl.on( 'error', function(err) {
+    	logger.error("erreur curl");
+    	self.nbErr ++;
+    	self.pct_ko = parseInt( (self.nbErr*100)/(self.tbPromos.length-1) );
+    	ccurl.close.bind( ccurl  );
+    	if (self.sockets !== null && self.sockets !== undefined) {
+    		self.sockets.emit("bad", self.pct_ko, self.pct_ok);
+    	}
+    	
+    	
+	});
+    ccurl.perform();
+    return 0;
+
+
+};
 var lCurl_promos = function (ccurl, l_url, self) {
 	ccurl.setOpt( 'URL', l_url );
     ccurl.setOpt( 'FOLLOWLOCATION', true );
@@ -36,6 +149,7 @@ var lCurl_promos = function (ccurl, l_url, self) {
         if (tb.length <= 1) {
         	logger.warn("branche promos BDR");
         	//('ctl00_main_ctl02_pnlElementProduitsBRD_NonPorteur
+        	//ctl00_ctl12_pnlGestionStock
         	tb = body.split("('ctl00_main_ctl02_pnlElementProduitsBRD_NonPorteur',");
         } else {
         	logger.warn("branche promos offre spe");
@@ -220,7 +334,7 @@ var lCurl = function(ccurl, l_url, self) {
 };
 
 
-function importeur(dest) {
+function importeur(dest, id_rayon, rayon) {
 	http.listen(1112, function(){
 	  console.log('listening on *:1112');
 	});
@@ -231,7 +345,11 @@ function importeur(dest) {
 	this.pct_ok = 0;
 	this.pct_ko = 0;
 	this.sockets = null;
-	
+	if (rayon !== null && rayon !== undefined) {
+		sails.models.typesproduits.findOrCreate({'id':id_rayon, 'nom': rayon}, {'id':id_rayon, 'nom': rayon}).exec(function createFindCB(error, createdOrFoundRecords){
+		  console.log('crea rayon');
+		});
+	}
 	this.io = require('socket.io')(http);
 	this.io.on('connection', function(socket){
 	  console.log("ok connect");
@@ -249,6 +367,8 @@ function importeur(dest) {
 	this.destinationFolder = "";
 	this.currentLink = null;
 	this.pointeur = -1;	
+	//pour chaque evennement remplacer le tbGeneric par la page correspondante, un peu brico mais bon
+	this.tbGeneric = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/offres-289174-Chocolats-de-Paques.aspx'];
 	this.tbPromos = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/offres-288597-Promotions.aspx','http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/bons-de-reduction.aspx'];
 	//autres promos http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/bons-de-reduction.aspx
 	this.tbLiens = ['http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284325-Boucherie.aspx',
@@ -265,8 +385,7 @@ function importeur(dest) {
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284314-Bio.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284315-Hygiene-Beaute.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284316-Entretien-Nettoyage.aspx',
-		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284317-Animalerie.aspx',
-		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284318-Bazar-Textile.aspx',
+    	'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284317-Animalerie.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284323-Fruits-Legumes.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284351-Legumes.aspx',
 		'http://fd8-courses.leclercdrive.fr/magasin-096201-Leulinghem/rayon-284351-Legumes.aspx',
@@ -356,18 +475,25 @@ importeur.prototype.getNext = function() {
 		this.currentLink = this.tbLiens[this.pointeur];
 		var curl = new Curl();
 	    var full_url = this.tbLiens[this.pointeur];
-    } else {
+    } else if (this.import_type == "promos") {
     	this.currentLink = this.tbPromos[this.pointeur];
 		var curl = new Curl();
 	    var full_url = this.tbPromos[this.pointeur];
+    } else {
+    	this.currentLink = this.tbGeneric[this.pointeur];
+		var curl = new Curl();
+	    var full_url = this.tbGeneric[this.pointeur];
     }
 
     if(full_url !== null && full_url !== undefined) {
     	logger.warn("pour ", full_url);
     	if (this.import_type == "")
     		lCurl(curl, full_url, this);
-    	else 
+    	else if(this.import_type == "promos")
     		lCurl_promos(curl, full_url, this);
+    	else {
+    		lCurl_generic(curl, full_url, this.import_type, this);
+    	}
 	}
 };
 

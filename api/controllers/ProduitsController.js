@@ -118,6 +118,29 @@ module.exports = {
 			return res.render ('produits/import',{'action': 'import', 'menu': menu});
 		});
 	},
+	//en paramètre url section représente le premier bloc à trouver
+	prepare_import_json_generic: function(req, res) {
+		var imp = new importeur(req.params.section,req.params.id_rayon, req.params.rayon);
+		imp.getNext();
+		imp.on("pasbon", function(){
+			logger.warn("catch error1", imp.currentLink, " pointeur ", this.pointeur);
+			imp.getNext();
+		});
+		
+		imp.on("completed", function(){
+			logger.warn("fini pour ", imp.currentLink, " pointeur ", this.pointeur);
+			imp.getNext();
+		});
+		imp.on("all_completed", function(){
+			//voir pour un socketio 
+			logger.warn("oki all finished");
+			imp = null;
+		});
+		var menu = fs.readFileSync(sails.config.appPath + '/views/menu.ejs').toString();
+		
+		return res.render ('produits/import',{'action': 'import', 'menu': menu});
+	
+	},
 	import_images: function(req, res) {
 		var imp = new import_images( function(err, st) {
 				
