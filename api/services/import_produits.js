@@ -121,7 +121,7 @@ module.exports = function(sck,callback){
 			prd.qte_dispo = currentP.iQteDisponible;
 			prd.disponibilite = prd.qte_dispo>0?1:0;
 			prd.id_fournisseur = 1;
-			sails.models.produits.rayonExiste(prd.id_type, function(err) {
+			sails.models.produits.rayonExiste(prd.id_type,null, function(err) {
 				sails.models.produits.findOne({'ref_externe': prd.ref_externe}).exec(function(err,results) {
 				  if (!err) {
 				  	logger.util("le result : ", results);

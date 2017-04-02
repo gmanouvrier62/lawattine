@@ -385,32 +385,33 @@ module.exports = {
 								ttc_externe: resultPr[0].ttc_externe
 							};
 							logger.util("ligne : ", ligne);
-						
-							sails.models.cmd_pr.findOrCreate(ligne,ligne).exec(function creaStat(err,created){
-								if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande " + err, 'commande': null});
-							
-								//sur retour ok, on recupere la comm créé et on affiche le prix
-								sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
-									if (err !== null && err !== undefined) {
-										logger.error(err);
-										return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
-									}
-									//logger.util(fCom);
-									var origine = { 'id': id_client};
-									var cible = { 
-										'current_avoir': avoir,
-										'current_debit': debit
-									};
-									sails.models.clients.update(origine, cible).exec(function creaStat(err,updated) {
-										logger.warn('alors update avoir ', updated);
+							sails.models.produits.rayonExiste(null,ligne.id_produit, function(err) {
+								sails.models.cmd_pr.findOrCreate(ligne,ligne).exec(function creaStat(err,created){
+									if(err !== null && err !== undefined) return res.send({'err':"Erreur d'insertion d'un rpoduit dans une commande " + err, 'commande': null});
+								
+									//sur retour ok, on recupere la comm créé et on affiche le prix
+									sails.models.commandes.getOneFullCommande(idCmd, id_client, function(err, fCom) {
 										if (err !== null && err !== undefined) {
 											logger.error(err);
-											return res.send({'err': "Erreur de l'update client", 'commande': null});
+											return res.send({'err': "Erreur de récupération de la commande", 'commande': null});
 										}
-										fCom.client.current_avoir = avoir;
-										fCom.client.current_debit = debit;
-										
-										return res.send({'err': null,'commande': fCom});
+										//logger.util(fCom);
+										var origine = { 'id': id_client};
+										var cible = { 
+											'current_avoir': avoir,
+											'current_debit': debit
+										};
+										sails.models.clients.update(origine, cible).exec(function creaStat(err,updated) {
+											logger.warn('alors update avoir ', updated);
+											if (err !== null && err !== undefined) {
+												logger.error(err);
+												return res.send({'err': "Erreur de l'update client", 'commande': null});
+											}
+											fCom.client.current_avoir = avoir;
+											fCom.client.current_debit = debit;
+											
+											return res.send({'err': null,'commande': fCom});
+										});
 									});
 								});
 							});

@@ -92,7 +92,7 @@ $(function(){
           produit_ligne += "<td class='rayon_pr'>" +  obj.rayon  + "</td>";
           produit_ligne += "<td class='ref_pr'>" +  obj.ref_interne  + "</td>";
           var imgPertinente = obj.idr;
-          if(obj.promo > 0) imgPertinente = '288567';
+          //if(obj.promo > 0) imgPertinente = '288567';
           produit_ligne += "<td><img class='pictoImg' src='/images/images_rayons/" + obj.idr + "/" + obj.icone + "'></td>";
           produit_ligne += "<td>" +   obj.nom  + "</td>";
           produit_ligne += "<td class='prqte'>" +   obj.qte   + "</td>";
@@ -323,7 +323,7 @@ $(function(){
           'id_produit': $(this).data('id'),
           'qte': qte
         }
-        //alert('pr :  ' + JSON.stringify(ligne));
+        alert('pr :  ' + JSON.stringify(ligne));
         lignes.push(ligne);
         $("#dvChoixPr").css('display','none');//fermeture de la modale
         var numC = parseInt($("#idCommande").html());
