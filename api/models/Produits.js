@@ -79,10 +79,11 @@ module.exports = {
       });
     }
     if (idp !== null) {
-      sails.models.produits.find({'id': id}).exec(function(err, rs) {
+      sails.models.produits.find({'id': idp}).exec(function(err, rs) {
         if (err !== null && err !== undefined) {
           return callback(err);
         }
+        
         var id_type = rs[0].id_type;
         sails.models.produits.findOrCreate({'id': id_type},{'id':id_type,'nom': 'N/D_' + id_type.toString()}).exec(function(err, dts) {
           callback(err);

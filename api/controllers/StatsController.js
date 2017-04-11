@@ -49,6 +49,7 @@ module.exports = {
 				var somme_com = 0;	
 				var ccc = 0;
 				if(results.length == 0) return res.send({"err": "Pas de commandes", "msg": null});
+				var tvaRepartie = {};
 				for (var c = 0; c < results.length; c++) {
 					var idC = results[c][0];//id_commande idc
 					var id_client = results[c][11];//id_client
@@ -57,6 +58,7 @@ module.exports = {
 					
 					sails.models.commandes.getOneFullCommande(idC, id_client, function(err, fCom) {
 						//Tous les produits de 1 commande
+						
 						for(var cptP = 0; cptP < fCom.produits.length; cptP++) {
 							var prd = [];
 							prd.push(fCom.produits[cptP].id);
@@ -71,7 +73,10 @@ module.exports = {
 
 							prd.push(fCom.produits[cptP].ttl_tva);
 							somme_tva += fCom.produits[cptP].ttl_tva;
-							prd.push(fCom.produits[cptP].ttc);
+							if (tvaRepartie[fCom.produits[cptP].tx_tva] === null || tvaRepartie[fCom.produits[cptP].tx_tva] === undefined) tvaRepartie[fCom.produits[cptP].tx_tva] = 0;
+							//logger.warn("le ttl tva : ", fCom.produits[cptP].ttl_tva);
+							tvaRepartie[fCom.produits[cptP].tx_tva] += roundDecimal(fCom.produits[cptP].ttl_tva, 2);							
+							prd.push(fCom.produits[cptP].ttc); 
 							somme_ttc += fCom.produits[cptP].ttc;
 							prd.push(fCom.produits[cptP].ttl_com);
 							somme_com += fCom.produits[cptP].ttl_com;
@@ -83,11 +88,17 @@ module.exports = {
 						if(ccc == results.length-1) {
 							var objResult = {"data": null};
 							objResult.data = tb;
+							var o = Object.keys(tvaRepartie);
+							o.map(function(obj, id) {
+								tvaRepartie[obj] = roundDecimal(tvaRepartie[obj], 2);
+							});
+
 							objResult.recap = {
 								'somme_ht': roundDecimal(somme_ht, 2),
 								'somme_tva': roundDecimal(somme_tva, 2),
 								'somme_ttc': roundDecimal(somme_ttc, 2),
-								'somme_com': roundDecimal(somme_com, 2)
+								'somme_com': roundDecimal(somme_com, 2),
+								'somme_tva_repartie': tvaRepartie
 							};
 							objResult.err = null;
 							res.send(objResult);

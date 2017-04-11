@@ -166,6 +166,16 @@ $(function(){
         }
     });
 	PNotify.prototype.options.styling = "jqueryui";
+    function toLi(tva, ttl_tva) {
+        
+        var result = "<table style='border:1px solid black;width:100%'>";
+        var o = Object.keys(tva);
+        o.map(function(obj, id) {
+            result += "<tr><td>TVA(" + obj + " %)</td><td style='margin-left:5px'>" + tva[obj] + "</td></tr>";
+        }); 
+        result += "<tr style='border:1px solid black'><td style='margin-top: 10px'>Total TVA</td><td>" + ttl_tva + "</td></tr>";
+        return result + "</table>";
+    }
 	function afficheStats(dDebut, dFin) {
 
         $.post("/chiffres/ventes_jour",{'dtDebut': dDebut, 'dtFin': dFin, 'status': [4]}, function(datas) {
@@ -185,7 +195,8 @@ $(function(){
     	        if(datas.data.length > 0){
     	        	$('#tblVentes').dataTable().fnAddData(datas.data);    
     	        	$("#somme_ht").html(datas.recap.somme_ht);
-    	        	$("#somme_tva").html(datas.recap.somme_tva);
+    	        	//$("#somme_tva").html(datas.recap.somme_tva);
+                    $("#somme_tva").html(toLi(datas.recap.somme_tva_repartie, datas.recap.somme_tva));
     	        	$("#somme_ttc").html(datas.recap.somme_ttc);
     	        	$("#somme_com").html(datas.recap.somme_com);
     	        }
